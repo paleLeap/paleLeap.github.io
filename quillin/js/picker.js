@@ -8,7 +8,7 @@
 
 import * as THREE from '../vendor/three/three.module.js';
 import { OrbitControls } from '../vendor/three/OrbitControls.js';
-import { buildVehicle } from './model.js?v=3d8f18a4';
+import { buildVehicle } from './model.js?v=0b4ff2a8';
 
 /* One accent, red, and nothing else. Light on hover, dark on select, so the two
    states are told apart by value and not only by hue. */
@@ -168,7 +168,13 @@ export function createPicker(opts) {
      vehicle as structure: near-black fills for occlusion, bright creases on top.
      Nothing is left that can catch a highlight wrong. */
 
-  const { group, panels } = buildVehicle(archetype.id, archetype.cab, archetype.panels);
+  /* Either a real model, already resolved by the caller, or one generated from
+     a profile table. Both arrive wearing the same materials and line weights,
+     so nothing below this line needs to know which it got. Resolving the file
+     BEFORE createPicker keeps everything here synchronous; making the whole
+     picker async to await a 42 KB fetch would have rewritten it for no gain. */
+  const { group, panels } = opts.vehicle ||
+    buildVehicle(archetype.id, archetype.cab, archetype.panels);
   scene.add(group);
 
   const size = group.userData.size;

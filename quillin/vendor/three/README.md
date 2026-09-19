@@ -8,6 +8,13 @@ three.js r186, MIT. Files copied from the npm package `three@0.186.0`:
     examples/jsm/utils/BufferGeometryUtils.js    -> BufferGeometryUtils.js
     examples/jsm/lines/LineSegmentsGeometry.js   -> LineSegmentsGeometry.js
     examples/jsm/lines/LineSegments2.js          -> LineSegments2.js
+    examples/jsm/loaders/GLTFLoader.js           -> GLTFLoader.js
+    examples/jsm/utils/SkeletonUtils.js          -> SkeletonUtils.js
+
+GLTFLoader pulls in BufferGeometryUtils and SkeletonUtils by '../utils/...',
+which does not exist in this flat directory; both specifiers are patched to
+'./'. SkeletonUtils is only reached for skinned meshes, which these vehicles do
+not have, but an unresolvable import fails the whole module graph regardless.
     examples/jsm/lines/LineMaterial.js           -> LineMaterial.js
     LICENSE                                      -> LICENSE
 

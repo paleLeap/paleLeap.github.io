@@ -533,6 +533,13 @@
 
   /* ---------- step 4: the picker ---------- */
 
+  /* Loaded once, lazily, next to the picker itself. Kept in a variable rather
+     than imported per open so the five model files are only ever fetched once
+     per visit however many times an earlier answer is edited. */
+  var Vehicles = null;
+  import('./vehicles.js?v=aff0c90c').then(function (mod) { Vehicles = mod; },
+    function (err) { console.error('Vehicle models unavailable:', err); });
+
   function teardownPicker() {
     if (picker) { picker.dispose(); picker = null; }
     clearChoices(el.pickerList);
@@ -553,13 +560,28 @@
     // './' is required; a bare 'picker.js' would be read as a package name.
     // Two-argument then(), not then().catch(): a throw inside the success
     // handler must not be reported as a module load failure.
-    import('./picker.js?v=c117fa39').then(function (mod) {
+    import('./picker.js?v=cdf35194').then(function (mod) {
+      /* The real model is fetched HERE rather than inside the picker, so the
+         picker itself stays synchronous. A body style we have no model for, or
+         a fetch that fails, resolves to null and the picker falls back to the
+         profile generator: a generated vehicle is a far better outcome than a
+         step that cannot draw anything. */
+      var ready = Vehicles && Vehicles.hasModel(archetype.id)
+        ? Vehicles.loadVehicle(archetype.id, archetype.cab, archetype.panels)
+            .catch(function (err) {
+              console.error('Vehicle model failed, using the generator:', err);
+              return null;
+            })
+        : Promise.resolve(null);
+
+      return ready.then(function (vehicleModel) {
       try {
         picker = mod.createPicker({
           mount: el.pickerStage,
           listMount: el.pickerList,
           archetype: archetype,
           labelFor: Glass.labelFor,
+          vehicle: vehicleModel,
           onChange: onPanels
         });
         /* Same reason as __lastRequest below: the picker is reached through a
@@ -571,6 +593,7 @@
         console.error('Glass picker failed to start:', err);
         plainList();
       }
+      });
     }, function (err) {
       console.error('Glass picker failed to load:', err);
       plainList();

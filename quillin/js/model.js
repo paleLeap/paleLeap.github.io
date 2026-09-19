@@ -744,4 +744,7 @@ export function archetypeIds() {
   return Object.keys(ARCHETYPES);
 }
 
-export { ARCHETYPES, MAT };
+/* Shared with vehicles.js, which builds the same look from a GLB instead of
+   from a profile table. Both paths must produce identical materials and line
+   weights or the two halves of the fleet would not look like one fleet. */
+export { ARCHETYPES, MAT, lineMat, edgesOf, glassMesh };
