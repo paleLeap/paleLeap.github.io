@@ -553,7 +553,7 @@
     // './' is required; a bare 'picker.js' would be read as a package name.
     // Two-argument then(), not then().catch(): a throw inside the success
     // handler must not be reported as a module load failure.
-    import('./picker.js?v=599c6c09').then(function (mod) {
+    import('./picker.js?v=c117fa39').then(function (mod) {
       try {
         picker = mod.createPicker({
           mount: el.pickerStage,

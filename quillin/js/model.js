@@ -13,7 +13,13 @@
    COORDINATES
    x  length, +x is the front of the vehicle, centred on 0
    y  height, 0 is the ground
-   z  width,  +z is the DRIVER side (US market, driver on the left)
+   z  width,  -z is the DRIVER side, +z the passenger side (US, driver left)
+
+              Worth deriving rather than trusting: three.js is right handed, so
+              with the nose at +x and up at +y, the left hand of someone sitting
+              in the car points along (up x forward) = (0,1,0) x (1,0,0) = -z.
+              This file used to claim the opposite, and every side panel was
+              built mirrored: the driver's door sat on the passenger's side.
 
    AUTHORING
    Profiles are written in normalised units so one table describes every body
@@ -668,8 +674,8 @@ export function buildVehicle(archetypeId, cab, wanted) {
 
   // side glass, mirrored to both sides
   const SIDES = [
-    { slot: 0, sign:  1 },   // driver
-    { slot: 1, sign: -1 }    // passenger
+    { slot: 0, sign: -1 },   // driver, US left, which is -z. See COORDINATES.
+    { slot: 1, sign:  1 }    // passenger
   ];
   Object.keys(side).forEach(key => {
     const ids = SIDE_IDS[key];
