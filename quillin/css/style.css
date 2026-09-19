@@ -1363,6 +1363,47 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
   .dock::-webkit-scrollbar { display: none; }
 
+  /* On a phone the bar is a plain row of words, not a state display. Marking
+     the current section lit a filled pill at the bottom of the screen, which
+     read as a selected button and pulled the eye down away from the work in
+     hand. You already know which page you are on; the bar only has to say
+     where else you can go. So: one weight, one colour, divided by rules.
+     Desktop keeps the highlight, where the bar only appears once you have
+     scrolled to the end and the cue is useful rather than distracting. */
+  .dock { justify-content: center; gap: 0; padding-left: .5rem; padding-right: .5rem; }
+
+  .dock a {
+    position: relative;
+    /* Trimmed until all five fit a 320px screen without the row overflowing:
+       centred content that overflows clips its left edge and cannot be
+       scrolled back to. At 320 this leaves 7px of slack. */
+    padding: .875rem .5rem;
+    font-size: .6875rem;
+    letter-spacing: .07em;
+  }
+
+  .dock a.is-on { color: var(--faint); background: none; }
+
+  /* Every item gets a divider, so about no longer needs its own. The rule is
+     drawn on the item rather than added as an element, and sits on the shared
+     boundary between two links: with gap 0 that is exactly left 0, centred in
+     the 1.125rem of padding the two neighbours contribute. It is a pseudo
+     element inside the link, so it must not swallow the tap. */
+  .dock .nav--apart { margin-left: 0; }
+
+  .dock a + a::before,
+  .dock .nav--apart::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 1px;
+    height: .75rem;
+    background: var(--line-2);
+    pointer-events: none;
+  }
+
   /* The fixed corner link and the bar were both pinned to the bottom, and the
      owner reported "About us is in the way" of the Contact us button. With the
      bar always present, about already has a place in it, so the floating copy
