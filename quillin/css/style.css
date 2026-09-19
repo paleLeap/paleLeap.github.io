@@ -326,6 +326,12 @@ body.on-quote #step-vin .manual { order: 7; width: 100%; }
 
 body.on-quote #step-vin .under { order: 8; }
 
+/* Last, explicitly. The reset is appended to whichever step is live, and on
+   this step that is a flex column where everything carries an order. An
+   unordered child defaults to 0, which put "Start over" above the VIN field
+   it was offering to clear. */
+body.on-quote #step-vin .reset { order: 9; }
+
 body.on-quote #step-vin .helppanel { max-width: 26rem; margin-left: auto; margin-right: auto; text-align: left; }
 
 body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-right: auto; text-align: left; }

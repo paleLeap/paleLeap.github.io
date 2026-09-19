@@ -343,14 +343,37 @@
 
   /* ---------- step 1b: no-VIN fallback ---------- */
 
+  /* Opens and closes the same way the VIN help does: the control that opened it
+     is still there, still says what it does, and a second press puts it away.
+     It used to hide itself on opening, which left the panel with no way out at
+     all, and the customer looking at three dropdowns they could not dismiss. */
   function openManual() {
     if (!el.manual.hidden) return;
-    el.noVin.hidden = true;
     /* Populated BEFORE opening. scrollHeight is measured as the animation
        starts, so filling the dropdowns afterwards would animate to the height
        of an empty box and then jump to the real one. */
     fillManual();
     slideOpen(el.manual);
+    el.noVin.setAttribute('aria-expanded', 'true');
+    restack();
+  }
+
+  function shutManual() {
+    if (el.manual.hidden) return;
+    slideShut(el.manual);
+    el.noVin.setAttribute('aria-expanded', 'false');
+
+    /* Unlike the help panel, this one holds an ANSWER: which vehicle this is.
+       Putting it away has to take the answer with it, or a year and make nobody
+       can see any more would go on driving every step below. */
+    el.mYear.value = '';
+    el.mMake.value = '';
+    el.mMake.disabled = true;
+    clearModels('Model');
+    el.mModel.disabled = true;
+    vehicle = null;
+    resetBelow(2);
+    restack();
   }
 
   function fillManual() {
@@ -364,9 +387,13 @@
   }
 
   el.noVin.addEventListener('click', function () {
-    openManual();
-    el.mYear.focus();
-    say('');
+    if (el.manual.hidden) {
+      openManual();
+      el.mYear.focus();
+      say('');
+    } else {
+      shutManual();
+    }
   });
 
   el.mYear.addEventListener('change', function () {
@@ -1265,7 +1292,7 @@
     el.vin.value = '';
     el.field.classList.remove('field--ok');
     hide(el.manual);
-    el.noVin.hidden = false;
+    el.noVin.setAttribute('aria-expanded', 'false');
     say('');
     resetBelow(2);            // cascades through damage, photos, timing, review
     restack();
@@ -1341,7 +1368,10 @@
   /* Shown once there is something worth losing. On an empty VIN step there is
      nothing to clear, and offering to clear it is just noise. */
   function placeReset(live) {
-    if (!live || live.id === 'step-vin') {
+    /* Normally there is nothing to start over from on a bare VIN step. With the
+       manual panel open there is: three dropdowns, and whatever has been chosen
+       in them. So the VIN step keeps the button in that one case. */
+    if (!live || (live.id === 'step-vin' && el.manual.hidden)) {
       if (resetUI.wrap.parentNode) resetUI.wrap.parentNode.removeChild(resetUI.wrap);
       return;
     }
