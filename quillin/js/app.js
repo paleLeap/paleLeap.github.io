@@ -49,6 +49,7 @@
     photoNote: $('photo-note'),
     submit:    $('submit-damage'),
     review:    $('step-review'),
+    greeting:  document.querySelector('.greeting h1'),
     summary:   $('summary'),
     sendWhere: $('send-where'),
     send:      $('send-request'),
@@ -1273,6 +1274,31 @@
 
     var open = steps.filter(function (x) { return !x.classList.contains('is-folded'); });
     placeReset(open[open.length - 1]);
+    greet();
+  }
+
+  /* The heading follows the flow. Once the review is on screen there is nothing
+     left to get; what is in front of you is the thing itself, waiting to be
+     checked. Driven from restack rather than from the reveal, so every way back
+     out of the review, start over, reopening an earlier step, puts the original
+     wording back without any of those having to know about it. */
+  var GREETINGS = { get: 'Get your quote.', review: 'Review your quote.' };
+
+  function greet() {
+    if (!el.greeting) return;
+    var want = el.review.hidden ? GREETINGS.get : GREETINGS.review;
+    if (el.greeting.textContent === want) return;   // restack runs constantly
+
+    if (!MOTION_OK) { el.greeting.textContent = want; return; }
+
+    /* Swapped at the dip rather than on the spot: at this size a word changing
+       under you mid-scroll catches the eye harder than the review appearing. */
+    if (el.greeting._swap) el.greeting._swap.cancel();
+    el.greeting._swap = el.greeting.animate(
+      [{ opacity: 1 }, { opacity: 0 }, { opacity: 0 }, { opacity: 1 }],
+      { duration: 460, easing: 'ease-in-out' }
+    );
+    setTimeout(function () { el.greeting.textContent = want; }, 170);
   }
 
   /* Catches every reveal and every reset without those having to know about
