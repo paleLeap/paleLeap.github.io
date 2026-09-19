@@ -109,6 +109,7 @@
         /* Retract first, then swap. The row lifts away while the page is
            fading, so the two reads as one movement rather than two. */
         if (brand) brand.classList.remove('is-open');
+        document.body.classList.remove('menu-open');
         if (location.hash === '#' + id) return;   // already here
         // Write the hash without firing hashchange, so the transition runs once.
         history.pushState(null, '', '#' + id);
@@ -172,12 +173,16 @@
         if (location.hash !== '#quote') { history.pushState(null, '', '#quote'); go('quote'); }
         return;
       }
-      brand.classList.toggle('is-open');
+      var open = !brand.classList.contains('is-open');
+      brand.classList.toggle('is-open', open);
+      document.body.classList.toggle('menu-open', open);
     });
 
     document.addEventListener('click', function (e) {
       if (canHover.matches) return;
-      if (!brand.contains(e.target)) brand.classList.remove('is-open');
+      if (brand.contains(e.target)) return;
+      brand.classList.remove('is-open');
+      document.body.classList.remove('menu-open');
     });
   }
 
