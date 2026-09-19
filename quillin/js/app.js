@@ -1291,7 +1291,11 @@
     lastRequest = null;
     el.vin.value = '';
     el.field.classList.remove('field--ok');
-    hide(el.manual);
+    /* slideShut, not hide. Starting over with the manual panel open used to
+       snap three dropdowns out of existence in a frame while everything else
+       on the page animated, which read as the page breaking rather than
+       clearing. slideShut returns immediately if it is already closed. */
+    slideShut(el.manual);
     el.noVin.setAttribute('aria-expanded', 'false');
     say('');
     resetBelow(2);            // cascades through damage, photos, timing, review
