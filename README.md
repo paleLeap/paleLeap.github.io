@@ -139,6 +139,26 @@ visitor's machine regardless of OS, that means self-hosting a variable font in
    them. Missing images degrade to a placeholder box rather than breaking.
 4. Drop the zip in `downloads/` and point the download button at it.
 
+## Live at
+
+**https://paleleap.com**
+
+Hosted free on GitHub Pages from the `paleLeap/paleLeap.github.io` repo. DNS is
+at Cloudflare: four A records and four AAAA records on the apex pointing at
+GitHub's Pages addresses, plus a `www` CNAME. Every record is DNS-only, never
+proxied, because proxying in front of Pages breaks certificate issuance. The
+`CNAME` file in this folder is what tells GitHub which domain to answer for;
+deleting it would break the site.
+
+`www.paleleap.com` and `paleleap.github.io` both 301 to the apex, so older
+links keep working.
+
+To publish a change:
+
+    git add -A && git commit -m "what changed" && git push
+
+Live about a minute later.
+
 ## Hosting
 
 The site is static, so anything that serves files works:
