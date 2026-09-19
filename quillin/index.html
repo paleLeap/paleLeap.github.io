@@ -9,7 +9,7 @@
      no favours. Remove this line when it goes live for real. -->
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=9d8c2f9b">
+<link rel="stylesheet" href="css/style.css?v=86975d3a">
 </head>
 <body>
 
@@ -78,10 +78,16 @@
       <input id="vin" name="vin" type="text" inputmode="latin" autocomplete="off"
              spellcheck="false" maxlength="17" placeholder="e.g. 1HGCM82633A004352"
              aria-describedby="vin-note">
-      <button type="button" class="field__help" id="vin-help-btn"
-              aria-expanded="false" aria-controls="vin-help"
-              aria-label="Where do I find my VIN?">?</button>
     </div>
+
+    <!-- Asks the question in words instead of leaving a symbol to be
+         interpreted. Sits under the input because that is where you look once
+         you have tried to find the number and could not. Clicking it again
+         puts it away. -->
+    <p class="helpask">
+      <button type="button" class="plainlink" id="vin-help-btn"
+              aria-expanded="false" aria-controls="vin-help">Need help finding your VIN?</button>
+    </p>
 
     <div class="helppanel" id="vin-help" hidden>
       <p>Where to find your VIN</p>

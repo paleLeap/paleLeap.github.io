@@ -289,13 +289,20 @@ body.on-quote #step-vin .step__hint {
 
 body.on-quote #step-vin .note { order: 3; }
 
-body.on-quote #step-vin > p { order: 4; }
+/* The disclosure opens directly beneath the line that asks the question and
+   above the next choice down, so the answer lands where the eye already is
+   instead of pushing past "I don't have my VIN" to appear underneath it.
+   .helpask is itself a `> p`, so it needs its own order or it would inherit
+   the shared one below and sit on the wrong side of the panel. */
+body.on-quote #step-vin .helpask { order: 4; }
 
 body.on-quote #step-vin .helppanel { order: 5; width: 100%; }
 
-body.on-quote #step-vin .manual { order: 6; width: 100%; }
+body.on-quote #step-vin > p { order: 6; }
 
-body.on-quote #step-vin .under { order: 7; }
+body.on-quote #step-vin .manual { order: 7; width: 100%; }
+
+body.on-quote #step-vin .under { order: 8; }
 
 body.on-quote #step-vin .helppanel { max-width: 26rem; margin-left: auto; margin-right: auto; text-align: left; }
 
@@ -818,34 +825,6 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 .field--ok input { border-bottom-color: var(--green); }
 
-.field__help {
-  position: absolute;
-  right: 0;
-  bottom: .625rem;
-  width: 1.625rem;
-  height: 1.625rem;
-  display: grid;
-  place-items: center;
-  /* No ring. A circled glyph beside a bare underlined input was the only
-     bordered control on the page and read as a button that did something to
-     the VIN. It is a question mark you can tap, nothing more. The box keeps
-     its size so the tap target survives; only the drawing goes. */
-  border: 0;
-  background: none;
-  color: var(--muted);
-  font-size: 1rem;
-  line-height: 1;
-  cursor: pointer;
-  padding: 0;
-  transition: color .2s var(--ease);
-}
-
-.field__help:hover { color: var(--ink); }
-
-/* Open state is carried by the glyph brightening, since there is no longer a
-   shape to fill. Orange because that is what the help panel it opens uses. */
-.field__help[aria-expanded="true"] { color: var(--orange); }
-
 .helppanel {
   margin: 1.25rem 0 0;
   padding: 0;
@@ -901,6 +880,12 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 }
 
 .plainlink:hover { color: var(--ink); text-decoration-color: var(--orange); }
+
+/* A quiet link that opens something stays lit while that thing is open, so a
+   second click reads as putting it away rather than as one that did nothing. */
+.plainlink[aria-expanded="true"] { color: var(--orange); text-decoration-color: var(--orange); }
+
+.helpask { margin: .75rem 0 0; }
 
 .manual { margin-top: 1.25rem; display: grid; gap: .5rem; }
 
@@ -1190,8 +1175,6 @@ body.on-quote #step-vin.is-folded { text-align: left; }
     padding: .625rem 0;
     min-height: 2.75rem;
   }
-
-  .field__help { width: 2.75rem; height: 2.75rem; bottom: 0; }
 
   .dock a { padding: .875rem 1rem; }
 
