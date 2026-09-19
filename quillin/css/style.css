@@ -698,7 +698,9 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 /* ---------- steps ---------- */
 
-.step { margin-top: 3rem; }
+/* position: relative so a reopened step can carry its own close control in
+   the corner without that control joining the flow and shifting the layout. */
+.step { margin-top: 3rem; position: relative; }
 
 .step[hidden] { display: none; }
 
@@ -788,9 +790,50 @@ body.on-quote #step-vin.is-folded { text-align: left; }
   transition: color .25s var(--ease);
 }
 
+/* The third column of a folded row. The row was already a button, but nothing
+   on it said so, so a stack of answered steps read as a receipt rather than as
+   a set of previous questions you can still go back into. */
+.step__folded-do {
+  flex: none;
+  margin-left: auto;
+  font-size: .625rem;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--faint);
+  transition: color .25s var(--ease);
+}
+
 .step__folded:hover { border-color: var(--line-2); }
 .step__folded:hover .step__folded-name { color: var(--orange); }
 .step__folded:hover .step__folded-value { color: var(--ink); }
+.step__folded:hover .step__folded-do { color: var(--orange); }
+
+/* Reopened, a previous step needs a way back. Hidden unless the step is
+   actually being edited: on the live question there is nothing to close, and
+   on a folded one the whole row already is the control. */
+.step__collapse {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  background: none;
+  border: 0;
+  padding: .4375rem 0 .4375rem .875rem;
+  font: inherit;
+  font-size: .625rem;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--faint);
+  cursor: pointer;
+  transition: color .2s var(--ease);
+}
+
+.step__collapse:hover { color: var(--orange); }
+
+.step.is-editing > .step__collapse { display: block; }
 
 /* ---------- the vin ---------- */
 
@@ -1192,7 +1235,14 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
   .btn--small { padding: .8125rem 1.125rem; }
 
-  .step__folded { padding: 1rem 0; }
+  /* The third column costs width, and a 17 character VIN was the first thing
+     to lose it: the value started truncating on a phone where it used to read
+     in full. The label column and the gaps give the room back. */
+  .step__folded { padding: 1rem 0; gap: 1rem; }
+
+  .step__folded-name { width: 4.25rem; }
+
+  .step__collapse { padding: .875rem 0 .875rem 1.25rem; min-height: 2.75rem; }
 
   /* An inline link inside a sentence cannot be made 44px tall without opening
      up the line spacing around it. Padding grows the hit area and an equal

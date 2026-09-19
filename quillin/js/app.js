@@ -1142,6 +1142,35 @@
       step.insertBefore(line, step.firstChild);
     }
 
+    /* The way back out. Opening a folded answer used to be a one way door:
+       nothing on screen closed it again, and it stayed open until some later
+       answer happened to fold it. Built alongside the folded line because only
+       a step that has folded can ever be reopened. */
+    if (!step.querySelector('.step__collapse')) {
+      var shut = document.createElement('button');
+      shut.type = 'button';
+      shut.className = 'step__collapse';
+      shut.textContent = 'Close';
+      shut.addEventListener('click', function () {
+        step.classList.remove('is-editing');
+        restack();
+        /* Put the eye back on whatever is now the live question, but only if
+           it is off screen; the same rule reveal() uses, for the same reason. */
+        var open = Array.prototype.filter.call(
+          document.querySelectorAll('.step'),
+          function (x) { return !x.hidden && !x.classList.contains('is-folded'); });
+        var live = open[open.length - 1];
+        if (live) {
+          var r = live.getBoundingClientRect();
+          var vh = window.innerHeight || document.documentElement.clientHeight;
+          if (r.top < 0 || r.bottom > vh) {
+            live.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }
+      });
+      step.insertBefore(shut, step.firstChild);
+    }
+
     var d = DIGEST[step.id] || { name: '', value: function () { return ''; } };
     var name = d.name;
     var value = d.value();
@@ -1153,8 +1182,14 @@
     var val = document.createElement('span');
     val.className = 'step__folded-value';
     val.textContent = value;
+    /* Third column: what you can do about it. Without it the row read as a
+       receipt and nothing suggested the answer was still yours to change. */
+    var act = document.createElement('span');
+    act.className = 'step__folded-do';
+    act.textContent = 'Change';
     line.appendChild(k);
     line.appendChild(val);
+    line.appendChild(act);
     line.setAttribute('aria-label', 'Change: ' + name +
       (value ? ', currently ' + value : ''));
   }
