@@ -427,18 +427,35 @@ body.on-quote #step-vin.is-folded { text-align: left; }
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .9s var(--ease);
+  /* Slow, because it happens once on arrival and a quick fade would read as a
+     flash behind the heading. */
+  transition: opacity 1.4s var(--ease);
 }
 
 .backdrop.is-on { opacity: 1; }
 
+/* The scrim, and it does the heavy lifting. This site is type on near black,
+   down to a --faint that is only 5.3:1 against it; over a lit skyline that
+   would be unreadable. The photographs are here to give the page depth, not to
+   be looked at, so they sit under enough darkness that every contrast ratio on
+   the site is the one it was designed with.
+
+   Even across the width, unlike the version this replaces: that one was cut for
+   the About page alone and weighted to the left, which put the darkest part of
+   the screen beside a centred VIN field and the brightest behind the corner
+   where the phone number sits. Vertical only now, a shade heavier top and
+   bottom where the header and the section bar have to stay legible. */
 .backdrop::after {
   content: "";
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(to right, var(--bg) 0%, rgba(10, 12, 14, .82) 45%, rgba(10, 12, 14, .62) 100%),
-    linear-gradient(to bottom, rgba(10, 12, 14, .55), rgba(10, 12, 14, .85));
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 12, 14, .93) 0%,
+    rgba(10, 12, 14, .88) 22%,
+    rgba(10, 12, 14, .87) 70%,
+    rgba(10, 12, 14, .93) 100%
+  );
 }
 
 .backdrop__layer {
@@ -463,7 +480,10 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 }
 
 /* Everything the customer reads sits above it. */
-.top, .flow, .dock, .aboutcorner { position: relative; z-index: 1; }
+/* Everything anyone reads sits above it. .panel is in this list now: the
+   backdrop used to run behind one page, so the supporting panels never needed
+   lifting, and left out they would render underneath a fixed layer. */
+.top, .flow, .panel, .dock, .aboutcorner { position: relative; z-index: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   .backdrop__layer { animation: none; }
