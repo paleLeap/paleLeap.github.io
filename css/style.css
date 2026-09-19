@@ -66,22 +66,31 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html {
-  /* Chrome adjusts the scroll position when content resizes, which on a
-     phone shows up as the page nudging itself. Nothing here needs it. */
-  overflow-anchor: none;
+/* The document itself never scrolls. It is pinned to the viewport and the
+   stage scrolls inside it instead.
 
-  /* The gutter is reserved whether or not a scrollbar is showing. Without
-     this, opening a section grows the page, the scrollbar appears, the
-     viewport narrows by ~15px, and every vw-based value reflows at once.
-     That lurch is what reads as the page twitching. */
-  scrollbar-gutter: stable;
+   This is what finally stopped the page nudging on a phone. Every earlier
+   attempt kept the document scrollable and tried to hold its height
+   constant, but any change at all in that height makes a mobile browser
+   re-clamp the scroll position and animate its URL bar, and both read as a
+   jump. With the document fixed at exactly the viewport, opening a section
+   cannot change it, so there is nothing left to re-clamp. */
+html {
+  height: 100%;
+  overflow: hidden;       /* the document itself never scrolls */
+  overflow-anchor: none;
 }
 
 body {
   margin: 0;
+
+  /* body is the scroll container, full width so its scrollbar sits at the
+     edge of the window where one normally would */
+  height: 100%;
+  overflow-y: auto;
   overflow-x: clip;
-  overscroll-behavior-y: none;
+  scrollbar-gutter: stable;
+  overscroll-behavior: none;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
@@ -168,7 +177,7 @@ img { max-width: 100%; display: block; }
   max-width: calc(var(--col) + var(--menu-indent));
   margin-inline: 0;
   padding: 8vh 2rem 8rem clamp(1.5rem, 6vw, 7rem);
-  min-height: 100svh;
+  min-height: 100%;
 }
 
 /* once something is open the column rises and widens a little to read */
