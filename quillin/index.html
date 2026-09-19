@@ -16,7 +16,7 @@
      loads is hashed and can still be cached hard. -->
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=a520ef34">
+<link rel="stylesheet" href="css/style.css?v=2e1483de">
 </head>
 <body>
 
@@ -147,6 +147,10 @@
   <!-- step 4: glass selection (3d picker lands here) -->
   <section class="step" id="step-glass" hidden aria-labelledby="glass-label">
     <p class="step__label" id="glass-label">So&hellip; where&rsquo;s the damage?</p>
+    <!-- Shown instead of the picker when the VIN decodes to something we do not
+         do glass on. The message box below stays, so it is a redirection rather
+         than a dead end. -->
+    <p class="step__hint" id="decline-note" hidden></p>
     <div class="picker" id="picker">
       <div class="picker__stage" id="picker-stage" aria-hidden="true"></div>
       <div class="picker__side">
@@ -443,7 +447,7 @@
 <script src="js/backdrop.js?v=fa3fd3aa"></script>
 <script src="js/landing.js?v=8b55d991"></script>
 <script src="js/vin.js?v=7b1d974c"></script>
-<script src="js/glass.js?v=1deb5234"></script>
-<script src="js/app.js?v=a92dc280"></script>
+<script src="js/glass.js?v=8ed14842"></script>
+<script src="js/app.js?v=85c648af"></script>
 </body>
 </html>

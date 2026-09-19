@@ -765,6 +765,16 @@ body.on-quote #step-vin.is-folded { text-align: left; }
    the corner without that control joining the flow and shifting the layout. */
 .step { margin-top: 3rem; position: relative; }
 
+/* The `hidden` attribute is only `display: none` in the USER AGENT stylesheet,
+   which every author rule outranks. Any element given a display here, and most
+   are, ignores `hidden` completely. That is how a declined motorcycle still
+   showed its glass picker and its "Or just tell us!" button: the JS set
+   `hidden` on both, correctly, and the CSS quietly put them back.
+
+   This project had already patched the two cases it happened to hit, .step and
+   .panel, one at a time. This says it once for all of them. */
+[hidden] { display: none !important; }
+
 .step[hidden] { display: none; }
 
 /* Section headings: the question being asked. Brighter than the answers

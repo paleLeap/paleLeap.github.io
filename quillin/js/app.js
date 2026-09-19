@@ -27,6 +27,8 @@
     cYes:      $('confirm-yes'),
     cNo:       $('confirm-no'),
     glass:     $('step-glass'),
+    glassLabel: $('glass-label'),
+    declineNote: $('decline-note'),
     chipQ:     $('chipq'),
     chipChoices: $('chip-choices'),
     thatIt:    $('thatit'),
@@ -313,6 +315,7 @@
   });
 
   function lookup(vin, doubtful) {
+    undecline();
     lastLookup = vin;
     say('Looking that up…');
 
@@ -426,6 +429,7 @@
   el.mModel.addEventListener('change', function () {
     if (!el.mModel.value) { resetBelow(2); return; }
     // No VIN means no ADAS data, so we have to ask rather than infer.
+    undecline();
     vehicle = {
       year: el.mYear.value,
       make: el.mMake.value,
@@ -444,16 +448,74 @@
     el.mModel.disabled = true;
   }
 
+  /* A vehicle Quillin does not do glass on. Says so plainly, and still takes a
+     message, because someone on a motorcycle asking about a windshield may well
+     have a car too, and a dead end is a worse answer than a person. */
+  function declineVehicle(v, r) {
+    el.picker.hidden = true;
+    el.justTell.hidden = true;
+    el.glassLabel.textContent = 'We don’t do ' + r.what + '.';
+    el.declineNote.textContent =
+      'That VIN is a ' + (v.label || r.label) + ', and glass on ' + r.what +
+      ' is not work we take on. If there’s another vehicle we can help with, ' +
+      'or you think we have this wrong, leave us a message and we’ll come back to you.';
+    el.declineNote.hidden = false;
+    reveal(el.glass);
+    show(el.tellus);
+    show(el.photos);
+    restack();
+  }
+
+  /* Puts the damage step back to normal. Called before every fresh lookup,
+     because the customer may correct a motorcycle VIN to a car. */
+  function undecline() {
+    el.picker.hidden = false;
+    el.declineNote.hidden = true;
+    el.glassLabel.textContent = 'So… where’s the damage?';
+  }
+
   /* ---------- step 2: specifics ---------- */
 
   /* Only ask what the VIN could not settle. If it settled everything, this step
      never appears and we go straight to confirm. */
   function askSpecifics(v, noVin) {
     resetBelow(2);
+    var questions = questionsFor(v, noVin);
+    if (!questions.length) { askConfirm(v); return; }
+    renderQuestion(v, noVin, questions);
+  }
+
+  /* What still needs asking, in the order it should be asked. One list, read by
+     both the step that shows a question and the handler that answers one, so
+     the two can never disagree about whether anything is left. */
+  function questionsFor(v, noVin) {
     var questions = [];
     var state = VIN.adasState(v);
 
-    if (state === 'maybe' || noVin) {
+    /* Asked whenever nothing that has seen the vehicle can say what shape it
+       is: every no-VIN entry, and any VIN whose body class vPIC does not carry.
+       It used to guess from the door count, which on the no-VIN path is also
+       unknown, so every manually entered pickup and van was drawn as a saloon
+       and the customer was asked to pick panes it does not have. */
+    if (!answers.bodyStyle && Glass.resolve(v).needsBody) {
+      questions.push({
+        key: 'bodyStyle',
+        hint: 'What shape is your ' +
+              [v.year, v.make, v.model].filter(Boolean).join(' ') + '?',
+        options: [
+          { value: 'sedan',       label: 'Sedan, four doors' },
+          { value: 'coupe',       label: 'Coupe, two doors' },
+          { value: 'hatch',       label: 'Hatchback or wagon' },
+          { value: 'suv',         label: 'SUV or crossover' },
+          { value: 'pickup',      label: 'Pickup truck' },
+          { value: 'van',         label: 'Van or minivan' },
+          { value: 'convertible', label: 'Convertible' },
+          { value: 'heavy',       label: 'Rig, box truck or motorhome' }
+        ]
+      });
+    }
+
+    if (!answers.adas && (state === 'maybe' || noVin)) {
       questions.push({
         key: 'adas',
         hint: 'Some ' + [v.year, v.make, v.model].filter(Boolean).join(' ') +
@@ -467,8 +529,10 @@
       });
     }
 
-    if (!questions.length) { askConfirm(v); return; }
+    return questions;
+  }
 
+  function renderQuestion(v, noVin, questions) {
     var q = questions[0];
     el.specHint.textContent = q.hint;
     clearChoices(el.specChoices);
@@ -486,6 +550,12 @@
       input.value = opt.value;
       input.addEventListener('change', function () {
         answers[q.key] = opt.value;
+        /* The body style the customer gives is what the resolver, the picker
+           and the panel list all read from here on. */
+        if (q.key === 'bodyStyle') v.bodyStyle = opt.value;
+        /* Only one question is on screen at a time, so re-ask rather than
+           confirm: body style first, then anything still outstanding. */
+        if (questionsFor(v, noVin).length) { askSpecifics(v, noVin); return; }
         askConfirm(v);
         restack();
       });
@@ -521,6 +591,12 @@
   }
 
   el.cYes.addEventListener('click', function () {
+    /* Checked here rather than at decode, so a mistyped VIN that lands on a
+       motorcycle can still be corrected at the confirm step instead of dead
+       ending before the customer has been shown what we read. */
+    var r = Glass.resolve(vehicle);
+    if (r.unsupported) { declineVehicle(vehicle, r); return; }
+
     reveal(el.glass);
     openPicker();
     /* Shown at the same time as the picker, not gated behind it. Photographs are
@@ -1340,6 +1416,8 @@
     lastRequest = null;
     el.vin.value = '';
     el.field.classList.remove('field--ok');
+    undecline();
+    answers = {};
     /* slideShut, not hide. Starting over with the manual panel open used to
        snap three dropdowns out of existence in a frame while everything else
        on the page animated, which read as the page breaking rather than

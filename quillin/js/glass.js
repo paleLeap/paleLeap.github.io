@@ -109,6 +109,32 @@
     return norm(hay).indexOf(needle) !== -1;
   }
 
+  /* Things with no automotive glass on them. Checked BEFORE the body rules,
+     because nothing below matches a motorcycle and the fallback would then
+     guess from the door count and draw a saloon. That is not a cosmetic
+     failure: a customer on a Harley was being shown a four door car with a
+     back window and asked which of its panes was broken.
+
+     vPIC reports these in VehicleType ("MOTORCYCLE") and again in BodyClass
+     ("Motorcycle - Touring/Sport Touring"), so both are tested. */
+  var UNSUPPORTED = [
+    { kind: 'motorcycle',
+      what: 'motorcycles',
+      test: function (b, t) {
+        return has(t, 'motorcycle') || has(b, 'motorcycle') ||
+               has(b, 'moped') || has(b, 'scooter');
+      } },
+    { kind: 'offroad',
+      what: 'ATVs and off road vehicles',
+      test: function (b, t) {
+        return has(b, 'all-terrain') || has(b, 'atv') || has(b, 'snowmobile') ||
+               has(t, 'off road') || has(t, 'offroad');
+      } },
+    { kind: 'trailer',
+      what: 'trailers',
+      test: function (b, t) { return has(t, 'trailer') || has(b, 'trailer'); } }
+  ];
+
   /* Ordered. First hit wins, so the specific sits above the general:
      "Sport Utility Truck" must beat "truck", "minivan" must beat "van". */
   var RULES = [
@@ -149,6 +175,24 @@
     var doors = parseInt(v.doors, 10);
     if (isNaN(doors)) doors = 0;
 
+    for (var u = 0; u < UNSUPPORTED.length; u++) {
+      if (UNSUPPORTED[u].test(body, type)) {
+        return {
+          id: null, unsupported: true,
+          kind: UNSUPPORTED[u].kind, what: UNSUPPORTED[u].what,
+          label: body || type || 'that vehicle',
+          panels: [], cab: '', confident: true, why: body || type
+        };
+      }
+    }
+
+    /* The customer's own answer outranks everything. It is the only source here
+       that has actually seen the vehicle. */
+    if (v.bodyStyle && ARCHETYPES[v.bodyStyle]) {
+      var chosen = ARCHETYPES[v.bodyStyle];
+      return finish(v.bodyStyle, chosen, doors, v, true, 'told us');
+    }
+
     var id = null;
     for (var i = 0; i < RULES.length; i++) {
       if (RULES[i].test(body, type)) { id = RULES[i].id; break; }
@@ -158,17 +202,29 @@
     var why = body || '';
 
     if (!id) {
-      // Nothing matched, usually because the customer took the no-VIN path and
-      // we have no body class at all. Door count is all we have.
-      id = doors === 2 ? 'coupe' : 'sedan';
-      why = doors ? doors + '-door' : 'unknown body style';
+      /* Nothing matched, and nothing here has seen the car. Rather than draw a
+         saloon and hope, say so: the caller asks the customer which body style
+         it is, and their answer comes back through v.bodyStyle above. Guessing
+         from the door count was silently wrong for every pickup and van that
+         arrived through the no-VIN path, where there is no door count either. */
+      return {
+        id: null, needsBody: true,
+        label: 'vehicle', panels: [], cab: '', confident: false,
+        why: doors ? doors + '-door, body style unknown' : 'no body style'
+      };
     }
 
     // A 4-door "coupe" is a data error somewhere. Trust the door count.
     if (id === 'coupe' && doors >= 4) { id = 'sedan'; confident = false; }
     if (id === 'sedan' && doors === 2) { id = 'coupe'; }
 
-    var arch = ARCHETYPES[id];
+    return finish(id, ARCHETYPES[id], doors, v, confident, why);
+  }
+
+  /* The panel set, once the body style is settled, from whichever route settled
+     it. Shared so a style the customer told us gets exactly the same treatment
+     as one the VIN gave us, cab handling included. */
+  function finish(id, arch, doors, v, confident, why) {
     var panels = arch.panels.slice();
     var cab = '';
 
