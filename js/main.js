@@ -25,7 +25,18 @@
     panel.classList.add("is-out");
     leaving = panel;
 
-    panel.addEventListener("animationend", function done() {
+    /* animationend is the normal path, but a backgrounded tab can stop
+       painting mid-exit and never fire it, which would strand the panel
+       on screen. The timeout is the backstop. */
+    var settled = false;
+    var timer = setTimeout(function () { done(); }, 900);
+
+    panel.addEventListener("animationend", done);
+
+    function done() {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
       panel.removeEventListener("animationend", done);
       if (leaving !== panel) return;   // it was reopened mid-flight
       panel.hidden = true;
@@ -38,7 +49,7 @@
       if (menu && !document.querySelector(".panel:not([hidden])")) {
         menu.classList.remove("is-collapsed");
       }
-    });
+    }
   }
 
   function open(panel) {

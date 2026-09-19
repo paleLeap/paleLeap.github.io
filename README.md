@@ -106,6 +106,22 @@ on the bare page; over the brightest patch of any background behind the menu it
 drops to 2.35:1. Body copy stays above 15:1 throughout. Anyone who has asked
 their system for reduced motion gets a single still image and no cycling.
 
+## Why the page does not shift
+
+Three rules work together to stop the layout moving when a section opens:
+
+`scrollbar-gutter: stable` on `html` reserves the scrollbar's space whether or
+not one is showing. Without it, opening a section grew the page, the scrollbar
+appeared, the viewport narrowed by about 15px, and every `vw`-based value
+reflowed at once. That lurch was the "twitchy" feel.
+
+`overflow-x: clip` on `body` means the panel sliding in from the right can
+never produce a horizontal scrollbar during the animation.
+
+`min-height: 100svh` on `.stage` holds the page at least a screen tall, so a
+short section opening does not add a vertical scrollbar at all. With the
+tallest section open the document is exactly the viewport height.
+
 ## Browser support notes
 
 Two things were changed after the site behaved badly on an iPhone:

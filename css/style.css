@@ -46,7 +46,7 @@
   --marker-w: 1.1rem;
   --letter-w: 0.49rem;
   --hang: calc((var(--marker-w) + var(--letter-w)) * var(--open-scale));
-  --ease: cubic-bezier(.22, .61, .36, 1);
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (prefers-color-scheme: light) {
@@ -66,8 +66,17 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+html {
+  /* The gutter is reserved whether or not a scrollbar is showing. Without
+     this, opening a section grows the page, the scrollbar appears, the
+     viewport narrows by ~15px, and every vw-based value reflows at once.
+     That lurch is what reads as the page twitching. */
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
+  overflow-x: clip;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
@@ -123,7 +132,8 @@ img { max-width: 100%; display: block; }
   width: 100%;
   max-width: calc(var(--col) + var(--menu-indent));
   margin-inline: 0;
-  padding: 8vh 2rem 10rem clamp(1.5rem, 6vw, 7rem);
+  padding: 8vh 2rem 8rem clamp(1.5rem, 6vw, 7rem);
+  min-height: 100svh;
 }
 
 /* once something is open the column rises and widens a little to read */
@@ -149,8 +159,8 @@ img { max-width: 100%; display: block; }
   /* shrinks toward its own top-left corner rather than its centre */
   transform-origin: top left;
   transition:
-    color     900ms ease,
-    transform 900ms var(--ease);
+    color     1000ms ease,
+    transform 1000ms var(--ease);
 }
 
 /* Open, the name stays exactly where it is in the layout. It only drifts
@@ -198,10 +208,10 @@ img { max-width: 100%; display: block; }
   white-space: nowrap;
   transform-origin: left center;
   transition:
-    transform   460ms var(--ease),
-    opacity     300ms ease,
-    color       220ms ease,
-    text-shadow 220ms ease;
+    transform   560ms var(--ease),
+    opacity     420ms var(--ease),
+    color       300ms ease,
+    text-shadow 300ms ease;
 }
 
 /* the marker: + when closed, − when open */
@@ -228,7 +238,7 @@ img { max-width: 100%; display: block; }
 /* the three not chosen slide out to the left and fade */
 .stage.is-open .menu a {
   opacity: 0;
-  transform: translateX(-2.5rem);
+  transform: translateX(-1.75rem);
   pointer-events: none;
 }
 
@@ -257,17 +267,17 @@ img { max-width: 100%; display: block; }
 
 /* Classes are put on and taken off by main.js, which waits for the leaving
    animation to finish before hiding the panel. */
-.panel.is-in  { animation: panel-in  460ms var(--ease) both; }
-.panel.is-out { animation: panel-out 320ms var(--ease) both; }
+.panel.is-in  { animation: panel-in  560ms var(--ease) both; }
+.panel.is-out { animation: panel-out 380ms var(--ease) both; }
 
 @keyframes panel-in {
-  from { opacity: 0; transform: translateX(2.5rem); }
+  from { opacity: 0; transform: translateX(1.75rem); }
   to   { opacity: 1; transform: none; }
 }
 
 @keyframes panel-out {
   from { opacity: 1; transform: none; }
-  to   { opacity: 0; transform: translateX(2.5rem); }
+  to   { opacity: 0; transform: translateX(1.75rem); }
 }
 
 /* ---------------------------------------------------------------- content -- */
