@@ -252,7 +252,20 @@ body:not(.on-quote) .greeting { display: none; }
   color: var(--muted);
 }
 
-.panel { --title-fs: clamp(1.75rem, 4.5vw, 2.5rem); }
+/* Smaller than it was. These are supporting pages, and a heading sized like a
+   hero made each of them announce itself as loudly as the quote tool, which is
+   the one thing on this site that is actually the point. */
+.panel { --title-fs: clamp(1.5rem, 3.4vw, 2rem); }
+
+/* Except this one. The guarantee is the page that has to be believed, so it
+   keeps a little more size and noticeably more weight than its neighbours. */
+#guarantee { --title-fs: clamp(1.75rem, 4vw, 2.375rem); }
+
+#guarantee .panel__title { font-weight: 300; letter-spacing: -.02em; }
+
+#guarantee .panel__sub { color: var(--ink-dim); }
+
+#guarantee .plain li b { color: var(--ink); font-weight: 400; }
 
 .panel__title {
   margin: 0 0 .75rem;
@@ -573,9 +586,9 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 .prose p {
   margin: 0 0 1.25rem;
-  font-size: 1rem;
+  font-size: .9375rem;
   font-weight: 300;
-  line-height: 1.75;
+  line-height: 1.7;
   color: var(--ink-dim);
 }
 
@@ -660,20 +673,27 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 .plain { list-style: none; margin: 0; padding: 0; }
 
+/* The subtitle hangs off the E of the title. The list hangs off the same axis,
+   so a page reads as one column stepped in from its heading instead of a
+   heading with a table parked underneath it. Same measured .587 advance, same
+   --title-fs, so it holds as the heading scales. */
+.panel .plain,
+.panel .prose { margin-left: calc(var(--title-fs) * .587); }
+
 /* The supporting sections sit one notch below the job in hand: the same type,
    a touch dimmer, so the quote always reads as the brighter thing. */
 .plain li {
-  padding: 1.25rem 0;
+  padding: 1.125rem 0;
   border-top: 1px solid var(--line);
-  font-size: 1rem;
+  font-size: .9375rem;
   font-weight: 300;
-  line-height: 1.65;
+  line-height: 1.6;
   color: var(--muted);
 }
 
 .plain li b {
   display: block;
-  font-size: 1.0625rem;
+  font-size: 1rem;
   font-weight: 300;
   color: var(--ink);
   margin-bottom: .3125rem;
@@ -684,7 +704,7 @@ body.on-quote #step-vin.is-folded { text-align: left; }
    become scannable down the left instead of buried in prose. */
 .plain--split li {
   display: grid;
-  grid-template-columns: 11.5rem 1fr;
+  grid-template-columns: 10.5rem 1fr;
   gap: 0 2rem;
   align-items: baseline;
 }

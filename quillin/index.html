@@ -8,8 +8,15 @@
      client's real live site, and two Quillin Auto Glass results would do them
      no favours. Remove this line when it goes live for real. -->
 <meta name="robots" content="noindex, nofollow">
+<!-- The document itself cannot be cache busted: bump.sh stamps the css and js
+     it points AT, but nothing can stamp this file's own URL. A cached copy
+     therefore keeps asking for the old hashes and every change looks like it
+     never shipped, which has now cost debugging time twice. This asks for a
+     revalidation on each visit. The file is a few KB; everything expensive it
+     loads is hashed and can still be cached hard. -->
+<meta http-equiv="Cache-Control" content="no-cache">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=afa3ab6a">
+<link rel="stylesheet" href="css/style.css?v=fa1de68d">
 </head>
 <body>
 
@@ -276,7 +283,7 @@
   </section>
 
   <section class="panel" id="guarantee" hidden>
-    <h1 class="panel__title">Our guarantee</h1>
+    <h1 class="panel__title">Quillin Guarantee</h1>
     <p class="panel__sub panel__sub--quote">&ldquo;We treat every ride like it&rsquo;s
       our own, and every neighbor like family.&rdquo;</p>
 
@@ -296,11 +303,6 @@
         <span>Mobile across the Dallas Metroplex. We meet the car where it
           already is, at home or at work, so you are not arranging a ride to a
           shop on top of everything else.</span>
-      </li>
-      <li>
-        <b>Insurance handled</b>
-        <span>We deal with the claim and talk to the adjuster ourselves. You
-          should not have to explain glass part numbers over the phone.</span>
       </li>
       <li>
         <b>No stress pricing</b>
