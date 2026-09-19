@@ -612,7 +612,7 @@ body.on-quote #step-vin.is-folded { text-align: left; }
   color: var(--faint);
   text-decoration: none;
   border-radius: 2px;
-  transition: color .25s var(--ease), background .25s var(--ease);
+  transition: color .25s var(--ease), background .25s var(--ease), text-shadow .25s var(--ease);
 }
 
 .dock.is-shown { opacity: 1; transform: none; pointer-events: auto; }
@@ -1382,7 +1382,30 @@ body.on-quote #step-vin.is-folded { text-align: left; }
     letter-spacing: .07em;
   }
 
-  .dock a.is-on { color: var(--faint); background: none; }
+  /* Tapping a word should read as the word answering you, not as a box
+     lighting up behind it. Mobile browsers paint a filled rectangle over the
+     whole link on touch by default, and that rectangle is the width of the
+     tap target, not the width of the text, so it always looks oversized.
+     Off, and replaced by the text brightening and picking up a halo for as
+     long as the finger is down. */
+  .dock a { -webkit-tap-highlight-color: transparent; }
+
+  .dock a:active {
+    color: var(--ink);
+    text-shadow: 0 0 10px rgba(237, 240, 242, .45);
+  }
+
+  /* Where you are now is the same gesture held far lower: a dim lift and the
+     faintest halo. Enough to answer the question if you go looking for it,
+     not enough to read as a lit control demanding attention, which is what
+     the filled pill did. */
+  .dock a.is-on {
+    color: var(--ink-dim);
+    background: none;
+    text-shadow: 0 0 8px rgba(237, 240, 242, .16);
+  }
+
+  .dock a.is-on:active { color: var(--ink); text-shadow: 0 0 10px rgba(237, 240, 242, .45); }
 
   /* Every item gets a divider, so about no longer needs its own. The rule is
      drawn on the item rather than added as an element, and sits on the shared
