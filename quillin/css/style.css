@@ -305,8 +305,10 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 .under { margin: 2.25rem 0 0; }
 
-/* it has done its job once the customer is past the VIN */
-.flow:has(.step.is-folded) .under { display: none; }
+/* Scoped to the VIN step. This hides the "Contact us!" button once the customer
+   is past the VIN, and it must NOT reach the "That it?" button further down,
+   which shares the class and only appears once earlier steps HAVE folded. */
+.flow:has(.step.is-folded) #step-vin .under { display: none; }
 
 /* Small and wide, sitting above the page like a plate on a door. The name is
    not the thing the customer came for, so it does not get the big type. */

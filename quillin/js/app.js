@@ -27,6 +27,8 @@
     cYes:      $('confirm-yes'),
     cNo:       $('confirm-no'),
     glass:     $('step-glass'),
+    thatIt:    $('thatit'),
+    thatItWrap: $('thatit-wrap'),
     picker:    $('picker'),
     pickerStage: $('picker-stage'),
     pickerNote:  $('picker-note'),
@@ -235,6 +237,8 @@
       hide(el.photos);
       noPhotos = false;
       clearPhotos();
+      el.thatItWrap.hidden = true;
+      el.thatIt.disabled = true;
     }
     if (step <= 5) {
       hide(el.when);
@@ -594,7 +598,6 @@
     noPhotos = true;
     clearPhotos();
     afterDamageChange();
-    restack();
     say2(damageGiven()
       ? 'No problem! Let\'s continue...'
       : 'No problem. Tell us which glass is damaged above and we can carry on.');
@@ -653,12 +656,37 @@
      step down and rebuilding it was both wiping their answer and scrolling the
      page away from the car they were still picking from. Only the review below
      is genuinely stale. */
+  /* Called whenever the damage changes: a pane toggled, a photo added or
+     dropped, the description edited.
+
+     It does NOT advance. Tapping a window on the car is an act of pointing, not
+     an act of finishing, and moving the page the moment someone points at
+     something takes the car out from under them while they are still deciding
+     whether there is a second break. Advancing is its own button.
+
+     It also does not reset the timing step. Choosing a second broken window
+     does not un-answer "when do you need this fixed"; only the review below is
+     genuinely stale. */
   function afterDamageChange() {
-    if (!damageGiven()) { resetBelow(5); restack(); return; }
+    if (!damageGiven()) { resetBelow(5); syncThatIt(); restack(); return; }
     resetBelow(6);
-    askWhen();            // no-op when it is already showing
+    syncThatIt();
     restack();
   }
+
+  /* Offered once there is something to move on from, and retired once they
+     have moved on. */
+  function syncThatIt() {
+    var ready = damageGiven();
+    el.thatIt.disabled = !ready;
+    el.thatItWrap.hidden = !ready || !el.when.hidden;
+  }
+
+  el.thatIt.addEventListener('click', function () {
+    askWhen();
+    syncThatIt();
+    restack();
+  });
 
   function say2(text, kind) {
     if (!text) { hide(el.photoNote); return; }
@@ -1061,10 +1089,17 @@
       document.querySelectorAll('.step'), function (s) { return !s.hidden; });
     var last = steps[steps.length - 1];
 
+    /* The damage and photo steps are peers, revealed together, and neither is
+       finished until the customer presses "That it?". Without this they folded
+       the instant a pane was picked, which took the car off the screen mid
+       decision: the same complaint as auto-advancing, by another route. */
+    var stillChoosing = el.when.hidden;
+
     steps.forEach(function (s) {
       var d = DIGEST[s.id];
       var answered = !!(d && d.value());
-      var fold = answered && s !== last && !s.classList.contains('is-editing');
+      var held = stillChoosing && (s === el.glass || s === el.photos);
+      var fold = answered && !held && s !== last && !s.classList.contains('is-editing');
       if (fold) foldLine(s);
       s.classList.toggle('is-folded', fold);
       if (s === last) s.classList.remove('is-editing');
