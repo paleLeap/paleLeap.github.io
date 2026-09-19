@@ -119,9 +119,14 @@
   var dock = document.querySelector('.dock');
   var ticking = false;
 
+  var persistentDock = window.matchMedia('(max-width: 40rem)');
+
   function checkDock() {
     ticking = false;
     if (!dock) return;
+    /* On a phone the bar is permanent furniture, so the scroll rule does not
+       apply to it at all. */
+    if (persistentDock.matches) { dock.classList.add('is-shown'); return; }
     var doc = document.documentElement;
     var scrollable = Math.max(0, doc.scrollHeight - window.innerHeight);
     var atEnd = window.scrollY >= scrollable - 4;

@@ -27,6 +27,8 @@
     cYes:      $('confirm-yes'),
     cNo:       $('confirm-no'),
     glass:     $('step-glass'),
+    chipQ:     $('chipq'),
+    chipChoices: $('chip-choices'),
     thatIt:    $('thatit'),
     thatItWrap: $('thatit-wrap'),
     picker:    $('picker'),
@@ -67,6 +69,16 @@
   var panels = [];         // glass panels picked in the picker
   var picker = null;       // the live picker instance, if WebGL is available
   var archetype = null;    // resolved body style for this vehicle
+  var windshield = null;   // 'chip' | 'crack' | 'unsure', when a windshield is picked
+
+  /* Sized the way the trade sizes it, and the way a customer can actually
+     check: a quarter and a dollar bill are in everyone's pocket. */
+  var CHIP = [
+    { value: 'chip',   label: 'A chip, smaller than a quarter' },
+    { value: 'crack',  label: 'A crack, or bigger than that' },
+    { value: 'unsure', label: 'I am not sure' }
+  ];
+
   var urgency = null;      // step 5
   var reach = {};          // step 6, channel value -> what the customer typed
   var lastRequest = null;  // the record Quillin would receive
@@ -233,6 +245,8 @@
       el.tellText.value = '';
       hide(el.tellNote);
       panels = [];
+      windshield = null;
+      hide(el.chipQ);
       teardownPicker();
       hide(el.photos);
       noPhotos = false;
@@ -560,8 +574,51 @@
 
   function onPanels(next) {
     panels = next || [];
+    syncChipQuestion();
     afterDamageChange();
     restack();
+  }
+
+  /* Asked only when it can matter. Nobody picking a door glass should be shown
+     a question about chips. */
+  function syncChipQuestion() {
+    var wants = panels.indexOf('windshield') !== -1;
+
+    if (!wants) {
+      windshield = null;
+      slideShut(el.chipQ);
+      Array.prototype.forEach.call(
+        el.chipChoices.querySelectorAll('input'), function (i) { i.checked = false; });
+      return;
+    }
+
+    if (!el.chipChoices.querySelector('input')) {
+      CHIP.forEach(function (opt) {
+        var id = 'chip-' + opt.value;
+        var label = document.createElement('label');
+        label.className = 'choice';
+        label.setAttribute('for', id);
+
+        var input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'chip';
+        input.id = id;
+        input.value = opt.value;
+        input.addEventListener('change', function () {
+          windshield = opt.value;
+          resetBelow(6);
+          syncThatIt();
+          restack();
+        });
+
+        var span = document.createElement('span');
+        span.textContent = opt.label;
+        label.appendChild(input);
+        label.appendChild(span);
+        el.chipChoices.appendChild(label);
+      });
+    }
+    slideOpen(el.chipQ);
   }
 
   /* ---------- step 4: describe it instead ---------- */
@@ -677,7 +734,9 @@
   /* Offered once there is something to move on from, and retired once they
      have moved on. */
   function syncThatIt() {
-    var ready = damageGiven();
+    // If the windshield is in play, the chip question is part of the answer.
+    var ready = damageGiven() &&
+      (panels.indexOf('windshield') === -1 || !!windshield);
     el.thatIt.disabled = !ready;
     el.thatItWrap.hidden = !ready || !el.when.hidden;
   }
@@ -824,6 +883,17 @@
       var services = Glass.servicesFor(panels, v).filter(function (x) {
         return x !== 'ADAS recalibration';
       });
+      /* A chip is repaired, not replaced, and saying "windshield replacement"
+         to someone who has a chip quotes them the wrong job. */
+      if (windshield === 'chip') {
+        services = services.map(function (x) {
+          return x === 'Windshield replacement' ? 'Rock chip repair' : x;
+        });
+      } else if (windshield === 'unsure') {
+        services = services.map(function (x) {
+          return x === 'Windshield replacement' ? 'Windshield: repair or replace, we will check' : x;
+        });
+      }
       if (services.length) rows.push(['Work', services.join(', ')]);
     }
 
@@ -891,7 +961,9 @@
         photos: photos.length,
         /* Distinguishes "said no" from "never engaged with the question", which
            is the difference between a complete request and an abandoned one. */
-        photosDeclined: noPhotos
+        photosDeclined: noPhotos,
+        // null unless the windshield was chosen
+        windshield: windshield
       },
       work: Glass.servicesFor(panels, v),      // ADAS included here
       adas: {
@@ -1032,7 +1104,11 @@
     } },
     'step-glass': { name: 'Damage', value: function () {
       var bits = [];
-      if (panels.length) bits.push(Glass.labelsFor(panels).join(', '));
+      if (panels.length) {
+        var names = Glass.labelsFor(panels);
+        if (windshield === 'chip') names[panels.indexOf('windshield')] = 'Windshield chip';
+        bits.push(names.join(', '));
+      }
       var typed = el.tellText.value.trim();
       if (typed) bits.push(typed.length > 54 ? typed.slice(0, 51) + '\u2026' : typed);
       return bits.join('. ');

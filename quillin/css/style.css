@@ -571,6 +571,14 @@ body.on-quote #step-vin.is-folded { text-align: left; }
   color: var(--ink);
 }
 
+/* A question that belongs to a selection, so it is indented under it rather
+   than presented as a step of its own. */
+.subq { margin-top: 1.75rem; }
+
+.subq[hidden] { display: none; }
+
+.subq .step__label { margin-bottom: .75rem; }
+
 /* ---------- the section bar ---------- */
 
 /* Small, fixed, and out of the way. It is how you get to the parts of the site
@@ -1228,11 +1236,15 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
   .top { --gutter: 1.25rem; }
 
-  .brand__logo img { height: 3.25rem; }
+  /* Bigger, on the owner's own feedback. The mark is the only thing on a phone
+     header telling you whose business this is, and it was being shrunk to make
+     room for icons that have since been dropped. */
+  .brand__logo img { height: 4.25rem; }
 
   .top__tel { font-size: .9375rem; }
 
-  .flow { padding-top: 2rem; padding-bottom: 6rem; }
+  /* Clears the persistent bar plus the home indicator. */
+  .flow { padding-top: 2rem; padding-bottom: 7.5rem; }
 
   .greeting h1 { font-size: clamp(1.75rem, 9vw, 2.25rem); }
 
@@ -1249,16 +1261,32 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
   .shots { grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr)); }
 
-  /* One row of five at 375px does not fit with padding that clears a thumb, so
-     it scrolls sideways instead of wrapping into an unpredictable shape. */
+  /* ALWAYS VISIBLE on a phone, not only at the end of the page.
+
+     Hiding it until the bottom made the whole site look like it had no
+     navigation: the owner's words were that it took him a minute to find more
+     information, and that tapping the logo to reveal it was not obvious enough.
+     On a phone a persistent bottom bar is the expected place for this, so it
+     just lives there. The logo toggle stays for desktop, where hovering the
+     mark is a reasonable thing to discover. */
   .dock {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
     justify-content: flex-start;
     overflow-x: auto;
     scrollbar-width: none;
-    padding-right: 7rem;      /* room for the About us. corner */
+    border-top: 1px solid var(--line);
+    background: var(--bg);
   }
 
   .dock::-webkit-scrollbar { display: none; }
+
+  /* The fixed corner link and the bar were both pinned to the bottom, and the
+     owner reported "About us is in the way" of the Contact us button. With the
+     bar always present, about already has a place in it, so the floating copy
+     goes. */
+  .aboutcorner { display: none; }
 
   .reach__input { font-size: 1rem; }   /* under 16px iOS zooms the page on focus */
 

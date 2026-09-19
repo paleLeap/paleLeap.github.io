@@ -150,6 +150,16 @@
       <p class="note" id="tellus-note" role="status" aria-live="polite" hidden></p>
     </div>
 
+    <!-- Only when the windshield is among the chosen glass. A chip and a
+         replacement are the same workflow but very different jobs, and it is
+         the single most common question the shop has to ask back. -->
+    <div class="subq" id="chipq" hidden>
+      <p class="step__label">The windshield: chip or crack?</p>
+      <fieldset class="choices" id="chip-choices">
+        <legend class="visually-hidden">Is the windshield damage a chip or a crack?</legend>
+      </fieldset>
+    </div>
+
     <p class="under" id="thatit-wrap" hidden>
       <button type="button" class="btn" id="thatit" disabled>That it?</button>
     </p>
