@@ -8,7 +8,7 @@
 
 import * as THREE from '../vendor/three/three.module.js';
 import { OrbitControls } from '../vendor/three/OrbitControls.js';
-import { buildVehicle } from './model.js';
+import { buildVehicle } from './model.js?v=b7254aa8';
 
 /* One accent, red, and nothing else. Light on hover, dark on select, so the two
    states are told apart by value and not only by hue. */
@@ -150,6 +150,7 @@ export function createPicker(opts) {
      customer stands outside on battery is a cost with no visible return; the
      model is line work on a flat ground and holds up fine at 2x. */
   var coarse = window.matchMedia('(pointer: coarse)').matches;
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)');
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, coarse ? 2 : 2));
   renderer.shadowMap.enabled = false;
   /* Filmic tone mapping instead of raw clamped output. Without it the clearcoat
@@ -239,8 +240,89 @@ export function createPicker(opts) {
     camera.position.copy(sphere.center).addScaledVector(DIR, dist);
     controls.minDistance = dist * 0.55;
     controls.maxDistance = dist * 2.2;
+    swing = null;
     controls.update();
   }
+
+  /* ---------- swinging to a selection ---------- */
+
+  /* Picking a piece of glass turns the vehicle round to face it. It is a SWING
+     and not a zoom: the distance never changes, only the angle. Moving in would
+     answer a question nobody asked and leaves the customer unsure whether the
+     rest of the car is still there to click.
+
+     The camera lands on the ray running from the pivot out through the centre
+     of the chosen panel, which is what puts that panel in the middle of the
+     frame. Azimuth is taken whole. Elevation is not: a roof light sits almost
+     directly above the pivot and a door glass almost level with it, so the raw
+     angles would throw the view between a plan shot and a flat side-on one.
+     Both are worse than the three-quarter the step opens on, so elevation only
+     LEANS toward the panel rather than going all the way. */
+
+  const SWING_MS = 620;
+  const HOUSE_POLAR = Math.acos(DIR.y);   // the opening elevation, as a polar angle
+  const LEAN = 0.5;
+
+  let swing = null;
+
+  function place(theta, phi, radius) {
+    const v = new THREE.Vector3().setFromSpherical(
+      new THREE.Spherical(radius, phi, theta)
+    );
+    camera.position.copy(controls.target).add(v);
+    camera.lookAt(controls.target);
+  }
+
+  function swingTo(id) {
+    const mesh = panels[id];
+    if (!mesh) return;
+
+    const centre = new THREE.Box3().setFromObject(mesh).getCenter(new THREE.Vector3());
+    const ray = centre.clone().sub(controls.target);
+    if (ray.lengthSq() < 1e-8) return;      // a panel sitting on the pivot has no direction to offer
+
+    const from = new THREE.Spherical().setFromVector3(
+      camera.position.clone().sub(controls.target)
+    );
+    const want = new THREE.Spherical().setFromVector3(ray);
+
+    let phi = HOUSE_POLAR + (want.phi - HOUSE_POLAR) * LEAN;
+    phi = Math.min(Math.max(phi, controls.minPolarAngle + 0.02), controls.maxPolarAngle - 0.02);
+
+    /* Shortest way round. Without this a panel just past the back of the car
+       reads as nearly a full turn away and the view takes the long route. */
+    let turn = want.theta - from.theta;
+    while (turn > Math.PI) turn -= Math.PI * 2;
+    while (turn < -Math.PI) turn += Math.PI * 2;
+
+    const to = { theta: from.theta + turn, phi: phi, radius: from.radius };
+
+    if (REDUCED.matches) {
+      place(to.theta, to.phi, to.radius);
+      swing = null;
+      return;
+    }
+    swing = { from: { theta: from.theta, phi: from.phi, radius: from.radius }, to: to, start: -1 };
+  }
+
+  function stepSwing(now) {
+    if (!swing) return;
+    if (swing.start < 0) swing.start = now;
+    const t = Math.min((now - swing.start) / SWING_MS, 1);
+    const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;   // ease in out
+    const a = swing.from, b = swing.to;
+    place(
+      a.theta + (b.theta - a.theta) * e,
+      a.phi + (b.phi - a.phi) * e,
+      a.radius + (b.radius - a.radius) * e
+    );
+    if (t >= 1) swing = null;
+  }
+
+  /* A hand on the model outranks the animation. The moment the customer starts
+     dragging, the swing gets out of the way rather than fighting it for the
+     same camera; the same goes for a resize, which reframes from scratch. */
+  controls.addEventListener('start', () => { swing = null; });
 
   /* ---------- picking ---------- */
 
@@ -315,6 +397,8 @@ export function createPicker(opts) {
     if (on) selected.add(id); else selected.delete(id);
     if (inputs[id]) inputs[id].checked = on;
     repaint();
+    // Only on the way in. Deselecting should leave the view where it is.
+    if (on) swingTo(id);
     if (onChange) onChange(list());
   }
 
@@ -368,8 +452,9 @@ export function createPicker(opts) {
   ro.observe(mount);
   resize();
 
-  function tick() {
+  function tick(now) {
     if (disposed) return;
+    stepSwing(now === undefined ? performance.now() : now);
     controls.update();
     renderer.render(scene, camera);
     requestAnimationFrame(tick);

@@ -517,7 +517,7 @@
     // './' is required; a bare 'picker.js' would be read as a package name.
     // Two-argument then(), not then().catch(): a throw inside the success
     // handler must not be reported as a module load failure.
-    import('./picker.js').then(function (mod) {
+    import('./picker.js?v=599c6c09').then(function (mod) {
       try {
         picker = mod.createPicker({
           mount: el.pickerStage,
@@ -526,6 +526,11 @@
           labelFor: Glass.labelFor,
           onChange: onPanels
         });
+        /* Same reason as __lastRequest below: the picker is reached through a
+           dynamic import and held in a closure, so without this there is no way
+           to read the camera from a console and every question about the 3D
+           view has to be answered by looking at pixels. */
+        window.__picker = picker;
       } catch (err) {
         console.error('Glass picker failed to start:', err);
         plainList();
