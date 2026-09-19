@@ -244,56 +244,7 @@
     }, hold + fade);
   }
 
-  /* ---- on-device diagnostic -------------------------------------------
-     Add ?debug to the URL. Reports what actually changes when a section is
-     tapped, which is the only way to see this on a real phone.           */
-  function debugPanel() {
-    if (window.location.search.indexOf("debug") === -1) return;
-
-    var el = document.createElement("pre");
-    el.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:99;margin:0;" +
-      "padding:8px;font:11px/1.35 monospace;background:#000;color:#0f0;" +
-      "white-space:pre-wrap;max-height:45vh;overflow:auto";
-    document.body.appendChild(el);
-
-    function read() {
-      var vv = window.visualViewport;
-      return {
-        docH: document.documentElement.scrollHeight,
-        scrollY: Math.round(window.scrollY),
-        innerH: window.innerHeight,
-        vvH: vv ? Math.round(vv.height) : "-",
-        vvTop: vv ? Math.round(vv.offsetTop) : "-",
-        padTop: Math.round(parseFloat(getComputedStyle(
-          document.querySelector(".stage")).paddingTop)),
-        nameY: Math.round(document.querySelector(".brand").getBoundingClientRect().y),
-        row0Y: Math.round(document.querySelector(".menu a").getBoundingClientRect().y)
-      };
-    }
-
-    function line(tag, a, b) {
-      var keys = Object.keys(a), out = tag + "\n";
-      keys.forEach(function (k) {
-        var changed = a[k] !== b[k];
-        out += "  " + k + ": " + a[k] + (changed ? "  ->  " + b[k] + "   <<<< MOVED" : "") + "\n";
-      });
-      return out;
-    }
-
-    el.textContent = "tap a section\n" + line("at rest", read(), read());
-
-    document.querySelectorAll(".menu a").forEach(function (a) {
-      a.addEventListener("click", function () {
-        var before = read();
-        setTimeout(function () {
-          el.textContent = line("before tap -> 700ms after", before, read());
-        }, 700);
-      });
-    });
-  }
-
   renderProjects();
-  debugPanel();
   reserveSpace();
   watchWidth();
   window.addEventListener("load", reserveSpace);
