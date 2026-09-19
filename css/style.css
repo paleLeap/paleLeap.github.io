@@ -67,6 +67,10 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
+  /* Chrome adjusts the scroll position when content resizes, which on a
+     phone shows up as the page nudging itself. Nothing here needs it. */
+  overflow-anchor: none;
+
   /* The gutter is reserved whether or not a scrollbar is showing. Without
      this, opening a section grows the page, the scrollbar appears, the
      viewport narrows by ~15px, and every vw-based value reflows at once.
@@ -77,6 +81,7 @@ html {
 body {
   margin: 0;
   overflow-x: clip;
+  overscroll-behavior-y: none;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
