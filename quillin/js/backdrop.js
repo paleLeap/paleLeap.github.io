@@ -9,10 +9,10 @@
    The blur and the darkening are baked into the files. Asking the browser to
    filter a full-screen image at 60fps costs far more than shipping one that is
    already soft, and on a phone it is the difference between a smooth drift and
-   a stuttering one. Each file is 30 to 53 KB.
+   a stuttering one. Each file is 95 to 160 KB.
 
    The photographs are the customer's own wallpapers, cropped to 16:9, blurred,
-   dimmed to 62% and desaturated, so type never has to compete with a skyline. */
+   dimmed to 66% and desaturated, so type never has to compete with a skyline. */
 
 (function () {
   'use strict';
@@ -62,8 +62,9 @@
     layer.style.backgroundImage = 'url("' + src + '")';
   }
 
-  /* Fetched one ahead rather than all at once. Ten photographs is 450 KB, and
-     nobody who came here to get a quote should wait on the ninth one. */
+  /* Fetched one ahead rather than all at once. Ten photographs is 1.3 MB, and
+     nobody who came here to get a quote should wait on the ninth one. At five
+     seconds a turn there is a full cycle of slack to fetch the next. */
   function warm(src) {
     var img = new Image();
     img.decoding = 'async';
