@@ -1,0 +1,1276 @@
+/* Quillin Auto Glass
+
+   Type-led and dark. No cards, no drop shadows, no bordered boxes: hierarchy
+   comes from size, weight and space instead. The 3D selector is already a black
+   instrument, so the page is built around it rather than pasting it onto a white
+   sheet.
+
+   The customer arriving here is usually standing next to a broken window and is
+   already having a bad day. One question on screen at a time, everything already
+   answered folded to a line, and a phone number that is never more than a glance
+   away. */
+
+/* Self-hosted so the page stays self-contained: no external request, no third
+   party, nothing to fail. Inter variable covers 100 to 900, which is the whole
+   point. The previous stack resolved to a face with ONE weight, so every
+   font-weight in this file was being ignored and the display type rendered at
+   regular no matter what it asked for. 48 KB, OFL-1.1, licence alongside it. */
+@font-face {
+  font-family: 'Inter var';
+  src: url('../assets/fonts/inter-var.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --gutter: clamp(1.5rem, 3.4vw, 2rem);
+  /* Quillin's own two, lifted where they have to survive a dark ground.
+     #2e6911 on near-black measures 1.5:1 and is effectively invisible, so the
+     green is raised to a tint of itself for text and kept true for fills. */
+  --brand-green:  #2e6911;
+  --green:        #8cc63f;
+  --brand-orange: #e56813;
+  --orange:       #f07d2a;
+
+  --bg:      #0a0c0e;
+  --raise:   #12161a;
+  --ink:     #edf0f2;
+  --ink-dim: #b9c0c7;
+  --muted:   #7d868f;
+  --faint:   #4d555d;
+  --line:    rgba(255, 255, 255, .09);
+  --line-2:  rgba(255, 255, 255, .16);
+
+  --pick-off: #e8615e;
+  --pick-on:  #8c1d1a;
+
+  --ease: cubic-bezier(.22, .61, .36, 1);
+  --col: 44rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 17px/1.6 'Inter var', ui-sans-serif, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-synthesis-weight: none;
+}
+
+:focus-visible { outline: 1px solid var(--orange); outline-offset: 3px; }
+
+::selection { background: rgba(240, 125, 42, .25); }
+
+/* ---------- top bar ---------- */
+
+/* One gutter, used on every side, so whatever sits in a corner is the same
+   distance from both edges that make it. It was 18px from the top and 33px from
+   the side, which reads as the mark hugging the top edge and drifting away from
+   the left one. */
+.top {
+  --gutter: clamp(1.5rem, 3.4vw, 2rem);
+  display: flex;
+  /* flex-start, not center. Centring aligned the right hand group to the middle
+     of a header whose height is set by the logo, so the taller the mark grew the
+     further the phone number slid down away from its own corner. Starting both
+     at the top puts each group the same gutter from the edge it belongs to. */
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: var(--gutter);
+}
+
+/* The logo and the section icons are one object. Hovering anywhere on it opens
+   the strip, and because the icons sit INSIDE the hover target the pointer never
+   crosses a dead gap on its way to them. */
+/* flex-start, so the category words open on the SAME line as the socials and
+   the phone number. Centring them put the strip at the mid-height of a tall
+   logo, which left it hanging below the information opposite it. */
+.brand { display: flex; align-items: flex-start; }
+
+.brand__logo { display: block; line-height: 0; flex: none; }
+
+/* Clamped rather than fixed: it is the largest thing in the header, so it has
+   to give way on a narrow screen instead of pushing the phone number off. */
+.brand__logo img {
+  width: auto;
+  /* The floor matters as much as the ceiling here: a vw-only value came out
+     BELOW the old fixed 56px on a narrow window, so "bigger" quietly became
+     smaller on laptops. */
+  height: clamp(4.8rem, 9vw, 6.6rem);
+  display: block;
+}
+
+.brandnav {
+  display: flex;
+  align-items: center;
+  gap: .125rem;
+  overflow: hidden;
+  max-width: 0;
+  /* max-width, not width: the strip has to animate from nothing to its natural
+     size, and a keyword like auto is not animatable. */
+  transition: max-width .5s var(--ease);
+}
+
+.brand:hover .brandnav,
+.brand:focus-within .brandnav,
+.brand.is-open .brandnav { max-width: 26rem; }
+
+/* Words, set exactly like the bar at the bottom of the page, so the two read as
+   the same control in two places rather than two different ideas. */
+.brandnav a {
+  display: block;
+  white-space: nowrap;
+  padding: .4375rem .75rem;
+  font-size: .75rem;
+  font-weight: 300;
+  letter-spacing: .1em;
+  text-decoration: none;
+  color: var(--faint);
+  opacity: 0;
+  transform: translateX(-.5rem);
+  transition: opacity .3s var(--ease), transform .35s var(--ease), color .2s var(--ease);
+  /* each icon follows the one before it, so the strip unrolls rather than
+     appearing all at once */
+  transition-delay: calc(var(--i) * 55ms);
+}
+
+.brand:hover .brandnav a,
+.brand:focus-within .brandnav a,
+.brand.is-open .brandnav a { opacity: 1; transform: none; }
+
+.brandnav a:hover { color: var(--ink-dim); }
+
+.brandnav a.is-on { color: var(--ink); background: rgba(255, 255, 255, .06); border-radius: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .brandnav, .brandnav a, .dock { transition: none; }
+}
+
+/* Sits at the top of the bar, so its cap height lands level with the gutter
+   rather than floating in the middle of whatever height the logo dictates. */
+.top__right { display: flex; align-items: center; gap: 1.5rem; padding-top: .25rem; }
+
+/* Present but quiet: noticeable when looked for, never competing with the
+   phone number beside them. */
+.social { display: flex; gap: 1rem; }
+
+.social { gap: .875rem; align-items: center; }
+
+.social a {
+  display: block;
+  line-height: 0;
+  color: var(--faint);
+  transition: color .25s var(--ease);
+}
+
+/* 1.125rem was small beside a 24px phone number. Up a notch. */
+.social svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.social a:hover { color: var(--ink); }
+
+.top__tel {
+  font-size: .9375rem;
+  font-weight: 300;
+  letter-spacing: .01em;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color .25s var(--ease);
+}
+
+.top__tel:hover { color: var(--orange); }
+
+/* ---------- the page ---------- */
+
+/* The whole view fades as one. The swap happens while it is at zero, so the
+   two views never overlap and the height change is never seen. 170ms matches
+   OUT_MS in landing.js; change one and change the other. */
+.flow {
+  transition: opacity .17s ease;
+  max-width: var(--col);
+  margin: 0 auto;
+  padding: clamp(2.5rem, 8vh, 5rem) clamp(1.5rem, 5vw, 2rem) 7rem;
+}
+
+.flow.is-leaving { opacity: 0; }
+
+/* The heading belongs to the quote and nothing else. Services, guarantee and
+   contact each open as their own page rather than as something appended under
+   a sales line about getting a quote. */
+body:not(.on-quote) .greeting { display: none; }
+
+.greeting { margin: 0 0 2.5rem; }
+
+/* Sits under a panel's title the way the standfirst sits under the quote
+   heading: thin, dim, and saying the one thing worth knowing up front. */
+/* NOT :last-of-type. The title is the only h1 in its panel, so :last-of-type
+   always matched and the wide margin was applied even when a subtitle followed,
+   leaving the pair floating apart. This asks the real question: is there a
+   subtitle under me? */
+.panel__title:not(:has(+ .panel__sub)) { margin-bottom: 2.5rem; }
+
+/* Indented by the advance of one capital S, so "All" starts under the E of
+   "Services". Measured, not guessed: at weight 150 with -.03em tracking, Inter's
+   S advances 0.587 of the font size. Tied to --title-fs so it holds as the
+   heading scales. */
+/* A quoted line runs longer than a label, so it gets a ceiling on its measure
+   rather than running the full width of the column. */
+.panel__sub--quote {
+  max-width: 36ch;
+  line-height: 1.45;
+}
+
+.panel__sub {
+  margin: 0 0 2.75rem calc(var(--title-fs) * .587);
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
+  font-weight: 200;
+  letter-spacing: -.008em;
+  color: var(--muted);
+}
+
+.panel { --title-fs: clamp(1.75rem, 4.5vw, 2.5rem); }
+
+.panel__title {
+  margin: 0 0 .75rem;
+  font-size: var(--title-fs);
+  line-height: 1.1;
+  font-weight: 150;
+  letter-spacing: -.03em;
+  color: var(--ink);
+}
+
+/* On the quote view, before anything has been answered, the whole thing is
+   centred: a heading, one field, one small way out. Once the flow is underway
+   it goes back to a left-aligned column, because lists and a 3D selector do not
+   read centred. */
+body.on-quote .greeting { text-align: center; margin-bottom: 3rem; }
+
+body.on-quote .greeting h1 { max-width: none; }
+
+body.on-quote .standfirst { max-width: 62ch; }
+
+body.on-quote #step-vin { text-align: center; }
+
+body.on-quote #step-vin .field { max-width: 26rem; margin: 0 auto; }
+
+body.on-quote #step-vin .field input { text-align: center; padding-right: 2.5rem; }
+
+/* Heading, then the field, then the explanation. The field is what the page is
+   for, so nothing sits between it and the heading that announces it. */
+body.on-quote #step-vin { display: flex; flex-direction: column; align-items: center; }
+
+body.on-quote #step-vin .field { order: 1; width: 100%; }
+
+body.on-quote #step-vin .step__hint {
+  order: 2;
+  margin: 1rem auto 0;
+  font-size: .8125rem;
+  color: var(--muted);
+}
+
+body.on-quote #step-vin .note { order: 3; }
+
+body.on-quote #step-vin > p { order: 4; }
+
+body.on-quote #step-vin .helppanel { order: 5; width: 100%; }
+
+body.on-quote #step-vin .manual { order: 6; width: 100%; }
+
+body.on-quote #step-vin .under { order: 7; }
+
+body.on-quote #step-vin .helppanel { max-width: 26rem; margin-left: auto; margin-right: auto; text-align: left; }
+
+body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-right: auto; text-align: left; }
+
+/* once folded, the VIN row is a record again and sits left like the rest */
+body.on-quote #step-vin.is-folded { text-align: left; }
+
+.under { margin: 2.25rem 0 0; }
+
+/* it has done its job once the customer is past the VIN */
+.flow:has(.step.is-folded) .under { display: none; }
+
+/* Small and wide, sitting above the page like a plate on a door. The name is
+   not the thing the customer came for, so it does not get the big type. */
+.wordmark {
+  margin: 0 0 2.5rem;
+  font-size: .6875rem;
+  font-weight: 500;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.greeting h1 {
+  margin: 0;
+  font-size: clamp(2.25rem, 6vw, 3.5rem);
+  line-height: 1.08;
+  font-weight: 150;
+  letter-spacing: -.03em;
+  color: var(--ink);
+  text-wrap: balance;
+  max-width: 20ch;
+}
+
+/* Sits above the heading and runs wider than it: one long quiet line that sets
+   the scene before the page asks for anything. Dim enough that "Get your quote."
+   underneath is still what the eye lands on. */
+.standfirst {
+  margin: 0 auto 1.5rem;
+  max-width: 56ch;
+  font-size: clamp(1.0625rem, 2.4vw, 1.375rem);
+  line-height: 1.5;
+  font-weight: 200;
+  letter-spacing: -.008em;
+  color: var(--muted);
+  text-wrap: balance;
+}
+
+/* Marks the founding year as something nobody has told us yet, so it is
+   greppable and cannot quietly ship as "20xx". */
+[data-placeholder] { color: var(--orange); }
+
+/* ---------- start over ----------
+
+   Deliberately the quietest control in the step. It is the only thing here that
+   destroys work, so it should be findable and never inviting. */
+
+.reset { margin-top: 2.25rem; }
+
+.reset__ask { font-size: .75rem; color: var(--faint); border-bottom-color: transparent; }
+
+.reset__ask:hover { color: var(--muted); border-bottom-color: var(--line-2); }
+
+.reset__ask[hidden] { display: none; }
+
+.reset__confirm {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .75rem 1rem;
+  padding: .875rem 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.reset__confirm[hidden] { display: none; }
+
+.reset__msg { font-size: .875rem; font-weight: 300; color: var(--ink-dim); }
+
+/* The destructive option is not the loud one. It is a small outlined button
+   next to a plain "keep it", and focus lands on keeping. */
+.reset__yes { border-color: var(--line-2); color: var(--muted); }
+
+.reset__yes:hover { color: #ef6b62; border-color: #ef6b62; background: none; }
+
+.reset__no { font-size: .8125rem; }
+
+/* ---------- the backdrop ----------
+
+   Two layers that dissolve into each other, each drifting slowly across itself.
+   Scaled past 1 so there is room to move without ever exposing an edge, and a
+   scrim over the top so the copy never has to compete with a photograph. */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .9s var(--ease);
+}
+
+.backdrop.is-on { opacity: 1; }
+
+.backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, var(--bg) 0%, rgba(10, 12, 14, .82) 45%, rgba(10, 12, 14, .62) 100%),
+    linear-gradient(to bottom, rgba(10, 12, 14, .55), rgba(10, 12, 14, .85));
+}
+
+.backdrop__layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition-property: opacity;
+  transition-timing-function: linear;
+  /* duration is set per layer by backdrop.js from FADE_MS */
+  transform: scale(1.12);
+  animation: drift 46s ease-in-out infinite alternate;
+  will-change: opacity, transform;
+}
+
+.backdrop__layer.is-on { opacity: 1; }
+
+@keyframes drift {
+  from { transform: scale(1.12) translate(-3%, -1.5%); }
+  to   { transform: scale(1.12) translate( 3%,  1.5%); }
+}
+
+/* Everything the customer reads sits above it. */
+.top, .flow, .dock, .aboutcorner { position: relative; z-index: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop__layer { animation: none; }
+}
+
+/* ---------- photographs in the copy ---------- */
+
+.prose .shot {
+  margin: 0 0 2rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  aspect-ratio: auto;
+  overflow: visible;
+  position: static;
+}
+
+.prose .shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 2px;
+  filter: saturate(.92);
+}
+
+/* The lead portrait sits beside the opening paragraphs on a wide screen and
+   above them on a narrow one. */
+.shot--lead {
+  float: right;
+  width: min(15rem, 38%);
+  margin: .25rem 0 1.5rem 2rem;
+}
+
+.shot--wide {
+  clear: both;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+  margin: 2.25rem 0;
+}
+
+@media (max-width: 38rem) {
+  .shot--lead { float: none; width: 100%; margin: 0 0 1.75rem; }
+  .shot--wide { grid-template-columns: 1fr; }
+}
+
+/* ---------- the about corner ----------
+
+   Bottom left, in the logo's own orange, faded back so it sits under everything
+   else in the reading order without ever disappearing. It is the one piece of
+   the site that is about them rather than about the job, so it gets a corner
+   rather than a place in the queue. */
+
+/* Bottom right, right in the corner, and very faint. A door left ajar rather
+   than a call to action. */
+.aboutcorner {
+  position: fixed;
+  right: var(--gutter, 1.75rem);
+  bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  z-index: 11;
+  font-size: .75rem;
+  font-weight: 300;
+  letter-spacing: .04em;
+  color: var(--brand-orange);
+  opacity: .3;
+  text-decoration: none;
+  transition: opacity .35s var(--ease);
+}
+
+.aboutcorner:hover, .aboutcorner:focus-visible { opacity: .85; }
+
+/* Tighter than the service lists. This page is read by someone who is already
+   hesitating, so it has to be takeable at a glance rather than scrolled. */
+.plain--tight li { padding: .8125rem 0; }
+
+.plain--tight li b { font-size: .9375rem; }
+
+.plain--tight li span { font-size: .9375rem; line-height: 1.55; max-width: 44ch; }
+
+.plain--tight.plain--split li { grid-template-columns: 13rem 1fr; }
+
+/* The process is five short lines, so it is a list and not a table. */
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: howto;
+  max-width: 50ch;
+}
+
+.steps li {
+  counter-increment: howto;
+  position: relative;
+  padding: .4375rem 0 .4375rem 2rem;
+  font-size: .9375rem;
+  font-weight: 300;
+  color: var(--muted);
+}
+
+.steps li::before {
+  content: counter(howto);
+  position: absolute;
+  left: 0;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.panel__h2 {
+  margin: 2.5rem 0 1rem;
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- long form copy ---------- */
+
+.prose { max-width: 58ch; }
+
+.prose p {
+  margin: 0 0 1.25rem;
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.75;
+  color: var(--ink-dim);
+}
+
+.prose b { font-weight: 400; color: var(--ink); }
+
+.prose__sign {
+  margin-top: 2rem;
+  font-size: 1.125rem;
+  font-weight: 200;
+  color: var(--ink);
+}
+
+/* ---------- the section bar ---------- */
+
+/* Small, fixed, and out of the way. It is how you get to the parts of the site
+   that are not the job in hand, and it never takes attention from the job. */
+/* Hidden until the page is actually at its end. The logo strip is the nav for
+   everyday use; this is the one that catches you when you have read to the
+   bottom and are looking for what is next. */
+.dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  opacity: 0;
+  transform: translateY(.75rem);
+  pointer-events: none;
+  transition: opacity .35s var(--ease), transform .35s var(--ease);
+  display: flex;
+  justify-content: center;
+  gap: .25rem;
+  padding: .75rem 1rem calc(.75rem + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(to top, var(--bg) 55%, rgba(10, 12, 14, 0));
+}
+
+.dock a {
+  padding: .4375rem .875rem;
+  font-size: .75rem;
+  font-weight: 300;
+  letter-spacing: .1em;
+  color: var(--faint);
+  text-decoration: none;
+  border-radius: 2px;
+  transition: color .25s var(--ease), background .25s var(--ease);
+}
+
+.dock.is-shown { opacity: 1; transform: none; pointer-events: auto; }
+
+/* About sits apart from the other four. They are all the service; this one is
+   the people behind it, so it gets its own side of a rule rather than queueing
+   with them. The bar is a flex row, so the separator is drawn on the item
+   rather than added as an element nothing would ever need to read. */
+.nav--apart { position: relative; margin-left: .875rem; }
+
+.nav--apart::before {
+  content: "";
+  position: absolute;
+  left: -.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: .875rem;
+  background: var(--line-2);
+}
+
+.dock a:hover { color: var(--ink-dim); }
+
+.dock a.is-on { color: var(--ink); background: rgba(255, 255, 255, .06); }
+
+.panel[hidden] { display: none; }
+
+/* ---------- plain lists, used by the panels ---------- */
+
+.plain { list-style: none; margin: 0; padding: 0; }
+
+/* The supporting sections sit one notch below the job in hand: the same type,
+   a touch dimmer, so the quote always reads as the brighter thing. */
+.plain li {
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--line);
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.plain li b {
+  display: block;
+  font-size: 1.0625rem;
+  font-weight: 300;
+  color: var(--ink);
+  margin-bottom: .3125rem;
+}
+
+/* Name in its own column, explanation beside it. A stack of bold-then-paragraph
+   reads as a blog post; two columns read as a list of services, and the names
+   become scannable down the left instead of buried in prose. */
+.plain--split li {
+  display: grid;
+  grid-template-columns: 11.5rem 1fr;
+  gap: 0 2rem;
+  align-items: baseline;
+}
+
+.plain--split li b { margin-bottom: 0; }
+
+.plain--split li span { display: block; max-width: 46ch; }
+
+@media (max-width: 46rem) {
+  .plain--split li { grid-template-columns: 1fr; gap: .375rem 0; }
+  .plain--split li b { margin-bottom: .125rem; }
+}
+
+.plain a { color: var(--ink-dim); text-decoration: none; border-bottom: 1px solid var(--line-2); }
+
+.plain a:hover { color: var(--orange); border-color: var(--orange); }
+
+.aside { margin: 1.25rem 0 0; font-size: .8125rem; font-weight: 300; color: var(--faint); }
+
+
+/* ---------- steps ---------- */
+
+.step { margin-top: 3rem; }
+
+.step[hidden] { display: none; }
+
+/* Section headings: the question being asked. Brighter than the answers
+   beneath them, which is the whole hierarchy on a page with no boxes. */
+.step__label {
+  display: block;
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin: 0 0 1.125rem;
+}
+
+.step__hint a {
+  color: var(--orange);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(240, 125, 42, .4);
+  padding-bottom: 1px;
+  transition: border-color .2s var(--ease);
+}
+
+.step__hint a:hover { border-bottom-color: var(--orange); }
+
+.step__hint {
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: -.5rem 0 1.375rem;
+  max-width: 40ch;
+}
+
+/* Steps fade rather than travel. Movement across the page competes with the
+   thing being read; a fade just swaps what is there. */
+.step.is-live { animation: fadeIn .45s var(--ease) both; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ---------- folded steps ----------
+   Answered, a step is one line: what it was, and what you said. */
+
+.step__folded {
+  display: none;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--line);
+  padding: .8125rem 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+  align-items: baseline;
+  gap: 1.5rem;
+  transition: border-color .3s var(--ease);
+}
+
+.step.is-folded { margin-top: 0; }
+
+.step.is-folded > .step__folded { display: flex; }
+
+.step.is-folded > *:not(.step__folded) { display: none; }
+
+.step__folded-name {
+  flex: none;
+  width: 5.5rem;
+  font-size: .625rem;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--faint);
+  transition: color .25s var(--ease);
+}
+
+/* A folded step is a record, not a question, so it sits dimmer than the live
+   one above it. */
+.step__folded-value {
+  font-size: .9375rem;
+  font-weight: 300;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color .25s var(--ease);
+}
+
+.step__folded:hover { border-color: var(--line-2); }
+.step__folded:hover .step__folded-name { color: var(--orange); }
+.step__folded:hover .step__folded-value { color: var(--ink); }
+
+/* ---------- the vin ---------- */
+
+.field { position: relative; display: flex; align-items: center; }
+
+/* No box. A rule under the line you are typing on, and the type does the rest. */
+.field input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 200;
+  letter-spacing: .1em;
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+  padding: .25rem 3rem .625rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--line-2);
+  background: none;
+  color: var(--ink);
+  transition: border-color .25s var(--ease);
+}
+
+.field input::placeholder {
+  letter-spacing: .02em;
+  text-transform: none;
+  color: var(--faint);
+  font-size: .9375rem;
+}
+
+.field input:focus { outline: none; border-bottom-color: var(--orange); }
+
+.field--ok input { border-bottom-color: var(--green); }
+
+.field__help {
+  position: absolute;
+  right: 0;
+  bottom: .625rem;
+  width: 1.625rem;
+  height: 1.625rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-2);
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  font-size: .75rem;
+  cursor: pointer;
+  padding: 0;
+  transition: color .2s var(--ease), border-color .2s var(--ease);
+}
+
+.field__help:hover { color: var(--ink); border-color: var(--ink-dim); }
+
+.field__help[aria-expanded="true"] { color: var(--bg); background: var(--ink); border-color: var(--ink); }
+
+.helppanel {
+  margin: 1.25rem 0 0;
+  padding: 0;
+  font-size: .875rem;
+  font-weight: 300;
+}
+
+.helppanel[hidden] { display: none; }
+
+.helppanel p {
+  margin: 0 0 .625rem;
+  font-size: .625rem;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.helppanel ol { margin: 0; padding-left: 1.125rem; color: var(--ink-dim); }
+
+.helppanel li { margin-bottom: .375rem; }
+
+/* ---------- messages ---------- */
+
+.note { font-size: .8125rem; font-weight: 300; margin: .875rem 0 0; color: var(--muted); }
+
+.note[hidden] { display: none; }
+
+.note--warn { color: var(--orange); }
+
+.note--err { color: #ef6b62; }
+
+/* ---------- quiet links ---------- */
+
+.plainlink {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: .8125rem;
+  font-weight: 300;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 1px solid var(--line-2);
+  padding-bottom: 1px;
+  transition: color .2s var(--ease), border-color .2s var(--ease);
+}
+
+.plainlink:hover { color: var(--ink); border-color: var(--orange); }
+
+.manual { margin-top: 1.25rem; display: grid; gap: .5rem; }
+
+.manual[hidden] { display: none; }
+
+.manual select {
+  font: inherit;
+  font-size: .9375rem;
+  font-weight: 300;
+  padding: .75rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.manual select:disabled { color: var(--faint); cursor: default; }
+
+.manual select option { background: var(--raise); color: var(--ink); }
+
+/* ---------- choices ----------
+   Rows, not boxes. A hairline between them and a mark down the left when
+   chosen: the same information a bordered card carries, without the furniture. */
+
+.choices { display: grid; gap: 0; margin: 0; padding: 0; border: 0; }
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: .875rem;
+  padding: 1.0625rem .875rem;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-left: 2px solid transparent;
+  background: none;
+  cursor: pointer;
+  font-size: 1.0625rem;
+  font-weight: 300;
+  color: var(--ink-dim);
+  transition: color .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+}
+
+.choice:first-of-type { border-top: 1px solid var(--line); }
+
+.choice:hover { color: var(--ink); background: rgba(255, 255, 255, .025); }
+
+.choice:has(input:checked) {
+  color: var(--ink);
+  border-left-color: var(--orange);
+  background: rgba(240, 125, 42, .06);
+}
+
+.choice input { accent-color: var(--orange); margin: 0; flex: none; }
+
+.choice__detail { margin-left: auto; font-size: .8125rem; color: var(--faint); }
+
+/* ---------- buttons ---------- */
+
+.btn {
+  font: inherit;
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  padding: .9375rem 1.75rem;
+  border: 0;
+  border-radius: 2px;
+  background: var(--brand-orange);
+  color: #fff;
+  cursor: pointer;
+  transition: background .2s var(--ease), opacity .2s var(--ease);
+}
+
+.btn:hover { background: var(--orange); }
+
+.btn--quiet {
+  background: none;
+  color: var(--muted);
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.btn--quiet:hover { background: rgba(255, 255, 255, .04); color: var(--ink); }
+
+/* Declared AFTER .btn on purpose. Same specificity, so order is what decides
+   it, and when this sat higher up the file .btn's orange fill won and the small
+   quiet link rendered as a full call to action. */
+.btn--small {
+  display: inline-block;
+  text-decoration: none;
+  font-size: .6875rem;
+  letter-spacing: .12em;
+  padding: .5625rem 1rem;
+  background: none;
+  color: var(--muted);
+  border: 1px solid var(--line-2);
+}
+
+.btn--small:hover { background: none; color: var(--ink); border-color: var(--orange); }
+
+.btn[disabled] { opacity: .3; cursor: default; }
+
+.btn[disabled]:hover { background: var(--brand-orange); }
+
+/* ---------- glass picker ---------- */
+
+.picker { display: block; }
+
+/* No frame. The stage is the same ground as the page, so the vehicle simply
+   occupies the page rather than sitting in a window cut into it. */
+.picker__stage {
+  height: clamp(18rem, 44vh, 26rem);
+  background: none;
+  cursor: grab;
+  overflow: hidden;
+  margin: 0 0 .5rem;
+}
+
+.picker__stage:active { cursor: grabbing; }
+
+/* !important on purpose, and one of the few places it is the right tool.
+   OrbitControls sets `touch-action: none` inline on the canvas so it can own
+   every gesture; inline beats the cascade, so this is the only way to take the
+   vertical axis back. Without it a finger dragged up the screen over the car
+   rotates the car instead of scrolling the page, and the customer is trapped on
+   the step. One finger still rotates horizontally, two fingers still zoom. */
+.picker__stage canvas { touch-action: pan-y !important; }
+
+.picker__note {
+  margin: 0 0 1.25rem;
+  font-size: .75rem;
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--faint);
+}
+
+.picker .choices { grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+
+.choice--compact { padding: .6875rem .75rem; font-size: .8125rem; }
+
+/* One accent in here and it is red, matching the model. */
+.picker .choice input { accent-color: var(--pick-off); }
+
+.picker .choice:has(input:checked) {
+  border-left-color: var(--pick-off);
+  background: rgba(232, 97, 94, .07);
+}
+
+.picker--nogl .picker__stage { display: none; }
+
+/* ---------- how to reach you ---------- */
+
+.reach__input {
+  display: block;
+  width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 300;
+  margin: 0;
+  padding: .875rem .875rem .875rem 1.75rem;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, .02);
+  color: var(--ink);
+}
+
+.reach__input[hidden] { display: none; }
+
+.reach__input::placeholder { color: var(--faint); }
+
+.reach__input:focus { outline: none; border-bottom-color: var(--orange); }
+
+.reach__input--bad { border-bottom-color: #ef6b62; }
+
+.reach__error { margin: .5rem 0 0 1.75rem; font-size: .8125rem; color: #ef6b62; }
+
+.reach__error[hidden] { display: none; }
+
+/* ---------- photos ---------- */
+
+.shots {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+  gap: .375rem;
+}
+
+.shots[hidden] { display: none; }
+
+.shot {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--raise);
+}
+
+.shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.shot__name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: .5rem;
+  font-size: .625rem;
+  color: var(--muted);
+  word-break: break-all;
+  text-align: center;
+}
+
+.shot__drop {
+  position: absolute;
+  top: .25rem;
+  right: .25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: rgba(0, 0, 0, .65);
+  color: #fff;
+  font-size: .8125rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.shot__drop:hover { background: #000; }
+
+/* ---------- review ---------- */
+
+.summary {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 0;
+  font-size: .9375rem;
+}
+
+.summary dt {
+  color: var(--faint);
+  font-size: .625rem;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  padding: .875rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.summary dd {
+  margin: 0;
+  padding: 1rem 0;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 300;
+}
+
+.summary dd b { font-weight: 400; color: var(--ink); }
+
+.summary .summary__vin { font-variant-numeric: tabular-nums; letter-spacing: .06em; }
+
+.summary .summary__flag { color: var(--orange); }
+
+@media (prefers-reduced-motion: reduce) {
+  .step.is-live { animation: none; }
+  .flow { transition: none; }
+}
+
+/* ==========================================================================
+   TOUCH AND SMALL SCREENS
+
+   The customer here is standing next to a broken window, on a phone, one
+   handed, outdoors, and not calm. Everything below is judged against that.
+   ========================================================================== */
+
+/* Sized by INPUT rather than by width: a small laptop with a touch screen has
+   the same thumbs as a phone, and a narrow desktop window does not. 44px is the
+   floor both Apple and Google publish. */
+@media (pointer: coarse) {
+  .plainlink {
+    display: inline-block;
+    padding: .625rem 0;
+    min-height: 2.75rem;
+  }
+
+  .field__help { width: 2.75rem; height: 2.75rem; bottom: 0; }
+
+  .dock a { padding: .875rem 1rem; }
+
+  .aboutcorner { padding: .875rem 0 .875rem .875rem; }
+
+  .choice { min-height: 3rem; padding: .9375rem .875rem; }
+
+  .choice--compact { min-height: 2.75rem; padding: .75rem; font-size: .875rem; }
+
+  .brandnav a { padding: .75rem .875rem; }
+
+  .shot__drop { width: 2rem; height: 2rem; font-size: 1rem; }
+
+  .btn { padding: .9375rem 1.5rem; }
+
+  .btn--small { padding: .8125rem 1.125rem; }
+
+  .step__folded { padding: 1rem 0; }
+
+  /* An inline link inside a sentence cannot be made 44px tall without opening
+     up the line spacing around it. Padding grows the hit area and an equal
+     negative margin gives the layout back, so the target is thumb sized while
+     the paragraph still sets normally. */
+  .step__hint a {
+    padding: .6875rem .25rem;
+    margin: -.6875rem -.25rem;
+    display: inline-block;
+  }
+
+  /* The strip is a tap toggle here, so it must not also open on a stray hover
+     from a stylus or a trackpad in tablet mode. */
+  .brand:hover .brandnav { max-width: 0; }
+
+  .brand.is-open .brandnav { max-width: 26rem; }
+}
+
+@media (max-width: 40rem) {
+  /* dvh, not vh. Mobile browser chrome grows and shrinks, and vh is frozen to
+     the largest viewport, so a vh-sized stage pushes content under the toolbar
+     on first paint and then jumps. */
+  .picker__stage { height: clamp(15rem, 42dvh, 20rem); }
+
+  /* Two narrow columns rather than one long one. Eleven panels in a single
+     column put the list at about 500px under an already tall canvas. */
+  .picker .choices { grid-template-columns: repeat(2, 1fr); gap: .25rem; }
+
+  .choice--compact { font-size: .8125rem; padding: .75rem .5rem; gap: .4375rem; }
+
+  /* The header is the logo and the phone. The social icons are the first thing
+     to go: they are the least urgent item on the screen for someone whose
+     window is broken. */
+  .social { display: none; }
+
+  .top { --gutter: 1.25rem; }
+
+  .brand__logo img { height: 3.25rem; }
+
+  .top__tel { font-size: .9375rem; }
+
+  .flow { padding-top: 2rem; padding-bottom: 6rem; }
+
+  .greeting h1 { font-size: clamp(1.75rem, 9vw, 2.25rem); }
+
+  .standfirst { font-size: 1rem; max-width: 30ch; }
+
+  .summary { grid-template-columns: 1fr; gap: 0; }
+
+  .summary dt { border-top: 1px solid var(--line); padding-bottom: .25rem; }
+
+  .summary dd { border-top: 0; padding-top: 0; padding-bottom: .875rem; }
+
+  .plain--split li,
+  .plain--tight.plain--split li { grid-template-columns: 1fr; gap: .375rem 0; }
+
+  .shots { grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr)); }
+
+  /* One row of five at 375px does not fit with padding that clears a thumb, so
+     it scrolls sideways instead of wrapping into an unpredictable shape. */
+  .dock {
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-right: 7rem;      /* room for the About us. corner */
+  }
+
+  .dock::-webkit-scrollbar { display: none; }
+
+  .reach__input { font-size: 1rem; }   /* under 16px iOS zooms the page on focus */
+
+  .manual select { font-size: 1rem; }
+
+  .tellus textarea { font-size: 1rem; }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

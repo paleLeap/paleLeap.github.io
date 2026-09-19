@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quillin Auto Glass | Windshield and Auto Glass Repair, Wylie TX</title>
+<!-- Not for search engines yet. This is a proof of concept sitting beside the
+     client's real live site, and two Quillin Auto Glass results would do them
+     no favours. Remove this line when it goes live for real. -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="backdrop" aria-hidden="true"></div>
+
+<header class="top">
+  <!-- The logo is the handle. Hovering it grows the mark to the right into the
+       four sections; the logo itself is also the way back to the quote. -->
+  <div class="brand">
+    <a class="brand__logo" href="#quote" aria-label="Quillin Auto Glass, get a quote">
+      <img src="assets/img/logo.png" alt="" width="300" height="243">
+    </a>
+
+    <nav class="brandnav" aria-label="Sections">
+      <a href="#quote"     style="--i:0">quote</a>
+      <a href="#services"  style="--i:1">services</a>
+      <a href="#guarantee" style="--i:2">guarantee</a>
+      <a href="#contact"   style="--i:3">contact</a>
+      <a href="#about" class="nav--apart" style="--i:4">about</a>
+    </nav>
+  </div>
+  <div class="top__right">
+    <!-- Handles still unknown; these are placeholders until the client supplies
+         them, and they are marked so nobody ships them by accident. -->
+    <nav class="social" aria-label="Social">
+      <a href="#" data-placeholder aria-label="Instagram">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="3" y="3" width="18" height="18" rx="5"/>
+          <circle cx="12" cy="12" r="4.2"/>
+          <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/>
+        </svg>
+      </a>
+      <a href="#" data-placeholder aria-label="Facebook">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="3" y="3" width="18" height="18" rx="5"/>
+          <path d="M15.2 8.2h-1.6c-.9 0-1.4.5-1.4 1.3v1.6h2.9l-.4 2.9h-2.5V21"/>
+        </svg>
+      </a>
+    </nav>
+    <a class="top__tel" href="tel:+12145867650">(214) 586-7650</a>
+  </div>
+</header>
+
+<main class="flow">
+
+  <div class="greeting">
+    <p class="standfirst">Servicing Dallas Metroplex auto glass needs since
+      <span data-placeholder="founded">20xx</span>. Family owned and operated.
+      Let&rsquo;s get you back on the road.</p>
+    <h1>Get your quote.</h1>
+  </div>
+
+  <section class="panel" id="quote">
+
+  <!-- step 1: vin -->
+  <section class="step" id="step-vin" aria-labelledby="vin-label">
+    <label class="step__label visually-hidden" id="vin-label" for="vin">Start with your VIN</label>
+    <p class="step__hint">This tells us the exact glass your vehicle was built
+      with, nothing more. Need more help? <a href="#help">Click here!</a></p>
+
+    <div class="field" id="vin-field">
+      <input id="vin" name="vin" type="text" inputmode="latin" autocomplete="off"
+             spellcheck="false" maxlength="17" placeholder="e.g. 1HGCM82633A004352"
+             aria-describedby="vin-note">
+      <button type="button" class="field__help" id="vin-help-btn"
+              aria-expanded="false" aria-controls="vin-help"
+              aria-label="Where do I find my VIN?">?</button>
+    </div>
+
+    <div class="helppanel" id="vin-help" hidden>
+      <p>Where to find your VIN</p>
+      <ol>
+        <li>Your insurance card or vehicle registration.</li>
+        <li>The sticker in the driver&rsquo;s door jamb, visible with the door open.</li>
+        <li>The corner of the dash on the driver&rsquo;s side, read through the windshield.</li>
+      </ol>
+    </div>
+
+    <p class="note" id="vin-note" role="status" aria-live="polite" hidden></p>
+
+    <p style="margin:.875rem 0 0">
+      <button type="button" class="plainlink" id="no-vin">I don&rsquo;t have my VIN</button>
+    </p>
+
+    <p class="under">
+      <a class="btn btn--small" href="#contact">Contact us!</a>
+    </p>
+
+    <div class="manual" id="manual" hidden>
+      <label class="visually-hidden" for="m-year">Year</label>
+      <select id="m-year"><option value="">Year</option></select>
+      <label class="visually-hidden" for="m-make">Make</label>
+      <select id="m-make" disabled><option value="">Make</option></select>
+      <label class="visually-hidden" for="m-model">Model</label>
+      <select id="m-model" disabled><option value="">Model</option></select>
+    </div>
+  </section>
+
+  <!-- step 2: specifics -->
+  <section class="step" id="step-specifics" hidden aria-labelledby="spec-label">
+    <p class="step__label" id="spec-label">One more thing</p>
+    <p class="step__hint" id="spec-hint"></p>
+    <fieldset class="choices" id="spec-choices">
+      <legend class="visually-hidden">Vehicle specifics</legend>
+    </fieldset>
+  </section>
+
+  <!-- step 3: confirm -->
+  <section class="step" id="step-confirm" hidden aria-labelledby="confirm-label">
+    <p class="step__label" id="confirm-label">Did we get that right?</p>
+    <p class="confirm__vehicle" id="confirm-vehicle"></p>
+    <p class="confirm__detail" id="confirm-detail"></p>
+    <button type="button" class="btn" id="confirm-yes">Yes, that&rsquo;s my vehicle</button>
+    <button type="button" class="btn btn--quiet" id="confirm-no">No, start over</button>
+  </section>
+
+  <!-- step 4: glass selection (3d picker lands here) -->
+  <section class="step" id="step-glass" hidden aria-labelledby="glass-label">
+    <p class="step__label" id="glass-label">So&hellip; where&rsquo;s the damage?</p>
+    <div class="picker" id="picker">
+      <div class="picker__stage" id="picker-stage" aria-hidden="true"></div>
+      <div class="picker__side">
+        <p class="picker__note" id="picker-note"></p>
+        <fieldset class="choices" id="picker-list">
+          <legend class="visually-hidden">Which glass is damaged?</legend>
+        </fieldset>
+      </div>
+    </div>
+
+    <p style="margin:.875rem 0 0">
+      <button type="button" class="plainlink" id="just-tell">Or just tell us!</button>
+    </p>
+
+    <div class="tellus" id="tellus" hidden>
+      <label class="visually-hidden" for="tellus-text">Describe the damage</label>
+      <textarea id="tellus-text" rows="3"
+                placeholder="e.g. rock chip in the windshield on the passenger side, and the back door window on the driver's side is shattered"></textarea>
+      <p class="note" id="tellus-note" role="status" aria-live="polite" hidden></p>
+    </div>
+
+  </section>
+
+  <!-- step 4b: photographs -->
+  <section class="step" id="step-photos" hidden aria-labelledby="photos-label">
+    <p class="step__label" id="photos-label">Photos help the most, have any?</p>
+
+    <p style="margin:0">
+      <button type="button" class="btn" id="add-photos">Upload images</button>
+      <button type="button" class="btn btn--quiet" id="no-photos">No images</button>
+    </p>
+    <input type="file" id="photo-input" accept="image/*" multiple hidden>
+    <ul class="shots" id="shots" hidden></ul>
+    <p class="note" id="photo-note" role="status" aria-live="polite" hidden></p>
+  </section>
+
+  <!-- step 5: timing -->
+  <section class="step" id="step-when" hidden aria-labelledby="when-label">
+    <p class="step__label" id="when-label">When do you need this fixed?</p>
+    <fieldset class="choices" id="when-choices">
+      <legend class="visually-hidden">How soon do you need this fixed?</legend>
+    </fieldset>
+
+    <p style="margin:1.25rem 0 0">
+      <button type="button" class="btn" id="submit-damage" disabled>Review my request</button>
+    </p>
+  </section>
+
+  <!-- step 6: review -->
+  <section class="step" id="step-review" hidden aria-labelledby="review-label">
+    <p class="step__label" id="review-label">Here&rsquo;s what we have</p>
+
+    <dl class="summary" id="summary"></dl>
+
+    <p class="step__label" style="margin:1.5rem 0 .625rem">How would you like us to reach out?</p>
+    <fieldset class="choices" id="send-where">
+      <legend class="visually-hidden">How would you like us to reach out?</legend>
+    </fieldset>
+
+    <p style="margin:1.25rem 0 0">
+      <button type="button" class="btn" id="send-request" disabled>Looks right, send it</button>
+    </p>
+    <p class="note" id="send-note" role="status" aria-live="polite" hidden></p>
+  </section>
+
+  </section>
+
+  <section class="panel" id="services" hidden>
+    <h1 class="panel__title">Services</h1>
+    <p class="panel__sub">All cars, trucks and rigs.</p>
+    <!-- Ordered by how often the job actually comes up, not by price. Repairs
+         are attempted far more often than replacements, and edge cracks drive
+         most of the replacements that do happen, so the chip comes first.
+         Recalibration sits directly under windshield replacement because it is
+         caused by it. -->
+    <ul class="plain plain--split">
+      <li>
+        <b>Rock chip repair</b>
+        <span>A stone caught your windshield and left a chip. Caught early we can
+          fill it, the damage stops spreading, and the original glass stays in
+          the car. Quicker and cheaper than replacing it, so it is the first
+          thing we look at.</span>
+      </li>
+      <li>
+        <b>Windshield replacement</b>
+        <span>When a crack is too long, too deep, or sits in your line of sight,
+          the glass has to come out. Most cracks that spread began as a small
+          chip near the edge, which is why we would rather see it early.</span>
+      </li>
+      <li>
+        <b>ADAS recalibration</b>
+        <span>Newer vehicles watch the road through a camera behind the mirror
+          for lane keeping and automatic braking. Change the glass it looks
+          through and it has to be re-aimed, or it reads the road wrong.</span>
+      </li>
+      <li>
+        <b>Door glass</b>
+        <span>Side windows are tempered, so they do not crack, they go all at
+          once. We clear the fragments out of the door and off the seats, then
+          fit new glass.</span>
+      </li>
+      <li>
+        <b>Back glass</b>
+        <span>Same story as a side window, usually after a break-in or a knock
+          from behind. It often carries the defroster lines, and we match
+          them.</span>
+      </li>
+      <li>
+        <b>Power windows</b>
+        <span>The glass is fine but the window will not move, or it has dropped
+          down inside the door. That is normally the regulator or the motor. We
+          check the whole assembly before replacing any of it.</span>
+      </li>
+      <li>
+        <b>Specialty glass</b>
+        <span>Vent glass, quarter glass, mirrors, moldings, and the small
+          pieces nobody keeps on a shelf. If you are not sure what it is called,
+          send us a photo.</span>
+      </li>
+    </ul>
+  </section>
+
+  <section class="panel" id="guarantee" hidden>
+    <h1 class="panel__title">Our guarantee</h1>
+    <p class="panel__sub panel__sub--quote">&ldquo;We treat every ride like it&rsquo;s
+      our own, and every neighbor like family.&rdquo;</p>
+
+    <!-- Their own five points, kept in substance and re-ordered so the concrete
+         promise leads. "In and out before you finish your coffee" and "no
+         robots, just experienced hands" were the two lines doing the most
+         selling and the least explaining, so they say the same thing plainly
+         now. The warranty typo on the live site is fixed here. -->
+    <ul class="plain plain--split">
+      <li>
+        <b>Lifetime warranty</b>
+        <span>Every installation we carry out is covered for as long as you own
+          the vehicle. If our work fails, we come back and put it right.</span>
+      </li>
+      <li>
+        <b>We come to you</b>
+        <span>Mobile across the Dallas Metroplex. We meet the car where it
+          already is, at home or at work, so you are not arranging a ride to a
+          shop on top of everything else.</span>
+      </li>
+      <li>
+        <b>Insurance handled</b>
+        <span>We deal with the claim and talk to the adjuster ourselves. You
+          should not have to explain glass part numbers over the phone.</span>
+      </li>
+      <li>
+        <b>No stress pricing</b>
+        <span>Fair, honest and upfront. You have the number before we start, and
+          it does not move once we do.</span>
+      </li>
+      <li>
+        <b>Real people</b>
+        <span>Black owned and family operated, with over ten years in the trade.
+          The same hands on your vehicle every time.</span>
+      </li>
+      <li>
+        <b>One visit, usually</b>
+        <span>Most jobs are finished in a single appointment, and we tell you
+          up front when yours is not one of them.</span>
+      </li>
+    </ul>
+  </section>
+
+  <section class="panel" id="about" hidden>
+    <h1 class="panel__title">About us</h1>
+    <p class="panel__sub">Black owned and family operated.</p>
+
+    <!-- PLACEHOLDER COPY: this is the client's own wording from their live
+         site, lightly punctuated, sitting here so the page has something real
+         in it while they decide what they actually want to say. -->
+    <div class="prose">
+      <figure class="shot shot--lead">
+        <img src="assets/img/about/aria-jacob.jpg" alt="Aria and Jacob Quillin"
+             width="675" height="900" loading="lazy" decoding="async">
+      </figure>
+
+      <p>At Quillin Auto Glass, we believe in more than just fixing glass. We
+        believe in providing service with a smile. Whether you are in need of a
+        windshield replacement or a quick chip repair, our team is here to make
+        the process easy, fast and friendly.</p>
+
+      <p>As a family owned business, we treat each customer like they are one of
+        our own. Your satisfaction is our top priority, and we are dedicated to
+        ensuring your experience is smooth, stress free and enjoyable.</p>
+
+      <figure class="shot shot--wide">
+        <img src="assets/img/about/chip.jpg" alt="A rock chip in a windshield,
+             sized against a coin" width="675" height="900" loading="lazy" decoding="async">
+        <img src="assets/img/about/door-glass.jpg" alt="A door glass frame being
+             lifted out of a vehicle" width="675" height="900" loading="lazy" decoding="async">
+      </figure>
+
+      <p>With over ten years of experience in the industry and a childlike
+        passion for building up broken things and solving puzzles, Quillin Auto
+        has been a dream well in the making. Reaching the community and caring
+        for neighbors using the gifts on hand, Aria and Jacob Quillin have taken
+        their core values and beliefs and poured them into this company. The
+        Quillins aim to serve the community that they grew up in with integrity,
+        honesty and transparency.</p>
+
+      <p class="prose__sign">Let&rsquo;s get you back on the road.</p>
+    </div>
+  </section>
+
+  <section class="panel" id="help" hidden>
+    <h1 class="panel__title">How this works</h1>
+    <p class="panel__sub">In plain terms.</p>
+
+    <!-- Doubts first, steps second. Someone who opened this page is hesitating,
+         and the things that actually make a person leave are "do I have to do
+         this", "why do you want my VIN" and "is that my car". Answering those
+         before explaining the process is the difference between reassurance and
+         a manual. -->
+    <ul class="plain plain--split plain--tight">
+      <li>
+        <b>Do I have to use this?</b>
+        <span>No. Call or text <a href="tel:+12145867650">(214) 586-7650</a> and
+          talk to a person. This only saves you the call.</span>
+      </li>
+      <li>
+        <b>Why do you want my VIN?</b>
+        <span>It tells us the exact glass your vehicle was built with. It
+          describes the vehicle, not you, and we use it for nothing else.</span>
+      </li>
+      <li>
+        <b>Does anything send before I say so?</b>
+        <span>No. Nothing leaves your device until you press send, and you see
+          all of it first.</span>
+      </li>
+      <li>
+        <b>Is that car on screen mine?</b>
+        <span>No, it is the same shape as yours so you have something to point
+          at. The list of windows beside it is yours.</span>
+      </li>
+      <li>
+        <b>Do I have to send photos?</b>
+        <span>No, but one clear picture of the break tells us more than anything
+          else you can give us.</span>
+      </li>
+      <li>
+        <b>What if I cannot find my VIN?</b>
+        <span>Pick your year, make and model from a list instead.</span>
+      </li>
+    </ul>
+
+    <h2 class="panel__h2">The whole thing, start to finish</h2>
+
+    <ol class="steps">
+      <li>Tell us the vehicle, by VIN or from a list.</li>
+      <li>Tap whichever glass is broken, or just describe it.</li>
+      <li>Add a photo if you can.</li>
+      <li>Say how soon you need it.</li>
+      <li>Check it over and tell us how to reach you.</li>
+    </ol>
+  </section>
+
+  <section class="panel" id="contact" hidden>
+    <h1 class="panel__title">Contact</h1>
+    <ul class="plain">
+      <li><b>Phone</b><a href="tel:+12145867650">(214) 586-7650</a>, calls and texts.</li>
+      <li><b>Email</b><a href="mailto:QuillinAutoGlass@gmail.com">QuillinAutoGlass@gmail.com</a></li>
+      <li><b>Hours</b>Monday to Friday 8am to 6pm. Saturday 8am to noon. Sunday by appointment.</li>
+      <li><b>Where</b>Based in Wylie, Texas. We come to you.</li>
+      <li><b>Payment</b>All major cards, cash, Zelle.</li>
+    </ul>
+  </section>
+
+</main>
+
+<!-- Bottom right corner, in the logo's orange, very faint. -->
+<a class="aboutcorner" href="#about">About us.</a>
+
+<nav class="dock" aria-label="Sections">
+  <a href="#quote">quote</a>
+  <a href="#services">services</a>
+  <a href="#guarantee">guarantee</a>
+  <a href="#contact">contact</a>
+  <a href="#about" class="nav--apart">about</a>
+</nav>
+
+<script src="js/backdrop.js"></script>
+<script src="js/landing.js"></script>
+<script src="js/vin.js"></script>
+<script src="js/glass.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
