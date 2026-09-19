@@ -25,6 +25,13 @@
     <a href="#contact"  style="--i: 3">contact</a>
   </nav>
 
+  <!-- The panels sit in their own box. They are positioned rather than
+       stacked in flow, and the box reserves the height of the tallest one,
+       so opening or closing a section never changes the page height. On a
+       phone a height change re-clamps the scroll and can toggle the URL
+       bar, which shows up as a small upward jump. -->
+  <div class="panels">
+
   <!-- ================================================================ ABOUT -->
   <section class="panel" id="about" hidden>
     <p>
@@ -67,6 +74,8 @@
       <li><a href="mailto:paleLeap@pm.me">paleLeap@pm.me</a></li>
     </ul>
   </section>
+
+  </div>
 
 </div>
 

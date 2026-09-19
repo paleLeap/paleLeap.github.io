@@ -110,7 +110,37 @@ img { max-width: 100%; display: block; }
   transition-property: opacity;
   transition-timing-function: linear;
   /* duration is set per layer by main.js from BG_FADE_MS */
-  will-change: opacity;
+  will-change: opacity, transform;
+
+  /* Scaled up so there is room to drift without ever showing an edge.
+     At scale S the image overhangs each side by (S-1)/2 of the width, so a
+     translate of P is safe while S*P <= (S-1)/2. With S = 1.14 the limit is
+     6.1%; the pans below go to 4%, which leaves margin at any aspect ratio. */
+  transform: scale(1.14);
+  animation: bg-pan-a 54s ease-in-out infinite alternate;
+}
+
+/* Different layers drift in different directions, so consecutive images do
+   not look like one continuous move. */
+.bg-layer:nth-child(2n) { animation-name: bg-pan-b; animation-duration: 62s; }
+.bg-layer:nth-child(3n) { animation-name: bg-pan-c; animation-duration: 48s; }
+.bg-layer:nth-child(5n) { animation-name: bg-pan-d; animation-duration: 58s; }
+
+@keyframes bg-pan-a {
+  from { transform: scale(1.14) translate(-4%, -2%); }
+  to   { transform: scale(1.14) translate( 4%,  2%); }
+}
+@keyframes bg-pan-b {
+  from { transform: scale(1.14) translate( 4%, -1.5%); }
+  to   { transform: scale(1.14) translate(-4%,  1.5%); }
+}
+@keyframes bg-pan-c {
+  from { transform: scale(1.14) translate( 1.5%,  3.5%); }
+  to   { transform: scale(1.14) translate(-1.5%, -3.5%); }
+}
+@keyframes bg-pan-d {
+  from { transform: scale(1.14) translate(-3%,  2.5%); }
+  to   { transform: scale(1.14) translate( 3%, -2.5%); }
 }
 
 .bg-layer.is-showing { opacity: 1; }
@@ -137,9 +167,9 @@ img { max-width: 100%; display: block; }
 }
 
 /* once something is open the column rises and widens a little to read */
-.stage.is-open {
-  max-width: calc(44rem + var(--menu-indent));
-}
+/* Opening a section deliberately changes nothing about the stage box. Any
+   padding or width change here shifts the whole page, which on a phone also
+   re-clamps the scroll and shows up as a jump. */
 
 /* --------------------------------------------------------------- the name -- */
 
@@ -179,19 +209,9 @@ img { max-width: 100%; display: block; }
   height: calc(var(--row) * 4);
 }
 
-/* Collapsed, the menu ends just below the chosen row, so the content always
-   sits the same distance under its title no matter which row was clicked.
-   --i-open and this class are both set by main.js.
-
-   The height changes instantly and never animates. The panel below sits in
-   normal flow, so an animated height would drag the panel upward while it
-   was sliding in, turning a sideways slide into a diagonal one. main.js
-   holds this class on until the leaving panel has finished, so the panel
-   never moves vertically in either direction. The menu items themselves are
-   absolutely positioned and do not care about this height. */
-.menu.is-collapsed {
-  height: calc((var(--i-open) + 1) * var(--row));
-}
+/* The menu keeps its full height at all times. Nothing about opening a
+   section changes the page's layout, which is what keeps a phone from
+   re-clamping its scroll position and jumping. */
 
 .menu a {
   position: absolute;
@@ -259,9 +279,24 @@ img { max-width: 100%; display: block; }
 
 /* ------------------------------------------------------------- the panels -- */
 
+/* The panels box reserves the height of the tallest panel, measured once by
+   main.js into --panel-reserve. The panels themselves are positioned inside
+   it, so switching between them moves nothing. */
+.panels {
+  position: relative;
+  min-height: var(--panel-reserve, 0px);
+}
+
 .panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Sit just under whichever row is open. The menu is always four rows tall
+     and this box starts below it, so the offset is negative for every row
+     but the last. The rows above are invisible by then. */
+  top: calc((var(--i-open, 3) + 1 - 4) * var(--row) + 1.4rem);
   padding-left: calc(var(--menu-indent) + var(--step) + var(--hang));
-  padding-top: 1.4rem;
+  max-width: 44rem;
 }
 .panel[hidden] { display: none; }
 
@@ -407,11 +442,12 @@ figcaption {
 
 @media (max-width: 34rem) {
   .stage { padding: 7vh 1.25rem 6rem; }
-  .stage.is-open { padding-top: 5vh; }
   .brand { margin-bottom: 2.5rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .bg-layer { animation: none; transform: scale(1.14); }
+
   /* The old rule here set every duration to 0.01ms, which turned the whole
      site into instant snapping. Movement is what causes trouble, not fading,
      so drop the travel and keep the crossfades. Elements still land in their

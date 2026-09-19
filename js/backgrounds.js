@@ -13,6 +13,10 @@
 
    HOLD_MS  how long each image sits at full strength
    FADE_MS  how long the crossfade between two images takes
+
+   Each layer also drifts slowly across itself the whole time. That is pure
+   CSS, in style.css: the layer is scaled to 1.14 so it has room to move
+   without ever exposing an edge.
    ========================================================================== */
 
 const BACKGROUNDS = [
@@ -24,5 +28,5 @@ const BACKGROUNDS = [
   "assets/bg/skyline.jpg",
 ];
 
-const BG_HOLD_MS = 7000;
-const BG_FADE_MS = 4000;
+const BG_HOLD_MS = 4000;
+const BG_FADE_MS = 3500;

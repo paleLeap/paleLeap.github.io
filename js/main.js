@@ -14,7 +14,28 @@
      button works.                                                          */
   var leaving = null;            // panel currently animating out, if any
 
-  function menuEl() { return document.querySelector(".menu"); }
+  /* Reserve the height of the tallest panel, once, so the page height never
+     changes when a section opens. A height change on a phone re-clamps the
+     scroll position and can toggle the URL bar, which reads as a jump. */
+  function reserveSpace() {
+    var box = document.querySelector(".panels");
+    if (!box) return;
+    var tallest = 0;
+
+    PANELS.forEach(function (id) {
+      var p = document.getElementById(id);
+      if (!p) return;
+      var wasHidden = p.hidden;
+      p.style.visibility = "hidden";
+      p.hidden = false;
+      tallest = Math.max(tallest, p.offsetHeight);
+      p.hidden = wasHidden;
+      p.style.visibility = "";
+    });
+
+    box.style.setProperty("--panel-reserve", tallest + "px");
+  }
+
 
   /* Take a panel off screen properly: run the leaving animation, and only
      hide it once that has finished. Hiding it outright is what made it blink
@@ -42,13 +63,6 @@
       panel.hidden = true;
       panel.classList.remove("is-out");
       leaving = null;
-
-      /* Only now let the menu grow back to its full four rows. Doing it at
-         the start of the close would drop the panel down mid-exit. */
-      var menu = menuEl();
-      if (menu && !document.querySelector(".panel:not([hidden])")) {
-        menu.classList.remove("is-collapsed");
-      }
     }
   }
 
@@ -72,10 +86,12 @@
     /* Set the row and collapse the menu BEFORE the panel is shown, so the
        panel is at its final height from the very first frame and only ever
        travels sideways. */
-    var menu = menuEl();
-    if (menu && target) {
-      menu.style.setProperty("--i-open", String(PANELS.indexOf(target)));
-      menu.classList.add("is-collapsed");
+    /* Which row is open decides where the panel sits. Set before the panel
+       is shown so it is in position from the first frame. Left in place on
+       close so the leaving panel does not move while it fades. */
+    if (target) {
+      document.querySelector(".panels")
+        .style.setProperty("--i-open", String(PANELS.indexOf(target)));
     }
 
     PANELS.forEach(function (id) {
@@ -158,15 +174,35 @@
     var fade = (typeof BG_FADE_MS === "number") ? BG_FADE_MS : 4000;
     var hold = (typeof BG_HOLD_MS === "number") ? BG_HOLD_MS : 7000;
 
+    /* Only the first image is fetched up front. The rest are attached once
+       the page has loaded, staggered, so six photographs do not compete with
+       the page itself for bandwidth on first paint. */
     var layers = BACKGROUNDS.map(function (src, i) {
       var el = document.createElement("div");
       el.className = "bg-layer";
-      el.style.backgroundImage = 'url("' + base + src + '")';
       el.style.transitionDuration = fade + "ms";
-      if (i === 0) el.classList.add("is-showing");
+      if (i === 0) {
+        el.style.backgroundImage = 'url("' + base + src + '")';
+        el.classList.add("is-showing");
+      } else {
+        el.dataset.src = base + src;
+      }
       host.appendChild(el);
       return el;
     });
+
+    function loadRest() {
+      layers.forEach(function (el, i) {
+        if (!el.dataset.src) return;
+        setTimeout(function () {
+          el.style.backgroundImage = 'url("' + el.dataset.src + '")';
+          delete el.dataset.src;
+        }, i * 400);
+      });
+    }
+
+    if (document.readyState === "complete") loadRest();
+    else window.addEventListener("load", loadRest);
 
     if (layers.length < 2) return;
 
@@ -186,6 +222,8 @@
   }
 
   renderProjects();
+  reserveSpace();
+  window.addEventListener("resize", reserveSpace);
   backgrounds();
   shotFallbacks();
   route();

@@ -106,6 +106,21 @@ on the bare page; over the brightest patch of any background behind the menu it
 drops to 2.35:1. Body copy stays above 15:1 throughout. Anyone who has asked
 their system for reduced motion gets a single still image and no cycling.
 
+## The background
+
+Six photographs crossfade, and each one drifts slowly across itself while it
+is showing. Edit the list and the timing in `js/backgrounds.js`; the drift is
+pure CSS in `style.css`.
+
+They are 2100x1181 with only a faint blur baked in, which is sharper and
+larger than a screen needs. The extra pixels exist because the layer is scaled
+to 1.14 so it has room to move. At that scale the image overhangs each edge by
+7% of its width, and the pans reach 4%, so an edge can never come into view.
+
+Only the first image is fetched on load. The rest attach after the page has
+loaded, staggered, so 850KB of photographs do not compete with the page itself
+for bandwidth on first paint.
+
 ## Why the page does not shift
 
 Three rules work together to stop the layout moving when a section opens:
@@ -119,8 +134,20 @@ reflowed at once. That lurch was the "twitchy" feel.
 never produce a horizontal scrollbar during the animation.
 
 `min-height: 100svh` on `.stage` holds the page at least a screen tall, so a
-short section opening does not add a vertical scrollbar at all. With the
-tallest section open the document is exactly the viewport height.
+short section opening does not add a vertical scrollbar at all.
+
+Beyond that, **nothing about opening a section changes the layout at all.** The
+menu keeps its full height, the panels are positioned rather than stacked in
+flow, and `.panels` reserves the height of the tallest one (measured once by
+`main.js` into `--panel-reserve`). Which row is open only moves the panel, via
+`--i-open`. Measured across closed, all four sections, and closed again, the
+document height, the stage padding, the name's position and the rows' positions
+are all identical.
+
+This matters most on a phone, where any height change re-clamps the scroll
+position and can toggle the URL bar. That showed up as a small upward jump when
+opening a section. The specific culprit was a leftover rule that cut the stage's
+top padding from 7vh to 5vh on open, moving the whole page up 16px.
 
 ## Browser support notes
 
