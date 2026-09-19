@@ -1304,8 +1304,18 @@ body.on-quote #step-vin.is-folded { text-align: left; }
     filter: drop-shadow(0 2px 14px rgba(0, 0, 0, .5));
   }
 
-  /* Above the scrim. */
-  .brand { position: relative; z-index: 30; }
+  /* Above the scrim.
+
+     `.top` carries position:relative and z-index:1, which makes it a STACKING
+     CONTEXT: everything inside it is trapped there, so .brand's z-index 30 was
+     compared against its siblings rather than against the scrim, and the scrim
+     covered both the mark and the menu. That blurred the two things meant to be
+     in focus, and a real finger tapping a category hit the scrim and closed the
+     menu instead. Programmatic clicks bypass hit testing, which is why it
+     tested clean. The header itself has to be lifted. */
+  body.menu-open .top { z-index: 30; }
+
+  .brand { position: relative; }
 
   /* Bigger, on the owner's own feedback. The mark is the only thing on a phone
      header telling you whose business this is, and it was being shrunk to make
@@ -1379,9 +1389,9 @@ body::after {
   position: fixed;
   inset: 0;
   z-index: 20;
-  background: rgba(10, 12, 14, .38);
-  -webkit-backdrop-filter: blur(7px) saturate(.85);
-  backdrop-filter: blur(7px) saturate(.85);
+  background: rgba(10, 12, 14, .34);
+  -webkit-backdrop-filter: blur(3.5px) saturate(.9);
+  backdrop-filter: blur(3.5px) saturate(.9);
   opacity: 0;
   pointer-events: none;
   transition: opacity .28s var(--ease);
