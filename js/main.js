@@ -43,6 +43,22 @@
     box.style.setProperty("--panel-reserve", Math.ceil(deepest) + "px");
   }
 
+  /* The reserve depends on how the copy wraps, so it has to be redone
+     whenever the width changes. A ResizeObserver catches every cause of
+     that, including the ones that never fire a window resize event. */
+  function watchWidth() {
+    var box = document.querySelector(".panels");
+    if (!box || typeof ResizeObserver === "undefined") return;
+
+    var lastWidth = 0;
+    new ResizeObserver(function (entries) {
+      var w = Math.round(entries[0].contentRect.width);
+      if (w === lastWidth) return;   // height changes are our own doing
+      lastWidth = w;
+      reserveSpace();
+    }).observe(box);
+  }
+
 
   /* Take a panel off screen properly: run the leaving animation, and only
      hide it once that has finished. Hiding it outright is what made it blink
@@ -279,7 +295,7 @@
   renderProjects();
   debugPanel();
   reserveSpace();
-  window.addEventListener("resize", reserveSpace);
+  watchWidth();
   window.addEventListener("load", reserveSpace);
   if (window.visualViewport) {
     window.visualViewport.addEventListener("resize", reserveSpace);
