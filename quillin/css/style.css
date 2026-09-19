@@ -158,7 +158,9 @@ body {
 
 /* Sits at the top of the bar, so its cap height lands level with the gutter
    rather than floating in the middle of whatever height the logo dictates. */
-.top__right { display: flex; align-items: center; gap: 1.5rem; padding-top: .25rem; }
+/* No top padding: it belongs to the corner, and every pixel of lead-in pulled
+   it toward the middle of the header instead. */
+.top__right { display: flex; align-items: center; gap: 1.25rem; padding-top: 0; }
 
 /* Present but quiet: noticeable when looked for, never competing with the
    phone number beside them. */
@@ -187,17 +189,20 @@ body {
 
 .social a:hover { color: var(--ink); }
 
+/* Faded, like the social marks beside it. It is an offer standing quietly in
+   the corner, not an instruction; the quote tool is what the page is for. Still
+   5.3:1 on this ground, so quiet is not the same as hard to read. */
 .top__tel {
-  font-size: .9375rem;
+  font-size: .875rem;
   font-weight: 300;
   letter-spacing: .01em;
-  color: var(--ink);
+  color: var(--muted);
   text-decoration: none;
   white-space: nowrap;
   transition: color .25s var(--ease);
 }
 
-.top__tel:hover { color: var(--orange); }
+.top__tel:hover { color: var(--ink); }
 
 /* ---------- the page ---------- */
 
@@ -272,7 +277,11 @@ body.on-quote #step-vin { text-align: center; }
 
 body.on-quote #step-vin .field { max-width: 26rem; margin: 0 auto; }
 
-body.on-quote #step-vin .field input { text-align: center; padding-right: 2.5rem; }
+/* The 2.5rem of right padding here was clearance for the circled ? that used
+   to sit inside the field. That control is gone, and the padding with it: left
+   in place it pushed the centred text half a control to the left of its own
+   rule. Centring now comes from .field input itself. */
+body.on-quote #step-vin .field input { text-align: center; }
 
 /* Heading, then the field, then the explanation. The field is what the page is
    for, so nothing sits between it and the heading that announces it. */
@@ -837,7 +846,7 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 /* ---------- the vin ---------- */
 
-.field { position: relative; display: flex; align-items: center; }
+.field { position: relative; display: flex; align-items: center; justify-content: center; }
 
 /* No box. A rule under the line you are typing on, and the type does the rest. */
 .field input {
@@ -849,7 +858,18 @@ body.on-quote #step-vin.is-folded { text-align: left; }
   letter-spacing: .1em;
   font-variant-numeric: tabular-nums;
   text-transform: uppercase;
-  padding: .25rem 3rem .625rem 0;
+  /* Centred, and only as wide as the job. A full bleed rule invited a sentence;
+     a rule the length of a VIN says how much is wanted before a character is
+     typed. 17ch is the seventeen characters, the em is the letter-spacing they
+     carry, and the rest is breathing room at either end.
+
+     The old right padding was clearance for the circled ? that used to sit in
+     the field. That control is gone, so the space it reserved goes with it,
+     otherwise the text sits visibly off centre inside its own rule. */
+  width: 100%;
+  max-width: calc(17ch + 1.7em + 1em);
+  text-align: center;
+  padding: .25rem 0 .625rem;
   border: 0;
   border-bottom: 1px solid var(--line-2);
   background: none;
@@ -1365,7 +1385,7 @@ body.on-quote #step-vin.is-folded { text-align: left; }
      room for icons that have since been dropped. */
   .brand__logo img { height: 4.25rem; }
 
-  .top__tel { font-size: .9375rem; }
+  .top__tel { font-size: .875rem; }
 
   /* Clears the persistent bar plus the home indicator. */
   .flow { padding-top: 2rem; padding-bottom: 7.5rem; }

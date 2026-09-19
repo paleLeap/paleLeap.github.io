@@ -322,8 +322,16 @@
         openManual();
         return;
       }
-      say(doubtful ? 'That VIN’s check digit looks off, but here’s what we found.' : '',
-          doubtful ? 'warn' : '');
+      /* vPIC can work out what a mistyped VIN was meant to be. Saying so is
+         worth more than a bare warning about a check digit, which means
+         nothing to anyone who has not had to explain one. */
+      if (v.suggested) {
+        say('That VIN looks like it was meant to be ' + v.suggested +
+            '. Here’s what we found for it.', 'warn');
+      } else {
+        say(doubtful ? 'That VIN’s check digit looks off, but here’s what we found.' : '',
+            doubtful ? 'warn' : '');
+      }
       vehicle = v;
       askSpecifics(v);
     }).catch(function () {
@@ -395,7 +403,7 @@
       make: el.mMake.value,
       model: el.mModel.value,
       trim: '', bodyClass: '', doors: '', cab: '', vin: '',
-      adas: { lane: '', collision: '', cruise: '' },
+      adas: { camera: [], mixed: [], elsewhere: [] },
       label: el.mYear.value + ' ' + el.mMake.value + ' ' + el.mModel.value,
       usable: true
     };
@@ -975,10 +983,24 @@
         fromVin: state,                        // yes / maybe / no
         customerSaid: answers.adas || null,    // yes / no / unsure, when asked
         recalibrationLikely: state === 'yes' || answers.adas === 'yes',
+        /* Broken out by where each sensor sits, so a flag can be judged rather
+           than taken on trust. Anything under notGlassRelated was seen and
+           deliberately not counted. */
+        systems: v.vin ? VIN.adasDetail(v) : null,
         note: v.vin
-          ? 'Model-level data from NHTSA vPIC. Verify against the vehicle.'
+          ? 'Model-level data from NHTSA vPIC. Only systems that look through ' +
+            'the windshield were counted. Verify against the vehicle.'
           : 'No VIN given, so this rests on the customer\'s answer alone.'
       },
+      /* What the decoder made of the VIN itself. A corrected VIN or a year the
+         registry did not supply is worth knowing before ordering a part. */
+      decode: v.vin ? {
+        codes: v.codes || [],
+        note: v.errorText || null,
+        suggestedVin: v.suggested || null,
+        yearFromVinOnly: !!v.yearFromVinOnly,
+        source: 'NHTSA vPIC DecodeVinValuesExtended'
+      } : null,
       urgency: urgency ? urgency.value : null,
       // How to reach the customer, and on what. The part Quillin cannot work without.
       reach: Object.keys(reach).map(function (k) {

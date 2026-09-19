@@ -50,50 +50,193 @@
     return { state: 'ok', vin: vin };
   }
 
-  function json(url) {
-    return fetch(url).then(function (r) {
-      if (!r.ok) throw new Error('vpic ' + r.status);
-      return r.json();
+  /* A request that cannot hang and gets one second chance.
+
+     Without a timeout a stalled connection leaves "Looking that up…" on screen
+     for as long as the browser is willing to wait, which on a phone with one
+     bar is minutes. Better to give up at eight seconds, try once more, and then
+     offer the manual path. The retry is worth having because the failure this
+     guards against is usually a single dropped request rather than an outage. */
+  var TIMEOUT_MS = 8000;
+
+  function json(url, attempt) {
+    attempt = attempt || 0;
+    var ctl = typeof AbortController === 'function' ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, TIMEOUT_MS);
+
+    return fetch(url, ctl ? { signal: ctl.signal } : undefined)
+      .then(function (r) {
+        if (!r.ok) throw new Error('vpic ' + r.status);
+        return r.json();
+      })
+      .then(function (d) { clearTimeout(timer); return d; },
+            function (err) {
+              clearTimeout(timer);
+              if (attempt < 1) return json(url, attempt + 1);
+              throw err;
+            });
+  }
+
+  /* Model year from position 10, used only when vPIC returns none of its own.
+
+     The code repeats every 30 years, and position 7 is the tie break: on a
+     vehicle built 2010 or later it holds a letter, and before that a digit.
+     This is never allowed to override a decoded year; it is a floor, not a
+     second opinion. */
+  var YEAR_CODES = 'ABCDEFGHJKLMNPRSTVWXY123456789';
+
+  function yearFromVin(vin) {
+    var at = YEAR_CODES.indexOf(vin.charAt(9));
+    if (at === -1) return '';
+    var seventh = vin.charAt(6);
+    var modern = /[A-Z]/.test(seventh);
+    var year = 1980 + at + (modern ? 30 : 0);
+    // A model year more than one ahead of now is a misread, not a new vehicle.
+    var ceiling = new Date().getFullYear() + 1;
+    if (year > ceiling) year -= 30;
+    return String(year);
+  }
+
+  /* vPIC answers with a comma separated list of codes rather than an HTTP
+     status: "0" alone means a clean decode. The ones worth acting on are 1 and
+     4, which say the check digit is wrong and, sometimes, what the VIN should
+     have been. */
+  function codesOf(r) {
+    return String(r.ErrorCode || '').split(',')
+      .map(function (c) { return c.trim(); })
+      .filter(Boolean);
+  }
+
+  /* Driver assist, split by WHERE THE SENSOR LIVES rather than by what the
+     feature is called. This is the whole point of the grouping: only a system
+     that looks through the windshield is affected by replacing it.
+
+     CAMERA systems ride on the bracket behind the rearview mirror, essentially
+     without exception, so glass work means recalibration.
+
+     MIXED systems can be camera, radar, or both fused together depending on
+     make, model and year. Forward collision warning on a 2016 economy car is
+     often radar alone, behind the grille, and nothing to do with the glass.
+     These raise a "maybe", never a "yes".
+
+     ELSEWHERE is listed so the record shows the system was seen and ruled out
+     rather than missed. Adaptive cruise is the one that matters here: it is
+     radar in the grille on most vehicles, it used to sit in the group that
+     drove this flag, and it was a standing source of the false positives the
+     owners reported. */
+  var ADAS_CAMERA = {
+    LaneDepartureWarning: 'Lane departure warning',
+    LaneKeepSystem: 'Lane keeping assist',
+    LaneCenteringAssistance: 'Lane centering',
+    AdaptiveDrivingBeam: 'Adaptive high beam'
+  };
+
+  var ADAS_MIXED = {
+    ForwardCollisionWarning: 'Forward collision warning',
+    CIB: 'Crash imminent braking',
+    DynamicBrakeSupport: 'Dynamic brake support',
+    PedestrianAutomaticEmergencyBraking: 'Pedestrian emergency braking'
+  };
+
+  var ADAS_ELSEWHERE = {
+    AdaptiveCruiseControl: 'Adaptive cruise control (usually grille radar)',
+    BlindSpotMon: 'Blind spot monitor (rear quarter radar)',
+    RearCrossTrafficAlert: 'Rear cross traffic alert (rear radar)',
+    ParkAssist: 'Park assist (ultrasonic)',
+    RearVisibilitySystem: 'Backup camera'
+  };
+
+  function fitments(r, group) {
+    var out = [];
+    Object.keys(group).forEach(function (field) {
+      var fitted = String(r[field] || '').trim();
+      // vPIC writes "Standard", "Optional", or leaves it blank / "Not Applicable".
+      if (fitted === 'Standard' || fitted === 'Optional') {
+        out.push({ field: field, label: group[field], fitted: fitted });
+      }
     });
+    return out;
   }
 
   /* One decoded vehicle, reduced to the fields that bear on glass. */
-  function shape(r) {
-    var year = r.ModelYear || '';
+  function shape(r, entered) {
+    var vin = r.VIN || entered || '';
+    var year = r.ModelYear || (vin.length === 17 ? yearFromVin(vin) : '');
     var make = titleCase(r.Make || '');
     var model = r.Model || '';
+    var codes = codesOf(r);
+
+    // Only worth showing if it actually differs from what was typed.
+    var suggested = String(r.SuggestedVIN || '').trim();
+    if (!suggested || suggested === vin) suggested = '';
 
     return {
-      vin: r.VIN || '',
+      vin: vin,
       year: year,
       make: make,
       model: model,
+      // Series carries the body variant on several makes where Trim is blank.
       trim: r.Trim || r.Series || '',
       bodyClass: r.BodyClass || '',
       doors: r.Doors || '',
       cab: r.BodyCabType || '',
       vehicleType: r.VehicleType || '',
-      // Standard means the vehicle has it. Optional means it might, which is a
-      // question for the customer. Either way it drives ADAS recalibration.
+      driveType: r.DriveType || '',
+      plant: [r.PlantCity, r.PlantCountry].filter(Boolean).join(', '),
+
       adas: {
-        lane: r.LaneDepartureWarning || '',
-        collision: r.ForwardCollisionWarning || '',
-        cruise: r.AdaptiveCruiseControl || ''
+        camera: fitments(r, ADAS_CAMERA),
+        mixed: fitments(r, ADAS_MIXED),
+        elsewhere: fitments(r, ADAS_ELSEWHERE)
       },
+
+      // What vPIC thought of the VIN itself, kept for the owner record.
+      codes: codes,
+      errorText: String(r.ErrorText || '').replace(/^\d+\s*-\s*/, ''),
+      suggested: suggested,
+      yearFromVinOnly: !r.ModelYear && !!year,
+
       label: [year, make, model].filter(Boolean).join(' '),
       usable: !!(year && make && model)
     };
   }
 
+  /* vPIC writes makes in capitals. Title casing them reads better for the
+     customer, except where the name IS an initialism, and "Bmw" or "Gmc" on a
+     confirmation screen is the sort of thing that makes a quote look automated
+     and careless. Hyphens are already word boundaries, so Mercedes-Benz and
+     Rolls-Royce come out right without help. */
+  var KEEP_CAPS = {
+    BMW: 1, GMC: 1, RAM: 1, MINI: 1, FIAT: 1, MG: 1, DS: 1, KTM: 1, BYD: 1,
+    AM: 1, INEOS: 0
+  };
+
   function titleCase(s) {
-    return s.toLowerCase().replace(/\b[a-z]/g, function (m) { return m.toUpperCase(); });
+    var word = String(s || '').trim();
+    if (KEEP_CAPS[word.toUpperCase()]) return word.toUpperCase();
+    return word.toLowerCase().replace(/\b[a-z]/g, function (m) { return m.toUpperCase(); });
   }
 
+  /* DecodeVinValuesExtended, not DecodeVinValues. Same request cost, same shape
+     of answer, but it carries the full driver assist block and the body detail
+     the archetype picker leans on. There is no reason to ask for less.
+
+     vPIC is the decoder here because it is the registry US manufacturers file
+     into, it is free, and it needs no key. A key would have to be shipped in
+     this page, where anyone could read it, so a paid decoder is not an option
+     until there is a server to hide one behind. */
+  var cache = Object.create(null);
+
   function decode(vin) {
-    return json(API + '/DecodeVinValues/' + encodeURIComponent(vin) + '?format=json')
+    if (cache[vin]) return Promise.resolve(cache[vin]);
+
+    return json(API + '/DecodeVinValuesExtended/' + encodeURIComponent(vin) + '?format=json')
       .then(function (d) {
         var r = (d.Results && d.Results[0]) || {};
-        return shape(r);
+        var v = shape(r, vin);
+        // Only a usable answer is worth keeping; a failure should be retried.
+        if (v.usable) cache[vin] = v;
+        return v;
       });
   }
 
@@ -116,12 +259,36 @@
   }
 
   /* ADAS presence, collapsed to one of: yes / maybe / no.
-     A windshield replacement on a "yes" vehicle needs recalibration. */
+
+     Only the camera group can produce a "yes". Everything else is at most a
+     "maybe", because the sensor may well be nowhere near the glass. "Standard"
+     means the vehicle was built with it; "Optional" means this model could have
+     been, which is a question for the customer and not a fact about their car. */
   function adasState(v) {
-    var flags = [v.adas.lane, v.adas.collision, v.adas.cruise];
-    if (flags.indexOf('Standard') !== -1) return 'yes';
-    if (flags.indexOf('Optional') !== -1) return 'maybe';
+    var a = (v && v.adas) || {};
+    var camera = a.camera || [];
+    var mixed = a.mixed || [];
+
+    function has(list, fitted) {
+      return list.some(function (x) { return x.fitted === fitted; });
+    }
+
+    if (has(camera, 'Standard')) return 'yes';
+    if (has(camera, 'Optional') || mixed.length) return 'maybe';
     return 'no';
+  }
+
+  /* The same finding, written out for the owners. They see the systems and
+     where each one sits, so a flag can be judged rather than taken on trust. */
+  function adasDetail(v) {
+    var a = (v && v.adas) || {};
+    var say = function (x) { return x.label + ': ' + x.fitted; };
+    return {
+      state: adasState(v),
+      throughTheWindshield: (a.camera || []).map(say),
+      couldBeEitherWay: (a.mixed || []).map(say),
+      notGlassRelated: (a.elsewhere || []).map(say)
+    };
   }
 
   global.VIN = {
@@ -129,7 +296,9 @@
     inspect: inspect,
     decode: decode,
     modelsFor: modelsFor,
-    adasState: adasState
+    adasState: adasState,
+    adasDetail: adasDetail,
+    yearFromVin: yearFromVin
   };
 
 })(window);
