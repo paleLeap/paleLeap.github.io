@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>paleLeap</title>
+<meta name="description" content="paleLeap. Programs, games and tools.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="bg" aria-hidden="true"></div>
+
+<div class="stage">
+
+  <h1 class="brand">paleLeap</h1>
+
+  <!-- The menu. Closed, each reads "+ name". Open, the other three and the
+       name above vanish, and the chosen one becomes "− name", stepped right,
+       with its content beneath. -->
+  <nav class="menu">
+    <a href="#about"    style="--i: 0">about</a>
+    <a href="#projects" style="--i: 1">projects</a>
+    <a href="#social"   style="--i: 2">social</a>
+    <a href="#contact"  style="--i: 3">contact</a>
+  </nav>
+
+  <!-- ================================================================ ABOUT -->
+  <section class="panel" id="about" hidden>
+    <p>
+      I build what I think is useful. Most of that is streamlining: cutting
+      steps out of a workflow, making something run faster or with less fuss
+      than it did before. The rest is whatever seems fun, or whatever I wanted
+      to exist and couldn't find.
+    </p>
+    <p>
+      I keep it laid back. I travel when I can, but am always available. Let
+      me know if you'd like to collaborate or need work done.
+    </p>
+  </section>
+
+  <!-- ============================================================= PROJECTS -->
+  <section class="panel" id="projects" hidden>
+    <ul class="list" data-projects></ul>
+  </section>
+
+  <!-- =============================================================== SOCIAL -->
+  <section class="panel" id="social" hidden>
+    <ul class="list list--row">
+      <li><a href="https://github.com/paleLeap">github</a></li>
+      <li><a href="https://x.com/paleLeap">x</a></li>
+      <li><a href="https://youtube.com/@pale-sonder">youtube</a></li>
+    </ul>
+  </section>
+
+  <!-- ============================================================== CONTACT -->
+  <section class="panel" id="contact" hidden>
+    <p>
+      If you'd like to collaborate, request work, bring up concerns, or just
+      offer input, email me at:
+    </p>
+    <ul class="list">
+      <li><a href="mailto:paleLeap@pm.me">paleLeap@pm.me</a></li>
+    </ul>
+  </section>
+
+</div>
+
+<script src="js/backgrounds.js"></script>
+<script src="js/projects-data.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

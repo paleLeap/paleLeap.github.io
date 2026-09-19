@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slate | paleLeap</title>
+<meta name="description" content="A single-window trading terminal that watches social feeds for the earliest mention of a ticker and ranks it against your strategy.">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="bg" data-base="../" aria-hidden="true"></div>
+
+<div class="stage is-open">
+
+  <a class="back" href="../index.html#projects">projects</a>
+
+  <div class="doc">
+    <h1>Slate</h1>
+
+    <p>
+      A single-window trading terminal. It watches social feeds for the earliest
+      mention of a ticker, checks it against your parameters, and keeps a live
+      Top 10 ranked by how well it fits your strategy right now.
+    </p>
+
+    <div class="facts">
+      <span>2026</span>
+      <span>Python, SQLite</span>
+      <span>Linux</span>
+      <span>Running daily</span>
+    </div>
+
+    <a class="get" href="#" aria-disabled="true">download (packaging in progress)</a>
+
+    <figure>
+      <img src="../assets/screenshots/slate-01.png" alt="Slate's main window showing the ranked Top 10">
+      <figcaption>The main page. Ten tickers, ranked on momentum.</figcaption>
+    </figure>
+
+    <p>
+      Slate is read-only. It connects to market-data and social endpoints and
+      nothing else. There is no order-entry code path anywhere in it. It hands
+      you a shortlist, you place your own trades.
+    </p>
+
+    <h2>What it does</h2>
+    <p>
+      The setup it hunts for is a hyped ticker between $1.50 and $15 that runs
+      50% or more in the first hour after the open. Catching one of those means
+      seeing the hype before the bell, which means watching where the hype
+      actually starts rather than where it gets reported.
+    </p>
+    <p>
+      A collector runs 24/7 in the background pulling from Reddit, StockTwits
+      and a handful of other public feeds, timestamping the first mention of
+      every symbol it sees. By 6am there's an overnight picture waiting: what
+      got talked about, where, how fast it spread, and how many distinct
+      platforms picked it up.
+    </p>
+    <p>
+      It does not predict, and it doesn't pretend to. It ranks how closely
+      something resembles setups that have run before. A hit-rate tab keeps
+      score on whether that resemblance actually pays, which is the only honest
+      way to know if the ranking is worth anything.
+    </p>
+
+    <figure>
+      <img src="../assets/screenshots/slate-02.png" alt="Slate's focus screen for a single ticker">
+      <figcaption>Focus. Everything known about one ticker on one screen.</figcaption>
+    </figure>
+
+    <h2>How it works</h2>
+    <p>
+      The interesting piece is the premarket participation ratio. Raw premarket
+      volume would be the ideal signal, but the free feeds don't publish it
+      cleanly, so the score is built from what is available and weighted by how
+      many distinct platforms are carrying the name. That one measure does more
+      work than anything else in the ranking before the open.
+    </p>
+    <p>
+      Market data comes from Schwab where credentials are configured, and falls
+      back to delayed Yahoo data where they aren't. Everything lands in a local
+      SQLite database, so the history is yours and the scoring can be re-run
+      against past days to check whether a tuning change would actually have
+      helped.
+    </p>
+    <p>
+      The whole thing is tuned from one <code>config.yaml</code>: thresholds,
+      price band, which subreddits to watch, how much each signal counts toward
+      the heat score.
+    </p>
+
+    <h2>Running it</h2>
+    <pre><code>./run.sh                 the window
+./install-collector.sh   the 24/7 collector, once</code></pre>
+  </div>
+
+</div>
+
+<script src="../js/backgrounds.js"></script>
+<script src="../js/main.js"></script>
+</body>
+</html>

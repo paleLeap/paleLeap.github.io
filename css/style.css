@@ -1,0 +1,419 @@
+/* ==========================================================================
+   paleLeap. One stylesheet. Minimal by intent: thin type, no boxes, no
+   rules, no chrome. Colours are all set in :root.
+   ========================================================================== */
+
+:root {
+  --bg:         #0c0d10;
+  --text:       #e8eaee;
+  --text-dim:   #8d94a2;
+  --text-faint: #565d6b;
+  --accent:     #d8a35c;
+
+  /* Written out rather than built with color-mix(), which Safari only got in
+     16.2. An older iPhone would drop every declaration that used it and fall
+     back to whatever came before, which meant the wrong colours. */
+  --text-soft:  rgba(232, 234, 238, 0.72);   /* the name, at rest */
+  --text-ghost: rgba(232, 234, 238, 0.40);   /* the name, once a panel is open */
+  --glow:       rgba(232, 234, 238, 0.22);   /* the hover halo */
+  --wash:       rgba(232, 234, 238, 0.03);   /* pending-screenshot box */
+
+  /* Faces chosen for having a genuine Thin cut: Ubuntu Sans on Linux,
+     Helvetica Neue on macOS, Segoe UI on Windows. Weight 100 to 200 below
+     therefore renders as actual hairline type, not faux-light. */
+  --font: "Ubuntu Sans", "Helvetica Neue", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "Ubuntu Sans Mono", "SF Mono", Menlo, monospace;
+
+  --col: 34rem;
+
+  /* The name's size, and the indent that lines the menu's "+" up with the
+     "l" in paleLeap. "pa" measures 0.998 x the font-size in this face, so
+     the indent tracks the name at every viewport width. */
+  --brand-size: clamp(3.2rem, 8vw, 5.2rem);
+  --menu-indent: calc(var(--brand-size) * 0.998);
+
+  /* One menu row. The items are absolutely positioned on this grid so the
+     chosen one can travel to the top instead of the list reflowing. */
+  --row: 1.75rem;
+  --step: 1.4rem;        /* how far the chosen one steps right */
+  --open-scale: 1.12;    /* how much the chosen one grows */
+
+  /* How far a panel's text hangs in from the title above it, so the first
+     letter of the copy sits under the SECOND letter of the title: the "I"
+     of "I build" under the "b" of "about". It is the marker's width plus one
+     lowercase letter, both scaled up with the open title, so it follows
+     --open-scale on its own. Remeasure only if the menu font-size changes. */
+  --marker-w: 1.1rem;
+  --letter-w: 0.49rem;
+  --hang: calc((var(--marker-w) + var(--letter-w)) * var(--open-scale));
+  --ease: cubic-bezier(.22, .61, .36, 1);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:         #faf9f7;
+    --text:       #16181d;
+    --text-dim:   #5e6673;
+    --text-faint: #99a0ac;
+    --accent:     #9c611a;
+
+    --text-soft:  rgba(22, 24, 29, 0.78);
+    --text-ghost: rgba(22, 24, 29, 0.42);
+    --glow:       rgba(22, 24, 29, 0.18);
+    --wash:       rgba(22, 24, 29, 0.04);
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 200;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img { max-width: 100%; display: block; }
+
+/* --------------------------------------------------------- the background -- */
+
+/* Sits behind everything. Negative z-index puts it above the page colour but
+   below all content, so nothing needs a stacking context of its own. */
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition-property: opacity;
+  transition-timing-function: linear;
+  /* duration is set per layer by main.js from BG_FADE_MS */
+  will-change: opacity;
+}
+
+.bg-layer.is-showing { opacity: 1; }
+
+/* The scrim. Everything above is painted at full strength and then knocked
+   back by this, so the crossfade stays clean and the dimming is one number
+   to tune rather than six. */
+.bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  opacity: 0.88;
+}
+
+/* -------------------------------------------------------------- the stage -- */
+
+.stage {
+  width: 100%;
+  max-width: calc(var(--col) + var(--menu-indent));
+  margin-inline: 0;
+  padding: 8vh 2rem 10rem clamp(1.5rem, 6vw, 7rem);
+}
+
+/* once something is open the column rises and widens a little to read */
+.stage.is-open {
+  max-width: calc(44rem + var(--menu-indent));
+}
+
+/* --------------------------------------------------------------- the name -- */
+
+.brand {
+  display: block;
+  font-size: var(--brand-size);
+  font-weight: 100;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  height: 1em;
+  /* not quite solid, it sits back from the page rather than on top of it */
+  color: var(--text-soft);
+  margin: 0 0 3.5rem;
+  /* it is a name, not a control */
+  cursor: default;
+  user-select: none;
+  /* shrinks toward its own top-left corner rather than its centre */
+  transform-origin: top left;
+  transition:
+    color     900ms ease,
+    transform 900ms var(--ease);
+}
+
+/* Open, the name stays exactly where it is in the layout. It only drifts
+   up and left, shrinks a little and thins out. Nothing below it moves, so
+   the page never reflows and it never reads as a new page. */
+.stage.is-open .brand {
+  color: var(--text-ghost);
+  transform: translate(-0.5rem, -1rem) scale(0.85);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------- the menu -- */
+
+.menu {
+  position: relative;
+  height: calc(var(--row) * 4);
+}
+
+/* Collapsed, the menu ends just below the chosen row, so the content always
+   sits the same distance under its title no matter which row was clicked.
+   --i-open and this class are both set by main.js.
+
+   The height changes instantly and never animates. The panel below sits in
+   normal flow, so an animated height would drag the panel upward while it
+   was sliding in, turning a sideways slide into a diagonal one. main.js
+   holds this class on until the leaving panel has finished, so the panel
+   never moves vertically in either direction. The menu items themselves are
+   absolutely positioned and do not care about this height. */
+.menu.is-collapsed {
+  height: calc((var(--i-open) + 1) * var(--row));
+}
+
+.menu a {
+  position: absolute;
+  left: var(--menu-indent);
+  top: calc(var(--i) * var(--row));
+  display: flex;
+  align-items: center;
+  height: var(--row);
+  font-size: 0.95rem;
+  font-weight: 200;
+  letter-spacing: 0.01em;
+  color: var(--text-faint);
+  text-decoration: none;
+  white-space: nowrap;
+  transform-origin: left center;
+  transition:
+    transform   460ms var(--ease),
+    opacity     300ms ease,
+    color       220ms ease,
+    text-shadow 220ms ease;
+}
+
+/* the marker: + when closed, − when open */
+.menu a::before {
+  content: "+";
+  display: inline-block;
+  width: var(--marker-w);
+  color: var(--text-faint);
+  font-weight: 200;
+  transition: color 220ms ease;
+}
+
+/* glow, and grow a touch */
+.menu a:hover,
+.menu a:focus-visible {
+  color: var(--text);
+  text-shadow: 0 0 12px var(--glow);
+  transform: scale(1.045);
+  outline: none;
+}
+.menu a:hover::before,
+.menu a:focus-visible::before { color: var(--text-dim); }
+
+/* the three not chosen slide out to the left and fade */
+.stage.is-open .menu a {
+  opacity: 0;
+  transform: translateX(-2.5rem);
+  pointer-events: none;
+}
+
+/* The chosen one stays on its own row and only steps right, staying grown.
+   No vertical travel: the row it started on is the row it keeps. */
+.stage.is-open .menu a.is-open {
+  opacity: 1;
+  color: var(--text);
+  pointer-events: auto;
+  transform: translateX(var(--step)) scale(var(--open-scale));
+}
+.stage.is-open .menu a.is-open::before { content: "\2212"; color: var(--text-dim); }
+
+/* hovering the open one keeps it where it is, no second jump */
+.stage.is-open .menu a.is-open:hover {
+  text-shadow: 0 0 12px var(--glow);
+}
+
+/* ------------------------------------------------------------- the panels -- */
+
+.panel {
+  padding-left: calc(var(--menu-indent) + var(--step) + var(--hang));
+  padding-top: 1.4rem;
+}
+.panel[hidden] { display: none; }
+
+/* Classes are put on and taken off by main.js, which waits for the leaving
+   animation to finish before hiding the panel. */
+.panel.is-in  { animation: panel-in  460ms var(--ease) both; }
+.panel.is-out { animation: panel-out 320ms var(--ease) both; }
+
+@keyframes panel-in {
+  from { opacity: 0; transform: translateX(2.5rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes panel-out {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateX(2.5rem); }
+}
+
+/* ---------------------------------------------------------------- content -- */
+
+h1, h2, h3 {
+  font-weight: 200;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 0 0 0.6em;
+}
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.15rem; margin-top: 2.6em; color: var(--text-dim); }
+h3 { font-size: 1rem; margin-top: 2em; }
+
+p { margin: 0 0 1.2em; color: var(--text-dim); }
+.panel p, .doc p { max-width: 36rem; }
+
+a { color: var(--accent); text-decoration: none; }
+
+/* Only links inside running copy underline. Nothing structural (not the
+   menu, not the project list, not the social links) ever does. */
+.panel p a:hover,
+.doc p a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--text);
+}
+
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--text-dim);
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+/* ------------------------------------------------------------------ lists -- */
+
+/* project list and social list share one plain-text treatment */
+.list { list-style: none; margin: 0; padding: 0; }
+
+.list li { margin-bottom: 1.4rem; }
+
+/* a row instead of a stack, used by the social links */
+.list--row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 2.25rem;
+}
+.list--row li { margin-bottom: 0; }
+
+.list a {
+  font-size: 1.05rem;
+  font-weight: 200;
+  color: var(--text);
+  text-decoration: none;
+  transition: text-shadow 200ms ease;
+}
+.list a:hover {
+  text-decoration: none;
+  text-shadow: 0 0 12px var(--glow);
+}
+
+.list .note {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-faint);
+  max-width: 34rem;
+  line-height: 1.6;
+}
+
+/* ---------------------------------------------------------- project pages -- */
+
+.back {
+  display: inline-block;
+  font-size: 0.9rem;
+  font-weight: 200;
+  color: var(--text-faint);
+  text-decoration: none;
+  margin-bottom: 4rem;
+}
+.back::before { content: "\2212"; display: inline-block; width: 1.1rem; }
+.back:hover { color: var(--text); text-decoration: none; }
+
+.doc { padding-top: 0; }
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.75rem;
+  margin: 0 0 3rem;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+}
+.facts span { white-space: nowrap; }
+
+.get {
+  display: inline-block;
+  font-size: 0.95rem;
+  color: var(--accent);
+  margin-bottom: 3rem;
+}
+.get[aria-disabled="true"] { color: var(--text-faint); pointer-events: none; }
+
+figure { margin: 0 0 2.5rem; }
+figure img { width: 100%; }
+figcaption {
+  font-size: 0.8rem;
+  color: var(--text-faint);
+  margin-top: 0.6rem;
+}
+
+/* a screenshot that hasn't been captured yet */
+.shot-pending {
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  background: var(--wash);
+}
+
+@media (max-width: 34rem) {
+  .stage { padding: 7vh 1.25rem 6rem; }
+  .stage.is-open { padding-top: 5vh; }
+  .brand { margin-bottom: 2.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The old rule here set every duration to 0.01ms, which turned the whole
+     site into instant snapping. Movement is what causes trouble, not fading,
+     so drop the travel and keep the crossfades. Elements still land in their
+     designed positions, they just arrive without sliding. */
+
+  .brand { transition-property: color; }
+
+  .menu a { transition-property: opacity, color, text-shadow; }
+
+  .panel.is-in  { animation: fade-in  320ms linear both; }
+  .panel.is-out { animation: fade-out 260ms linear both; }
+}
+
+@keyframes fade-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
