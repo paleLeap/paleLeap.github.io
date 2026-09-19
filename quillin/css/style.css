@@ -710,12 +710,10 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 .step__hint a {
   color: var(--orange);
   text-decoration: none;
-  border-bottom: 1px solid rgba(240, 125, 42, .4);
-  padding-bottom: 1px;
-  transition: border-color .2s var(--ease);
+  transition: color .2s var(--ease);
 }
 
-.step__hint a:hover { border-bottom-color: var(--orange); }
+.step__hint a:hover { color: var(--ink); }
 
 .step__hint {
   font-size: 1rem;
@@ -828,19 +826,25 @@ body.on-quote #step-vin.is-folded { text-align: left; }
   height: 1.625rem;
   display: grid;
   place-items: center;
-  border: 1px solid var(--line-2);
-  border-radius: 50%;
+  /* No ring. A circled glyph beside a bare underlined input was the only
+     bordered control on the page and read as a button that did something to
+     the VIN. It is a question mark you can tap, nothing more. The box keeps
+     its size so the tap target survives; only the drawing goes. */
+  border: 0;
   background: none;
   color: var(--muted);
-  font-size: .75rem;
+  font-size: 1rem;
+  line-height: 1;
   cursor: pointer;
   padding: 0;
-  transition: color .2s var(--ease), border-color .2s var(--ease);
+  transition: color .2s var(--ease);
 }
 
-.field__help:hover { color: var(--ink); border-color: var(--ink-dim); }
+.field__help:hover { color: var(--ink); }
 
-.field__help[aria-expanded="true"] { color: var(--bg); background: var(--ink); border-color: var(--ink); }
+/* Open state is carried by the glyph brightening, since there is no longer a
+   shape to fill. Orange because that is what the help panel it opens uses. */
+.field__help[aria-expanded="true"] { color: var(--orange); }
 
 .helppanel {
   margin: 1.25rem 0 0;
@@ -885,12 +889,18 @@ body.on-quote #step-vin.is-folded { text-align: left; }
   font-weight: 300;
   color: var(--muted);
   cursor: pointer;
-  border-bottom: 1px solid var(--line-2);
-  padding-bottom: 1px;
-  transition: color .2s var(--ease), border-color .2s var(--ease);
+  /* text-decoration rather than a border. The border sat on the bottom edge of
+     the BOX, and on a touch screen the box is padded out to 44px, so the rule
+     was floating ten pixels clear of the words it belonged to. A decoration
+     hugs the text whatever the padding does. */
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--line-2);
+  text-underline-offset: .32em;
+  transition: color .2s var(--ease), text-decoration-color .2s var(--ease);
 }
 
-.plainlink:hover { color: var(--ink); border-color: var(--orange); }
+.plainlink:hover { color: var(--ink); text-decoration-color: var(--orange); }
 
 .manual { margin-top: 1.25rem; display: grid; gap: .5rem; }
 
