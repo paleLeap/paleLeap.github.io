@@ -77,6 +77,7 @@ body {
    the left one. */
 .top {
   --gutter: clamp(1.5rem, 3.4vw, 2rem);
+  position: relative;      /* the mobile category row hangs off this */
   display: flex;
   /* flex-start, not center. Centring aligned the right hand group to the middle
      of a header whose height is set by the logo, so the taller the mark grew the
@@ -1235,6 +1236,49 @@ body.on-quote #step-vin.is-folded { text-align: left; }
   .social { display: none; }
 
   .top { --gutter: 1.25rem; }
+
+  /* THE CATEGORY ROW, on a phone.
+
+     On desktop the strip grows the header sideways, which is fine because there
+     is room. On a phone there is not: five words wrapped onto several lines and
+     pushed the whole page down, so opening the menu made the site feel like it
+     had grown a limb.
+
+     Here it is lifted out of the layout entirely. It hangs under the header as
+     one row that cannot wrap, scrolls sideways if it must, and overlays the
+     page rather than displacing it. Nothing below it moves at any point. */
+  .brandnav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-width: none;
+    padding: .5rem var(--gutter) .75rem;
+    gap: .25rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    /* Closed, it sits slightly up and invisible. That IS the retract: removing
+       is-open plays the same transition in reverse, so it lifts away upwards. */
+    opacity: 0;
+    transform: translateY(-.75rem);
+    pointer-events: none;
+    transition: opacity .26s var(--ease), transform .3s var(--ease);
+  }
+
+  .brandnav::-webkit-scrollbar { display: none; }
+
+  .brand.is-open .brandnav {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  /* The container carries the movement here, so the per item stagger would only
+     make the retract feel late. */
+  .brandnav a { transition-delay: 0s; opacity: 1; transform: none; }
 
   /* Bigger, on the owner's own feedback. The mark is the only thing on a phone
      header telling you whose business this is, and it was being shrunk to make

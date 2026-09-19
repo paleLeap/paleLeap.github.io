@@ -99,8 +99,15 @@
     function (a) {
       var id = a.getAttribute('href').slice(1);
       if (PANELS.indexOf(id) === -1) return;
+      /* The logo points at #quote so it is a way home on a pointer device, but
+         it is ALSO the menu toggle on touch. Wiring it here as well meant one
+         tap ran both handlers: the menu opened and was closed again in the same
+         gesture while the page navigated. It gets its own handler below. */
+      if (a.classList.contains('brand__logo')) return;
       a.addEventListener('click', function (e) {
         e.preventDefault();
+        /* Retract first, then swap. The row lifts away while the page is
+           fading, so the two reads as one movement rather than two. */
         if (brand) brand.classList.remove('is-open');
         if (location.hash === '#' + id) return;   // already here
         // Write the hash without firing hashchange, so the transition runs once.
@@ -159,8 +166,12 @@
 
   if (brand && logo) {
     logo.addEventListener('click', function (e) {
-      if (canHover.matches) return;          // pointer devices keep the hover
       e.preventDefault();
+      if (canHover.matches) {
+        // pointer devices: the strip is already open on hover, so this is home
+        if (location.hash !== '#quote') { history.pushState(null, '', '#quote'); go('quote'); }
+        return;
+      }
       brand.classList.toggle('is-open');
     });
 
