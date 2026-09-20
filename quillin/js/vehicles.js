@@ -49,7 +49,7 @@ export function hasModel(archetypeId) {
    nothing was busting them: a re-converted model stayed cached and the fixes
    never reached anyone. Found it when the live site kept serving a hatch whose
    quarter glass was still 1.23m after that had been fixed and deployed. */
-const MODELS_V = '?v=f5c59227';
+const MODELS_V = '?v=5221f38e';
 
 const loader = new GLTFLoader();
 const cache = Object.create(null);
