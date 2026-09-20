@@ -829,6 +829,31 @@ body.on-quote #step-vin.is-folded { text-align: left; }
    .panel, one at a time. This says it once for all of them. */
 [hidden] { display: none !important; }
 
+/* No tap flash, anywhere.
+
+   A mobile browser paints a translucent box over whatever you touch, sized to
+   the ELEMENT and not to its text. Every quiet link here is padded out to a
+   44px touch target, so the flash came out as a wide pale blue slab around a
+   few small words: the least smooth thing on the page, on a site whose whole
+   point is to be calm for someone whose car is broken.
+
+   Turned off in one place rather than per control, because the next control
+   added would have had it too. What replaces it is below: the thing you pressed
+   responds, instead of a box appearing around it. */
+a, button, label, select, input, textarea, summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Pressed: the words brighten and the rule under them picks up the accent.
+   Same idea as the section bar at the foot of the page, so a press feels the
+   same wherever it happens. */
+.plainlink:active {
+  color: var(--ink);
+  text-decoration-color: var(--orange);
+}
+
+.btn:active { background: var(--orange); color: #fff; }
+
 .step[hidden] { display: none; }
 
 /* Section headings: the question being asked. Brighter than the answers
@@ -1576,8 +1601,6 @@ body.on-quote #step-vin.is-folded { text-align: left; }
      tap target, not the width of the text, so it always looks oversized.
      Off, and replaced by the text brightening and picking up a halo for as
      long as the finger is down. */
-  .dock a { -webkit-tap-highlight-color: transparent; }
-
   .dock a:active {
     color: var(--ink);
     text-shadow: 0 0 10px rgba(237, 240, 242, .45);
