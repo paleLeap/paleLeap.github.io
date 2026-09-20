@@ -21,6 +21,8 @@
 
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)');
   var OUT_MS = 170;          // must match .flow's transition in style.css
+  // The same curve as --ease in the stylesheet and EASE in app.js.
+  var EASE = 'cubic-bezier(.22,.61,.36,1)';
   var busy = false;
   var target = null;         // where we are heading, which a click can change mid-fade
 
@@ -242,6 +244,46 @@
      this script runs, and again after the load event once images settle the
      layout. Both have to be answered. */
   function toTop() { window.scrollTo(0, 0); }
+
+  /* ---- the common questions ---------------------------------------------
+
+     Native <details> snaps open, which is the one thing everything else on
+     this site does not do. So the toggle is taken over and the answer's height
+     animated, the same way the quote flow slides its disclosures, margins
+     included: a panel that collapses its height while keeping its margin
+     leaves a gap and then loses it in one frame, and that jump is exactly what
+     a stutter looks like.
+
+     The markup is still real <details>, so with this script broken or not yet
+     run every question still opens. */
+  Array.prototype.forEach.call(document.querySelectorAll('.faq__item'),
+    function (item) {
+      var summary = item.querySelector('summary');
+      var body = item.querySelector('.faq__a');
+      if (!summary || !body) return;
+
+      function slide(open) {
+        if (item._faq) { item._faq.cancel(); item._faq = null; }
+        if (REDUCED.matches) { item.open = open; return; }
+
+        if (open) item.open = true;         // measurable only once it is open
+        var h = body.scrollHeight;
+        var frames = open
+          ? [{ height: '0px', opacity: 0 }, { height: h + 'px', opacity: 1 }]
+          : [{ height: h + 'px', opacity: 1 }, { height: '0px', opacity: 0 }];
+
+        item._faq = body.animate(frames, { duration: open ? 260 : 200, easing: EASE });
+        item._faq.onfinish = function () {
+          item._faq = null;
+          if (!open) item.open = false;     // closed only after it has shrunk
+        };
+      }
+
+      summary.addEventListener('click', function (e) {
+        e.preventDefault();
+        slide(!item.open);
+      });
+    });
 
   /* ---- am I the current build? --------------------------------------------
 
