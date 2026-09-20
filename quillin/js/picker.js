@@ -8,7 +8,7 @@
 
 import * as THREE from '../vendor/three/three.module.js';
 import { OrbitControls } from '../vendor/three/OrbitControls.js';
-import { buildVehicle, LINE } from './model.js?v=b2a54265';
+import { buildVehicle, LINE } from './model.js?v=2e687300';
 
 /* One accent, red, and nothing else. Light on hover, dark on select, so the two
    states are told apart by value and not only by hue. */

@@ -695,7 +695,7 @@
      than imported per open so the five model files are only ever fetched once
      per visit however many times an earlier answer is edited. */
   var Vehicles = null;
-  import('./vehicles.js?v=d1d39254').then(function (mod) { Vehicles = mod; },
+  import('./vehicles.js?v=8506a6fa').then(function (mod) { Vehicles = mod; },
     function (err) { console.error('Vehicle models unavailable:', err); });
 
   function teardownPicker() {
@@ -718,7 +718,7 @@
     // './' is required; a bare 'picker.js' would be read as a package name.
     // Two-argument then(), not then().catch(): a throw inside the success
     // handler must not be reported as a module load failure.
-    import('./picker.js?v=0a18f614').then(function (mod) {
+    import('./picker.js?v=fbc19470').then(function (mod) {
       /* The real model is fetched HERE rather than inside the picker, so the
          picker itself stays synchronous. A body style we have no model for, or
          a fetch that fails, resolves to null and the picker falls back to the

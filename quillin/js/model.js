@@ -236,8 +236,11 @@ const MAT = {
      the vehicle occludes itself. Without them you see straight through to the
      far side's glass and cannot tell which door you are about to pick. */
   fill: () => new THREE.MeshBasicMaterial({
-    // A shade off the stage, so the body still reads as a mass and not a hole
-    color: 0x0c1116, toneMapped: false,
+    /* Lifted from 0x0c1116, which was within a couple of values of the stage
+       itself and so read as a hole cut in the background rather than a car
+       standing on it. Still far below the line work: this is a mass, not a
+       surface anyone should be looking at. */
+    color: 0x171f28, toneMapped: false,
     polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1
   }),
   /* Light blue and properly present, not a 5% white ghost.
@@ -249,10 +252,11 @@ const MAT = {
      tinted, and it hides most of what is behind it.
 
      depthWrite stays on. Transparent panes are drawn back to front, so the far
-     pane goes down first and the near one blends over it: at 0.34 the far side
-     is knocked back to about two thirds and stops competing. */
+     pane goes down first and the near one blends over it. Even so, opacity
+     alone was never going to fix the hollow look: see the cabin liner in
+     vehicles.js for the actual cause. */
   glass: () => new THREE.MeshBasicMaterial({
-    color: LINE.glass, transparent: true, opacity: 0.34, toneMapped: false,
+    color: LINE.glass, transparent: true, opacity: 0.55, toneMapped: false,
     side: THREE.DoubleSide,
     polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2
   })

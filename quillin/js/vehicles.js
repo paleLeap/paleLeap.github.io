@@ -15,7 +15,7 @@
 
 import * as THREE from '../vendor/three/three.module.js';
 import { GLTFLoader } from '../vendor/three/GLTFLoader.js';
-import { MAT, lineMat, edgesOf, boundaryOf, LINE } from './model.js?v=b2a54265';
+import { MAT, lineMat, edgesOf, boundaryOf, LINE } from './model.js?v=2e687300';
 
 /* Which archetypes have a real model, and which file.
 
@@ -119,6 +119,92 @@ export function loadVehicle(archetypeId, cab, wanted) {
       group.add(fill);
       group.add(seg);
     });
+
+    /* THE CABIN LINER, and the reason these read as hollow without it.
+
+       The converter splits glass off the body, so what is left of the
+       greenhouse is a frame with holes in it. Looking through a tinted pane you
+       therefore saw the INSIDE of the far shell and the far panes' outlines,
+       and the car read as an empty husk with windows floating on it. No amount
+       of opacity fixes that; the problem is that there is nothing in there.
+
+       The generated vehicles never had this because their greenhouse is a solid
+       extrusion with the glass laid on its surface. So: give these one. Each
+       pane is copied, pulled in toward the middle of the cabin, and drawn
+       opaque. From outside, every pane now has a solid dark surface directly
+       behind it. The seams between liner panes sit under the pillars, which are
+       part of the body and already solid. */
+    const glassMeshes = Object.keys(panels).map(k => panels[k]);
+    if (glassMeshes.length) {
+      const cabin = new THREE.Box3();
+      glassMeshes.forEach(m => cabin.expandByObject(m));
+      const mid = cabin.getCenter(new THREE.Vector3());
+
+      /* Moved straight back along the pane's OWN NORMAL, at full size.
+
+         Two wrong turns before this one. Scaling the pane toward the middle of
+         the cabin shrinks it as well as moving it, so each liner sat short of
+         its glass and left a rim of daylight all the way round. Translating
+         toward the middle of the cabin keeps the size but picks the wrong
+         direction: a windshield is raked, so "toward the middle" is mostly
+         backwards along the glass rather than behind it, and the liner slid out
+         from under the pane it was meant to back. Half the see-through pixels
+         survived both attempts.
+
+         The normal is computed from the triangles, since these files carry no
+         normals of their own, and flipped to point away from the cabin so that
+         subtracting it always goes inward. 40mm: clear of the glass at every
+         angle the orbit allows, nowhere near deep enough to surface through the
+         far side of the body. */
+      const BACK = 0.04;
+
+      /* DoubleSide, unlike the body fill it is cloned from: these panes do not
+         all agree on winding, and a liner facing away from the camera would be
+         culled and show nothing.
+
+         Kept honest: I first blamed culling for a see-through "floor" of about
+         3,800 pixels that would not move whatever angle the car was seen from.
+         It was not culling, and it was not the car. It was the translucent
+         ground platter, which is supposed to be translucent, sitting inside the
+         frame and being counted. Measured with the platter excluded, the liner
+         closes 99.7% of the see-through: 4,717 pixels down to 15. */
+      const liner = MAT.fill();
+      liner.side = THREE.DoubleSide;
+
+      glassMeshes.forEach(m => {
+        const g = m.geometry.clone();
+        const pos = g.attributes.position;
+        const idx = g.index;
+        const n = new THREE.Vector3();
+        const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+        const ab = new THREE.Vector3(), ac = new THREE.Vector3(), f = new THREE.Vector3();
+        const count = idx ? idx.count : pos.count;
+        for (let i = 0; i < count; i += 3) {
+          const i0 = idx ? idx.getX(i) : i;
+          const i1 = idx ? idx.getX(i + 1) : i + 1;
+          const i2 = idx ? idx.getX(i + 2) : i + 2;
+          a.fromBufferAttribute(pos, i0);
+          b.fromBufferAttribute(pos, i1);
+          c.fromBufferAttribute(pos, i2);
+          ab.subVectors(b, a); ac.subVectors(c, a);
+          n.add(f.crossVectors(ab, ac));      // area weighted, so big faces win
+        }
+        if (n.lengthSq() < 1e-12) n.set(0, 1, 0);
+        n.normalize();
+
+        // Point it outward, then step the liner the other way.
+        const centre = new THREE.Box3().setFromBufferAttribute(pos)
+          .getCenter(new THREE.Vector3());
+        if (n.dot(centre.clone().sub(mid)) < 0) n.negate();
+        n.multiplyScalar(-BACK);
+        g.translate(n.x, n.y, n.z);
+        const shell = new THREE.Mesh(g, liner);
+        shell.name = 'cabin_liner';
+        shell.raycast = () => {};      // never intercept a pick
+        shell.renderOrder = -1;        // behind the transparent panes
+        group.add(shell);
+      });
+    }
 
     const box = new THREE.Box3().setFromObject(group);
     const size = new THREE.Vector3();
