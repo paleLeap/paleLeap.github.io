@@ -475,6 +475,9 @@
       /* What vPIC filed this model under: car, truck, mpv, or several. Not a
          body style, but enough to stop us asking a stupid question about one. */
       vpicTypes: modelTypes[el.mModel.value] || [],
+      /* Worked out, not asked. See bodyFor: the name settles the common
+         nameplates and the vPIC bucket covers the rest. */
+      bodyStyle: bodyFor(el.mModel.value, modelTypes[el.mModel.value] || []),
       adas: { camera: [], mixed: [], elsewhere: [] },
       label: el.mYear.value + ' ' + el.mMake.value + ' ' + el.mModel.value,
       usable: true
@@ -525,34 +528,6 @@
     renderQuestion(v, noVin, questions);
   }
 
-  /* The body styles a vehicle could plausibly be, given what vPIC filed the
-     model under. Asking whether a Hyundai Elantra is a rig makes the site look
-     like it knows nothing about cars, and vPIC already answered that: an
-     Elantra comes back under 'car' and never under 'truck'.
-
-     A model can land in more than one bucket, a Ford Transit is both truck and
-     mpv, so the lists are unioned rather than picked between. With nothing to
-     go on the full list stands, which is the old behaviour. */
-  var BODY_BY_TYPE = {
-    car:   ['sedan', 'coupe', 'hatch', 'convertible'],
-    mpv:   ['suv', 'van', 'hatch'],
-    truck: ['pickup', 'van', 'suv', 'heavy']
-  };
-
-  var BODY_LABEL = {
-    sedan:       'Sedan, four doors',
-    coupe:       'Coupe, two doors',
-    hatch:       'Hatchback or wagon',
-    suv:         'SUV or crossover',
-    pickup:      'Pickup truck',
-    van:         'Van or minivan',
-    convertible: 'Convertible',
-    heavy:       'Rig, box truck or motorhome'
-  };
-
-  var BODY_ORDER = ['sedan', 'coupe', 'hatch', 'suv', 'pickup', 'van',
-                    'convertible', 'heavy'];
-
   /* vPIC's vehicle types are too coarse on their own: "truck" covers a pickup,
      a panel van, a Suburban and an eighteen wheeler alike, so a Ford F-150 was
      still being asked what shape it is. Nobody needs to be asked that.
@@ -563,42 +538,41 @@
      to the question rather than being assumed. A Tahoe must not become a pickup
      just because vPIC files it under truck. */
   var BY_NAME = [
-    { body: 'pickup', re: /\b(f-?[1-4]50|super ?duty|silverado|sierra|ram ?[1-5]500|tacoma|tundra|ranger|colorado|canyon|frontier|titan|ridgeline|gladiator|maverick|santa ?cruz|dakota|avalanche|ridgelin)\b/i },
-    { body: 'van',    re: /\b(transit|sprinter|promaster|express|savana|nv ?[0-9]*|metris|caravan|sienna|odyssey|pacifica|carnival|sedona|econoline|e-?[1-4]50|city ?express)\b/i },
-    { body: 'heavy',  re: /\b(f-?[678]50|cascadia|columbia|freightliner|kenworth|peterbilt|international|box ?truck|chassis|motorhome|school ?bus)\b/i },
-    { body: 'suv',    re: /\b(tahoe|suburban|yukon|escalade|expedition|navigator|explorer|traverse|4runner|sequoia|land ?cruiser|wrangler|bronco|durango|armada|pathfinder|telluride|palisade|highlander|pilot|atlas|ascent|grand ?cherokee|cherokee|edge|escape|equinox|rav ?4|cr-?v|rogue|forester|outback|cx-?[0-9]|tucson|santa ?fe|sorento|sportage)\b/i }
+    { body: 'pickup', re: /\b(f-?[1-4]50|super ?duty|silverado|sierra|ram ?[1-5]500|tacoma|tundra|ranger|colorado|canyon|frontier|titan|ridgeline|gladiator|maverick|santa ?cruz|dakota|avalanche|lightning|cybertruck|rivian ?r1t|hummer ?ev ?pickup)\b/i },
+    { body: 'van',    re: /\b(transit|sprinter|promaster|express|savana|nv ?[0-9]*|metris|caravan|sienna|odyssey|pacifica|carnival|sedona|econoline|e-?[1-4]50|city ?express|quest|routan|b-?series ?van)\b/i },
+    { body: 'heavy',  re: /\b(f-?[678]50|cascadia|columbia|freightliner|kenworth|peterbilt|international|box ?truck|chassis|motorhome|school ?bus|topkick|lcf)\b/i },
+    { body: 'suv',    re: /\b(tahoe|suburban|yukon|escalade|expedition|navigator|explorer|traverse|4runner|sequoia|land ?cruiser|wrangler|bronco|durango|armada|pathfinder|telluride|palisade|highlander|pilot|passport|atlas|ascent|grand ?cherokee|cherokee|compass|renegade|edge|escape|equinox|blazer|trailblazer|rav ?4|cr-?v|hr-?v|rogue|murano|kicks|forester|crosstrek|outback|cx-?[0-9]+|tucson|santa ?fe|kona|venue|sorento|sportage|seltos|encore|envision|enclave|acadia|terrain|q[357]|qx[456789]0|x[1-7]\b|gl[abcels]|mdx|rdx|xt[456]|nx|rx|gx|lx|model ?[xy]|id\.?4|mach-?e|ioniq ?5|ev6|ariya|bz4x|eqb|eqe ?suv|i[x4])\b/i },
+    { body: 'hatch',  re: /\b(golf|gti|r32|fit|yaris|versa ?note|veloster|soul|leaf|bolt|prius ?c?|impreza|mazda ??3 ?hatch|focus ?hatch|fiesta ?hatch|mini ?cooper|clubman|countryman|civic ?hatch|elantra ?gt|forte5|rio ?5|spark|sonic ?hatch|matrix|vibe|cube|xb|hatchback|wagon|sportwagen|allroad|avant|touring|estate)\b/i },
+    { body: 'convertible', re: /\b(miata|mx-?5|boxster|z4|cascada|solstice|sky|s2000|slk|sl[456]00|e[45]0 ?cabrio|convertible|cabriolet|roadster|spyder|spider|targa)\b/i },
+    { body: 'coupe',  re: /\b(camaro|mustang|challenger|corvette|supra|brz|gr ?86|frs|fr-?s|370 ?z|350 ?z|400 ?z|nissan ?z|gt-?r|cayman|celica|integra|rsx|tt|m[2348] ?coupe|rc ?[0-9]*|lc ?[0-9]*|q60|genesis ?coupe|veloster ?n|eclipse|monte ?carlo|grand ?prix ?coupe|firebird|trans ?am|viper|challenger|charger ?coupe)\b/i }
   ];
+
+  /* What each vPIC bucket is when the name says nothing. This is the change
+     that lets the question go away entirely: a passenger car nobody recognises
+     is a saloon, which is what most of them are; an MPV is a crossover; a truck
+     is a pickup, the SUV and van names above having already been taken out.
+
+     It is a fallback, so it is sometimes wrong, and being wrong is visible: the
+     customer is shown the vehicle and the list of its glass, with the note
+     saying it is a body like theirs rather than their exact car, and "Or just
+     tell us!" underneath. Wrong and correctable beats interrogating everybody
+     to spare the few. */
+  var BODY_DEFAULT = { car: 'sedan', mpv: 'suv', truck: 'pickup' };
 
   function bodyFromName(model) {
     var hits = BY_NAME.filter(function (r) { return r.re.test(model || ''); });
-    return hits.length === 1 ? hits[0].body : null;   // ambiguous stays a question
+    return hits.length === 1 ? hits[0].body : null;   // ambiguous: fall through
   }
 
-  function bodyChoicesFor(v) {
-    var known = bodyFromName(v && v.model);
-    if (known) return [{ value: known, label: BODY_LABEL[known] }];
-
-    var types = (v && v.vpicTypes) || [];
-    var allowed = Object.create(null);
-
-    types.forEach(function (t) {
-      (BODY_BY_TYPE[t] || []).forEach(function (b) { allowed[b] = true; });
-    });
-
-    /* Passenger car wins outright when it is one of the buckets. vPIC's older
-       data is loose enough that a 1994 Camaro comes back under 'mpv' as well as
-       'car', and unioning them offered SUV and van as answers for a Camaro.
-       Nothing that vPIC calls a passenger car is a van. */
-    if (types.indexOf('car') !== -1) {
-      allowed = Object.create(null);
-      BODY_BY_TYPE.car.forEach(function (b) { allowed[b] = true; });
+  /* The body style for a vehicle entered by hand, with no question asked.
+     Name first, because it is specific; then the bucket vPIC filed it under. */
+  function bodyFor(model, types) {
+    var byName = bodyFromName(model);
+    if (byName) return byName;
+    for (var i = 0; i < (types || []).length; i++) {
+      if (BODY_DEFAULT[types[i]]) return BODY_DEFAULT[types[i]];
     }
-
-    var ids = Object.keys(allowed);
-    if (!ids.length) ids = BODY_ORDER.slice();      // nothing known, ask it all
-
-    return BODY_ORDER.filter(function (b) { return ids.indexOf(b) !== -1; })
-      .map(function (b) { return { value: b, label: BODY_LABEL[b] }; });
+    return 'sedan';
   }
 
   /* What still needs asking, in the order it should be asked. One list, read by
@@ -613,26 +587,6 @@
        It used to guess from the door count, which on the no-VIN path is also
        unknown, so every manually entered pickup and van was drawn as a saloon
        and the customer was asked to pick panes it does not have. */
-    if (!answers.bodyStyle && Glass.resolve(v).needsBody) {
-      var choices = bodyChoicesFor(v);
-      if (choices.length === 1) {
-        /* Only one thing it can be, so do not ask. vPIC filed this model under
-           exactly one vehicle type and that type maps to one body style. */
-        v.bodyStyle = choices[0].value;
-      } else {
-        questions.push({
-          key: 'bodyStyle',
-          hint: 'What shape is your ' +
-                [v.year, v.make, v.model].filter(Boolean).join(' ') + '?',
-          options: choices
-        });
-      }
-    }
-
-    /* The year gate applies to the no-VIN path too. Without it the `noVin` flag
-       forced the question on everything, so the owner of a 1994 Camaro was
-       asked whether there is a camera behind the mirror. There is not; there
-       was no such thing. */
     if (!answers.adas && !VIN.tooOldForAdas(v) && (state === 'maybe' || noVin)) {
       questions.push({
         key: 'adas',
