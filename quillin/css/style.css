@@ -637,6 +637,32 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 /* A question that belongs to a selection, so it is indented under it rather
    than presented as a step of its own. */
+/* The answers already given, one line each. Quiet: they are a record of what
+   has been settled, and the question still on screen is the live thing. */
+.answered { margin-top: 1.5rem; }
+
+.answered[hidden] { display: none; }
+
+.answered li {
+  padding: .5rem 0;
+  border-top: 1px solid var(--line);
+  font-size: .875rem;
+  font-weight: 300;
+  color: var(--muted);
+  display: flex;
+  gap: .75rem;
+  align-items: baseline;
+}
+
+.answered li b {
+  flex: none;
+  font-size: .625rem;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
 .subq { margin-top: 1.75rem; }
 
 .subq[hidden] { display: none; }

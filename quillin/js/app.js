@@ -31,6 +31,9 @@
     declineNote: $('decline-note'),
     chipQ:     $('chipq'),
     chipChoices: $('chip-choices'),
+    chipLabel: $('chip-label'),
+    chipLegend: $('chip-legend'),
+    chipDone: $('chip-done'),
     thatIt:    $('thatit'),
     thatItWrap: $('thatit-wrap'),
     picker:    $('picker'),
@@ -75,6 +78,11 @@
   var picker = null;       // the live picker instance, if WebGL is available
   var archetype = null;    // resolved body style for this vehicle
   var windshield = null;   // 'chip' | 'crack' | 'unsure', when a windshield is picked
+
+  /* panel id -> 'chip' | 'crack' | 'unsure'. Asked once per piece of glass the
+     customer picked rather than only for the windshield: a shop needs to know
+     which of three broken windows is a chip before it can price any of them. */
+  var damageKind = {};
 
   /* Sized the way the trade sizes it, and the way a customer can actually
      check: a quarter and a dollar bill are in everyone's pocket. */
@@ -252,7 +260,10 @@
       hide(el.tellNote);
       panels = [];
       windshield = null;
+      damageKind = {};
       hide(el.chipQ);
+      el.chipDone.innerHTML = '';
+      el.chipDone.hidden = true;
       teardownPicker();
       hide(el.cause);
       el.causeSel.value = '';
@@ -357,8 +368,12 @@
      is still there, still says what it does, and a second press puts it away.
      It used to hide itself on opening, which left the panel with no way out at
      all, and the customer looking at three dropdowns they could not dismiss. */
-  function openManual() {
+  function openManual(announce) {
     if (!el.manual.hidden) return;
+    /* Said out loud rather than just opening three dropdowns. Someone who has
+       just told us they cannot find their VIN has already had one small
+       failure; the next thing they see should not be another form. */
+    if (announce) say('No problem! Let\u2019s continue like this\u2026');
     /* Populated BEFORE opening. scrollHeight is measured as the animation
        starts, so filling the dropdowns afterwards would animate to the height
        of an empty box and then jump to the real one. */
@@ -398,9 +413,8 @@
 
   el.noVin.addEventListener('click', function () {
     if (el.manual.hidden) {
-      openManual();
+      openManual(true);
       el.mYear.focus();
-      say('');
     } else {
       shutManual();
     }
@@ -789,43 +803,80 @@
 
   /* Asked only when it can matter. Nobody picking a door glass should be shown
      a question about chips. */
+  function chipLabelFor(value) {
+    for (var i = 0; i < CHIP.length; i++) if (CHIP[i].value === value) return CHIP[i].label;
+    return '';
+  }
+
+  /* Walks the chosen glass, asking about one piece at a time.
+
+     Each answer collapses to a line above the question and the question moves
+     on to the next piece, so the customer is never looking at four identical
+     sets of radio buttons and wondering which window they belong to. When the
+     last one is answered the question goes away and the photo ask is next. */
   function syncChipQuestion() {
-    var wants = panels.indexOf('windshield') !== -1;
+    // Drop answers for glass that is no longer selected.
+    Object.keys(damageKind).forEach(function (id) {
+      if (panels.indexOf(id) === -1) delete damageKind[id];
+    });
+    windshield = damageKind.windshield || null;   // the rest of the app reads this
 
-    if (!wants) {
-      windshield = null;
-      slideShut(el.chipQ);
-      Array.prototype.forEach.call(
-        el.chipChoices.querySelectorAll('input'), function (i) { i.checked = false; });
-      return;
+    // The lines already settled.
+    el.chipDone.innerHTML = '';
+    var answered = panels.filter(function (id) { return damageKind[id]; });
+    answered.forEach(function (id) {
+      var li = document.createElement('li');
+      var k = document.createElement('b');
+      k.textContent = Glass.labelFor(id);
+      var v = document.createElement('span');
+      v.textContent = chipLabelFor(damageKind[id]);
+      li.appendChild(k); li.appendChild(v);
+      el.chipDone.appendChild(li);
+    });
+    el.chipDone.hidden = !answered.length;
+
+    // The next one to ask about, in the order the panels are listed.
+    var next = null;
+    for (var i = 0; i < panels.length; i++) {
+      if (!damageKind[panels[i]]) { next = panels[i]; break; }
     }
 
-    if (!el.chipChoices.querySelector('input')) {
-      CHIP.forEach(function (opt) {
-        var id = 'chip-' + opt.value;
-        var label = document.createElement('label');
-        label.className = 'choice';
-        label.setAttribute('for', id);
+    if (!next) { slideShut(el.chipQ); return; }
 
-        var input = document.createElement('input');
-        input.type = 'radio';
-        input.name = 'chip';
-        input.id = id;
-        input.value = opt.value;
-        input.addEventListener('change', function () {
-          windshield = opt.value;
-          resetBelow(6);
-          syncThatIt();
-          restack();
-        });
+    var name = Glass.labelFor(next);
+    var lower = name.charAt(0).toLowerCase() + name.slice(1);
+    el.chipLabel.textContent = 'The ' + lower + ': chip or crack?';
+    el.chipLegend.textContent = 'Is the ' + lower + ' damage a chip or a crack?';
 
-        var span = document.createElement('span');
-        span.textContent = opt.label;
-        label.appendChild(input);
-        label.appendChild(span);
-        el.chipChoices.appendChild(label);
+    /* Rebuilt for each piece rather than reused, because a radio group that
+       still holds the previous answer reads as already answered. */
+    clearChoices(el.chipChoices);
+    CHIP.forEach(function (opt) {
+      var id = 'chip-' + opt.value;
+      var label = document.createElement('label');
+      label.className = 'choice';
+      label.setAttribute('for', id);
+
+      var input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'chip';
+      input.id = id;
+      input.value = opt.value;
+      input.addEventListener('change', function () {
+        damageKind[next] = opt.value;
+        resetBelow(6);
+        syncChipQuestion();      // straight on to the next piece of glass
+        syncThatIt();
+        restack();
       });
-    }
+
+      var span = document.createElement('span');
+      span.textContent = opt.label;
+      label.appendChild(input);
+      label.appendChild(span);
+      el.chipChoices.appendChild(label);
+    });
+
     slideOpen(el.chipQ);
   }
 
@@ -942,9 +993,10 @@
   /* Offered once there is something to move on from, and retired once they
      have moved on. */
   function syncThatIt() {
-    // If the windshield is in play, the chip question is part of the answer.
-    var ready = damageGiven() &&
-      (panels.indexOf('windshield') === -1 || !!windshield);
+    // Every chosen piece of glass has to have been asked about, not just the
+    // windshield: the answers are what separate a repair from a replacement.
+    var allAsked = panels.every(function (id) { return !!damageKind[id]; });
+    var ready = damageGiven() && allAsked;
     el.thatIt.disabled = !ready;
     el.thatItWrap.hidden = !ready || !el.when.hidden;
   }
@@ -1059,6 +1111,26 @@
     reveal(el.when);
   }
 
+  /* A chip is repaired, not replaced. The customer's summary already said so;
+     the owner record did not, and went on listing "Windshield replacement" for
+     a job that is a resin fill. One function now, read by both, so the quote
+     the customer sees and the work the shop reads can never disagree. */
+  function workFor(v) {
+    var services = Glass.servicesFor(panels, v);
+    if (windshield === 'chip') {
+      return services.map(function (x) {
+        return x === 'Windshield replacement' ? 'Rock chip repair' : x;
+      });
+    }
+    if (windshield === 'unsure') {
+      return services.map(function (x) {
+        return x === 'Windshield replacement'
+          ? 'Windshield: repair or replace, we will check' : x;
+      });
+    }
+    return services;
+  }
+
   /* ---------- step 5: review ---------- */
 
   /* Last stop before it leaves their hands. Everything we believe, in plain
@@ -1095,21 +1167,12 @@
     rows.push(['Damage', damage.join('. ') || 'Not specified']);
 
     if (panels.length) {
-      // Customer-facing, so the ADAS line is filtered out. See below.
-      var services = Glass.servicesFor(panels, v).filter(function (x) {
+      /* Customer-facing, so the ADAS line is filtered out of the shared list.
+         The owners asked for driver assist to reach them and not the customer,
+         because it can flag falsely; see the note below and buildRequest. */
+      var services = workFor(v).filter(function (x) {
         return x !== 'ADAS recalibration';
       });
-      /* A chip is repaired, not replaced, and saying "windshield replacement"
-         to someone who has a chip quotes them the wrong job. */
-      if (windshield === 'chip') {
-        services = services.map(function (x) {
-          return x === 'Windshield replacement' ? 'Rock chip repair' : x;
-        });
-      } else if (windshield === 'unsure') {
-        services = services.map(function (x) {
-          return x === 'Windshield replacement' ? 'Windshield: repair or replace, we will check' : x;
-        });
-      }
       if (services.length) rows.push(['Work', services.join(', ')]);
     }
 
@@ -1184,9 +1247,14 @@
            is the difference between a complete request and an abandoned one. */
         photosDeclined: noPhotos,
         // null unless the windshield was chosen
-        windshield: windshield
+        windshield: windshield,
+        /* Chip, crack or not sure, for every piece of glass chosen. This is the
+           difference between a repair and a replacement, per pane. */
+        kinds: panels.map(function (id) {
+          return { panel: id, label: Glass.labelFor(id), kind: damageKind[id] || null };
+        })
       },
-      work: Glass.servicesFor(panels, v),      // ADAS included here
+      work: workFor(v),                        // ADAS included here
       adas: {
         fromVin: state,                        // yes / maybe / no
         customerSaid: answers.adas || null,    // yes / no / unsure, when asked
