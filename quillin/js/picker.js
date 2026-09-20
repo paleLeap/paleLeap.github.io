@@ -8,7 +8,7 @@
 
 import * as THREE from '../vendor/three/three.module.js';
 import { OrbitControls } from '../vendor/three/OrbitControls.js';
-import { buildVehicle } from './model.js?v=c1c2f461';
+import { buildVehicle, LINE } from './model.js?v=b2a54265';
 
 /* One accent, red, and nothing else. Light on hover, dark on select, so the two
    states are told apart by value and not only by hue. */
@@ -338,7 +338,9 @@ export function createPicker(opts) {
 
   // 0.68 measured as #a54a49 against the near-black cabin behind it, too dark to
   // read as the light half of the pair. Raised until it renders close to target.
-  const hoverMat = markerMaterial(COLOR.hover, 0.30);
+  /* Lifted from 0.30 now the resting glass is a real 0.34 rather than a 5%
+     ghost: hover has to read as a change against what is already there. */
+  const hoverMat = markerMaterial(COLOR.hover, 0.46);
   const pickMat = markerMaterial(COLOR.picked, 0.62);
 
   function paint(mesh) {
@@ -351,7 +353,10 @@ export function createPicker(opts) {
     // the outline carries the state too, so a pane reads at any size
     const om = mesh.userData.outlineMat;
     if (om) {
-      om.color.setHex(isPicked ? COLOR.picked : isHover ? COLOR.hover : 0xffffff);
+      /* LINE.pane, not a hardcoded white. This runs on every repaint and was
+         quietly overriding the palette, putting the outlines back to pure white
+         the moment anything was hovered or picked. */
+      om.color.setHex(isPicked ? COLOR.picked : isHover ? COLOR.hover : LINE.pane);
       om.linewidth = isPicked ? 3.4 : isHover ? 3.0 : 2.2;
       om.opacity = isPicked || isHover ? 1.0 : 0.85;
       om.needsUpdate = true;

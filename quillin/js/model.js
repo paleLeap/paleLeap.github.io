@@ -47,7 +47,8 @@ import { LineMaterial } from '../vendor/three/LineMaterial.js';
 const LINE = {
   frame:  0xd2e0f4,    // the vehicle's own structure
   detail: 0x8ea4c2,    // wheels, mirrors, lamps
-  pane:   0xe6f0ff     // glass outlines, the brightest thing on screen
+  pane:   0xe6f0ff,    // glass outlines, the brightest thing on screen
+  glass:  0x9fd0f5     // the panes themselves
 };
 
 const PANE_LINE = LINE.pane;
@@ -239,8 +240,19 @@ const MAT = {
     color: 0x0c1116, toneMapped: false,
     polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1
   }),
+  /* Light blue and properly present, not a 5% white ghost.
+     
+     At 0.05 the panes were effectively invisible, so you looked straight
+     through the near side of the car and read the outlines of the glass on the
+     far side. The whole vehicle looked transparent and it was genuinely hard to
+     tell which door you were about to pick. Glass is not invisible; it is
+     tinted, and it hides most of what is behind it.
+
+     depthWrite stays on. Transparent panes are drawn back to front, so the far
+     pane goes down first and the near one blends over it: at 0.34 the far side
+     is knocked back to about two thirds and stops competing. */
   glass: () => new THREE.MeshBasicMaterial({
-    color: 0xffffff, transparent: true, opacity: 0.05, toneMapped: false,
+    color: LINE.glass, transparent: true, opacity: 0.34, toneMapped: false,
     side: THREE.DoubleSide,
     polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2
   })

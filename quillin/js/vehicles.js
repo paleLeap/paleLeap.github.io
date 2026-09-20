@@ -15,7 +15,7 @@
 
 import * as THREE from '../vendor/three/three.module.js';
 import { GLTFLoader } from '../vendor/three/GLTFLoader.js';
-import { MAT, lineMat, edgesOf, boundaryOf, LINE } from './model.js?v=c1c2f461';
+import { MAT, lineMat, edgesOf, boundaryOf, LINE } from './model.js?v=b2a54265';
 
 /* Which archetypes have a real model, and which file.
 
