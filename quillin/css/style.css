@@ -1018,7 +1018,11 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 .manual[hidden] { display: none; }
 
-.manual select {
+/* The cause dropdown wears the same clothes as the year/make/model selects: a
+   rule under the words, nothing else. Sharing the selector rather than copying
+   it means the two can never drift. */
+.manual select,
+#cause {
   font: inherit;
   font-size: .9375rem;
   font-weight: 300;
@@ -1032,7 +1036,10 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 .manual select:disabled { color: var(--faint); cursor: default; }
 
-.manual select option { background: var(--raise); color: var(--ink); }
+#cause { width: 100%; max-width: 26rem; }
+
+.manual select option,
+#cause option { background: var(--raise); color: var(--ink); }
 
 /* ---------- choices ----------
    Rows, not boxes. A hairline between them and a mark down the left when
@@ -1562,7 +1569,8 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
   .reach__input { font-size: 1rem; }   /* under 16px iOS zooms the page on focus */
 
-  .manual select { font-size: 1rem; }
+  .manual select,
+  #cause { font-size: 1rem; }
 
   .tellus textarea { font-size: 1rem; }
 }

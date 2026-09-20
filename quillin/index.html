@@ -16,7 +16,7 @@
      loads is hashed and can still be cached hard. -->
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=2e1483de">
+<link rel="stylesheet" href="css/style.css?v=c2ba57df">
 </head>
 <body>
 
@@ -188,7 +188,30 @@
 
   </section>
 
-  <!-- step 4b: photographs -->
+  <!-- step 4b: what happened.
+       Sits between the glass and the photographs because it is the question the
+       shop would ask next on the phone, and because the answer changes what gets
+       quoted: a chip is a repair, a break-in is a replacement plus vacuuming out
+       the door, a regulator fault is not glass work at all. -->
+  <section class="step" id="step-cause" hidden aria-labelledby="cause-label">
+    <p class="step__label" id="cause-label">What kind of damage will we be repairing?</p>
+    <label class="visually-hidden" for="cause">What kind of damage will we be repairing?</label>
+    <select id="cause">
+      <option value="">Choose the closest</option>
+      <option value="rock-chip">Rock chip or star break</option>
+      <option value="crack">Crack, or a chip that spread</option>
+      <option value="break-in">Break-in or vandalism</option>
+      <option value="accident">Accident or collision</option>
+      <option value="hail">Hail or storm damage</option>
+      <option value="road-debris">Road debris hit it</option>
+      <option value="scratched">Scratched or pitted glass</option>
+      <option value="leak">Leaking, wind noise or bad seal</option>
+      <option value="regulator">Window will not go up or down</option>
+      <option value="unknown">Not sure, or something else</option>
+    </select>
+  </section>
+
+  <!-- step 4c: photographs -->
   <section class="step" id="step-photos" hidden aria-labelledby="photos-label">
     <p class="step__label" id="photos-label">Photos help the most, have any?</p>
 
@@ -448,6 +471,6 @@
 <script src="js/landing.js?v=8b55d991"></script>
 <script src="js/vin.js?v=546382b1"></script>
 <script src="js/glass.js?v=8ed14842"></script>
-<script src="js/app.js?v=713cf1f5"></script>
+<script src="js/app.js?v=fc94839f"></script>
 </body>
 </html>

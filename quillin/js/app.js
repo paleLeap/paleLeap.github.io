@@ -43,6 +43,8 @@
     tellNote:  $('tellus-note'),
     when:      $('step-when'),
     whenChoices: $('when-choices'),
+    cause:     $('step-cause'),
+    causeSel:  $('cause'),
     photos:    $('step-photos'),
     addPhotos: $('add-photos'),
     noPhotos:  $('no-photos'),
@@ -252,6 +254,9 @@
       windshield = null;
       hide(el.chipQ);
       teardownPicker();
+      hide(el.cause);
+      el.causeSel.value = '';
+      answers.cause = null;
       hide(el.photos);
       noPhotos = false;
       clearPhotos();
@@ -661,6 +666,7 @@
 
     reveal(el.glass);
     openPicker();
+    show(el.cause);
     /* Shown at the same time as the picker, not gated behind it. Photographs are
        the most useful thing a customer can send, so the ask sits in plain view
        from the start rather than appearing only after they have done something
@@ -943,6 +949,12 @@
     el.thatItWrap.hidden = !ready || !el.when.hidden;
   }
 
+  el.causeSel.addEventListener('change', function () {
+    answers.cause = el.causeSel.value || null;
+    syncThatIt();
+    restack();
+  });
+
   el.thatIt.addEventListener('click', function () {
     askWhen();
     syncThatIt();
@@ -1070,6 +1082,8 @@
 
     if (v.vin) rows.push(['VIN', v.vin, 'vin']);
 
+    if (answers.cause) rows.push(['Cause', CAUSE_LABEL[answers.cause]]);
+
     var damage = [];
     if (panels.length) damage.push(Glass.labelsFor(panels).join(', '));
     var typed = el.tellText.value.trim();
@@ -1159,6 +1173,11 @@
       damage: {
         panels: panels.slice(),
         panelLabels: Glass.labelsFor(panels),
+        /* What the customer says happened. Changes the job, not just the part:
+           a chip is a repair, a break-in is a replacement plus clearing the
+           fragments out of the door, a regulator fault is not glass at all. */
+        cause: answers.cause || null,
+        causeLabel: CAUSE_LABEL[answers.cause] || null,
         description: el.tellText.value.trim() || null,
         photos: photos.length,
         /* Distinguishes "said no" from "never engaged with the question", which
@@ -1307,6 +1326,21 @@
      carries its own short noun for the folded state. The VIN row keeps the VIN
      and the confirm row keeps the vehicle, so the two never say the same thing
      twice. */
+  /* Kept next to the markup's own wording so the folded line, the review and the
+     record all say the same thing the customer picked. */
+  var CAUSE_LABEL = {
+    'rock-chip': 'Rock chip or star break',
+    'crack': 'Crack, or a chip that spread',
+    'break-in': 'Break-in or vandalism',
+    'accident': 'Accident or collision',
+    'hail': 'Hail or storm damage',
+    'road-debris': 'Road debris',
+    'scratched': 'Scratched or pitted glass',
+    'leak': 'Leaking, wind noise or bad seal',
+    'regulator': 'Window will not go up or down',
+    'unknown': 'Not sure, or something else'
+  };
+
   var DIGEST = {
     'step-vin': { name: 'VIN', value: function () {
       if (vehicle && !vehicle.vin) return 'Entered by hand';
@@ -1328,6 +1362,9 @@
       var typed = el.tellText.value.trim();
       if (typed) bits.push(typed.length > 54 ? typed.slice(0, 51) + '\u2026' : typed);
       return bits.join('. ');
+    } },
+    'step-cause': { name: 'Cause', value: function () {
+      return CAUSE_LABEL[answers.cause] || '';
     } },
     'step-photos': { name: 'Photos', value: function () {
       if (photos.length) return photos.length + (photos.length === 1 ? ' image' : ' images');
