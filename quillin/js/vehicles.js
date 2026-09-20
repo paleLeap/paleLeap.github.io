@@ -4,10 +4,10 @@
    this project's axes with their glass split into individually named panels.
    See assets/models/CREDITS.md.
 
-   The procedural generator in model.js stays, and is still the path for pickup,
-   van and heavy: those come from a Quaternius pack that uses a single texture
-   atlas with no glass material, so there is nothing to separate into panels. A
-   generated pickup is better than a real one whose windows cannot be clicked.
+   Five are downloaded (Quaternius, CC0) and three are built here, because
+   nothing free carries a modern pickup, van or tractor unit whose glass can be
+   separated into panes. The generator in model.js stays as the fallback for
+   anything with no model at all, and for a browser that cannot run WebGL.
 
    Both paths hand back the same thing, { group, panels }, wearing the same
    materials and line weights, so the picker does not know or care which built
@@ -28,7 +28,13 @@ const FILE = {
   coupe: 'coupe',
   suv: 'suv',
   hatch: 'sedan2',
-  convertible: 'coupe2'
+  convertible: 'coupe2',
+  /* Built rather than downloaded. Nothing free carries a modern pickup, van or
+     tractor unit with glass that can be separated into panes, so these three
+     are modelled from real dimensions by tools/build/*.py. See the notes. */
+  pickup: 'pickup',
+  van: 'van',
+  heavy: 'heavy'
 };
 
 export function hasModel(archetypeId) {
@@ -43,7 +49,7 @@ export function hasModel(archetypeId) {
    nothing was busting them: a re-converted model stayed cached and the fixes
    never reached anyone. Found it when the live site kept serving a hatch whose
    quarter glass was still 1.23m after that had been fixed and deployed. */
-const MODELS_V = '?v=b218eee0';
+const MODELS_V = '?v=9ae76548';
 
 const loader = new GLTFLoader();
 const cache = Object.create(null);
