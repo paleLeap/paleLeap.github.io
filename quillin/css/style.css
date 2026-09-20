@@ -748,9 +748,14 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 .panel[hidden] { display: none; }
 
-/* The way out of a supporting page. Sits at the foot, on the same axis as the
-   rest of the panel, quiet: it is a way back, not an invitation to leave. */
-.goback { margin: 2.5rem 0 0; }
+/* The way out of a supporting page. Sits at the foot and on the RIGHT, where a
+   hand already is after scrolling and where a "next" or "done" control belongs;
+   the left edge of these pages is the reading axis and this is not something to
+   read. Quiet with it: a way back, not an invitation to leave. */
+.goback {
+  margin: 2.5rem 0 0;
+  text-align: right;
+}
 
 /* ---------- plain lists, used by the panels ---------- */
 
