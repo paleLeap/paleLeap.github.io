@@ -643,19 +643,22 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 .answered[hidden] { display: none; }
 
+/* Stacked, not side by side: the part is the heading and the answer sits under
+   it. Side by side, three of these read as a table the customer has to scan
+   across, and this is a step someone reaches already annoyed that their car is
+   broken. Down the page, each answer sits directly under the thing it is about. */
 .answered li {
-  padding: .5rem 0;
+  padding: .625rem 0;
   border-top: 1px solid var(--line);
   font-size: .875rem;
   font-weight: 300;
   color: var(--muted);
-  display: flex;
-  gap: .75rem;
-  align-items: baseline;
+  display: block;
 }
 
 .answered li b {
-  flex: none;
+  display: block;
+  margin-bottom: .1875rem;
   font-size: .625rem;
   font-weight: 500;
   letter-spacing: .14em;
