@@ -540,7 +540,31 @@
   var BODY_ORDER = ['sedan', 'coupe', 'hatch', 'suv', 'pickup', 'van',
                     'convertible', 'heavy'];
 
+  /* vPIC's vehicle types are too coarse on their own: "truck" covers a pickup,
+     a panel van, a Suburban and an eighteen wheeler alike, so a Ford F-150 was
+     still being asked what shape it is. Nobody needs to be asked that.
+
+     The US market has a small, stable set of nameplates, so matching the model
+     name settles the common cases outright. Kept deliberately narrow: these are
+     names, not guesses at a pattern, and anything not on a list falls through
+     to the question rather than being assumed. A Tahoe must not become a pickup
+     just because vPIC files it under truck. */
+  var BY_NAME = [
+    { body: 'pickup', re: /\b(f-?[1-4]50|super ?duty|silverado|sierra|ram ?[1-5]500|tacoma|tundra|ranger|colorado|canyon|frontier|titan|ridgeline|gladiator|maverick|santa ?cruz|dakota|avalanche|ridgelin)\b/i },
+    { body: 'van',    re: /\b(transit|sprinter|promaster|express|savana|nv ?[0-9]*|metris|caravan|sienna|odyssey|pacifica|carnival|sedona|econoline|e-?[1-4]50|city ?express)\b/i },
+    { body: 'heavy',  re: /\b(f-?[678]50|cascadia|columbia|freightliner|kenworth|peterbilt|international|box ?truck|chassis|motorhome|school ?bus)\b/i },
+    { body: 'suv',    re: /\b(tahoe|suburban|yukon|escalade|expedition|navigator|explorer|traverse|4runner|sequoia|land ?cruiser|wrangler|bronco|durango|armada|pathfinder|telluride|palisade|highlander|pilot|atlas|ascent|grand ?cherokee|cherokee|edge|escape|equinox|rav ?4|cr-?v|rogue|forester|outback|cx-?[0-9]|tucson|santa ?fe|sorento|sportage)\b/i }
+  ];
+
+  function bodyFromName(model) {
+    var hits = BY_NAME.filter(function (r) { return r.re.test(model || ''); });
+    return hits.length === 1 ? hits[0].body : null;   // ambiguous stays a question
+  }
+
   function bodyChoicesFor(v) {
+    var known = bodyFromName(v && v.model);
+    if (known) return [{ value: known, label: BODY_LABEL[known] }];
+
     var types = (v && v.vpicTypes) || [];
     var allowed = Object.create(null);
 
