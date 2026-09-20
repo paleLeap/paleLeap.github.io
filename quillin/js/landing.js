@@ -53,6 +53,10 @@
      is worse than any amount of jank: the page and the address bar disagreed.
      The target is recorded instead, and the run in flight picks up whatever the
      latest one is. */
+  /* Set the moment a link inside the site is followed. Read by "Go back." to
+     decide between history.back() and simply going home. */
+  var enteredFromWithin = false;
+
   function go(id) {
     target = id;
 
@@ -71,15 +75,32 @@
       var landed = target;
       apply(landed);
       window.scrollTo(0, 0);
-      // two frames, so the browser paints the new view at zero before it lifts
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () {
-          stage.classList.remove('is-leaving');
-          busy = false;
-          // changed its mind again while we were fading in
-          if (target !== landed) go(target);
-        });
-      });
+
+      /* `busy` is released here, and it MUST be released.
+     
+         It used to be cleared only inside two nested requestAnimationFrames,
+         which do not run at all in a tab the browser has stopped painting. Put
+         a phone to sleep or switch apps during the fade and the flag stuck true
+         forever: every link afterwards returned at the `if (busy) return` above
+         and the site quietly stopped navigating, with nothing on screen to say
+         why. Found it when a test harness that does not composite reproduced
+         exactly that.
+
+         Two frames is still the good path, because it lets the browser paint
+         the new view at scroll zero before lifting the fade. The timer is the
+         guarantee that it happens regardless. */
+      var released = false;
+      function release() {
+        if (released) return;
+        released = true;
+        stage.classList.remove('is-leaving');
+        busy = false;
+        // changed its mind again while we were fading in
+        if (target !== landed) go(target);
+      }
+
+      requestAnimationFrame(function () { requestAnimationFrame(release); });
+      setTimeout(release, 400);
     }, OUT_MS);
   }
 
@@ -113,7 +134,29 @@
         if (location.hash === '#' + id) return;   // already here
         // Write the hash without firing hashchange, so the transition runs once.
         history.pushState(null, '', '#' + id);
+        enteredFromWithin = true;
         go(id);
+      });
+    });
+
+  /* ---- "Go back." at the foot of every supporting page -------------------
+
+     Literally back, when there is somewhere to go back to: someone who opened
+     Services from the quote page should land on the quote page, and someone who
+     opened it from Contact should land on Contact. history.back() is the only
+     thing that knows which.
+
+     It is not used blindly. A person who followed a link straight to
+     /quillin/#services has nothing behind them in this site, and history.back()
+     would take them off it entirely, which is not what a link at the bottom of
+     a page should ever do. `entered` records whether this session has navigated
+     within the site yet; if it has not, the quote page is the sensible home. */
+  Array.prototype.forEach.call(document.querySelectorAll('.goback__btn'),
+    function (btn) {
+      btn.addEventListener('click', function () {
+        if (history.length > 1 && enteredFromWithin) { history.back(); return; }
+        history.pushState(null, '', '#quote');
+        go('quote');
       });
     });
 

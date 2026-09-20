@@ -437,6 +437,22 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 .backdrop {
   position: fixed;
   inset: 0;
+  /* THE SCROLL STUTTER.
+
+     A mobile browser collapses and re-shows its address bar as you scroll,
+     which changes the small viewport, which resizes anything pinned with
+     `inset: 0`. The backdrop was therefore being resized and re-rastered
+     mid-scroll, and a full screen photograph re-rastering is exactly the lurch
+     that reads as the background trying to catch up with the page.
+
+     100lvh is the LARGE viewport height: the height with the bar collapsed. It
+     does not change when the bar moves, so the layer is laid out once and left
+     alone. Falls back to the old behaviour where lvh is unsupported. */
+  height: 100vh;
+  height: 100lvh;
+  /* Its own compositor layer, so scrolling the page never repaints it. */
+  transform: translateZ(0);
+  backface-visibility: hidden;
   z-index: 0;
   overflow: hidden;
   opacity: 0;
@@ -731,6 +747,10 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 .dock a.is-on { color: var(--ink); background: rgba(255, 255, 255, .06); }
 
 .panel[hidden] { display: none; }
+
+/* The way out of a supporting page. Sits at the foot, on the same axis as the
+   rest of the panel, quiet: it is a way back, not an invitation to leave. */
+.goback { margin: 2.5rem 0 0; }
 
 /* ---------- plain lists, used by the panels ---------- */
 
