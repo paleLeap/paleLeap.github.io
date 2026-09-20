@@ -243,6 +243,47 @@
      layout. Both have to be answered. */
   function toTop() { window.scrollTo(0, 0); }
 
+  /* ---- am I the current build? --------------------------------------------
+
+     This host sends `cache-control: max-age=600` on the document and it is not
+     ours to change, so a phone can serve a ten minute old copy of the page and
+     the site simply looks like it never updated. The <meta http-equiv> that
+     used to sit in the head did nothing at all: browsers ignore that tag for
+     caching, only the real header counts.
+
+     So the page asks. version.txt is written by bump.sh with the same id that
+     is stamped into the markup; fetched with cache: no-store it always comes
+     from the server. If the two disagree, this copy is stale and reloads once
+     against a URL the cache has never seen.
+
+     Guarded by sessionStorage against the obvious way to get this wrong: if
+     the reload somehow served the same stale page again, a naive version would
+     reload forever. One attempt per build id per session, and it fails silent
+     if version.txt cannot be reached, because a missing file must never take
+     the site down. */
+  (function freshness() {
+    var tag = document.querySelector('meta[name="build"]');
+    if (!tag || !window.fetch) return;
+    var mine = tag.getAttribute('content') || '';
+
+    fetch('version.txt', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.text() : null; })
+      .then(function (text) {
+        if (!text) return;
+        var live = text.trim();
+        if (!live || live === mine) return;
+
+        var key = 'quillin:reloaded:' + live;
+        try {
+          if (sessionStorage.getItem(key)) return;
+          sessionStorage.setItem(key, '1');
+        } catch (e) { return; }      // private mode: better stale than looping
+
+        location.replace(location.pathname + '?b=' + live + location.hash);
+      })
+      .catch(function () { /* offline, or no version.txt: leave the page be */ });
+  })();
+
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   requestAnimationFrame(toTop);
   window.addEventListener('load', function () { requestAnimationFrame(toTop); });

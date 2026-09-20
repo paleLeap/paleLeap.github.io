@@ -9,12 +9,20 @@
      no favours. Remove this line when it goes live for real. -->
 <meta name="robots" content="noindex, nofollow">
 <!-- The document itself cannot be cache busted: bump.sh stamps the css and js
-     it points AT, but nothing can stamp this file's own URL. A cached copy
-     therefore keeps asking for the old hashes and every change looks like it
-     never shipped, which has now cost debugging time twice. This asks for a
-     revalidation on each visit. The file is a few KB; everything expensive it
-     loads is hashed and can still be cached hard. -->
-<meta http-equiv="Cache-Control" content="no-cache">
+     it points AT, but nothing can stamp this file's own URL.
+
+     A <meta http-equiv="Cache-Control"> was here and it did nothing. Browsers
+     ignore that tag for caching decisions; only the real HTTP header counts,
+     and the host sends `cache-control: max-age=600`. So a phone can keep
+     serving a ten minute old copy of this page, which is exactly what "it
+     isn't updating" looks like.
+
+     The header is not ours to change on this host, so the page checks for
+     itself: `build` below is stamped by bump.sh, version.txt beside it holds
+     the same value, and js/landing.js fetches that file with cache: no-store
+     on load. If they disagree the page is stale and it reloads itself once
+     against a fresh URL. -->
+<meta name="build" content="a6da4b91f6">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
 <link rel="stylesheet" href="css/style.css?v=286721ff">
 </head>
@@ -502,7 +510,7 @@
 </nav>
 
 <script src="js/backdrop.js?v=fa3fd3aa"></script>
-<script src="js/landing.js?v=39eda870"></script>
+<script src="js/landing.js?v=d8663e74"></script>
 <script src="js/vin.js?v=546382b1"></script>
 <script src="js/glass.js?v=7b7553fa"></script>
 <script src="js/app.js?v=bb9ee73c"></script>
