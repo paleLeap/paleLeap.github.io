@@ -37,6 +37,21 @@ import { LineSegmentsGeometry } from '../vendor/three/LineSegmentsGeometry.js';
 import { LineSegments2 } from '../vendor/three/LineSegments2.js';
 import { LineMaterial } from '../vendor/three/LineMaterial.js';
 
+/* Line colours, kept together so the generated and the modelled vehicles cannot
+   drift apart.
+
+   Very slightly blue rather than white. On a near-black stage a pure white line
+   reads as glare and makes the drawing feel hot; a trace of blue reads as cold,
+   clean glass, which is the business. The shift is small on purpose: this should
+   look like a better white, not like a blue car. */
+const LINE = {
+  frame:  0xd2e0f4,    // the vehicle's own structure
+  detail: 0x8ea4c2,    // wheels, mirrors, lamps
+  pane:   0xe6f0ff     // glass outlines, the brightest thing on screen
+};
+
+const PANE_LINE = LINE.pane;
+
 /* A side profile is authored once and mirrored, so the table below keys on the
    shared base name. These are the panel ids each base produces, driver first.
    Spelled out rather than concatenated: 'door_f' + '_' + 'l' would give
@@ -352,6 +367,65 @@ function extrude(shape, depth, bevel) {
   return toCreasedNormals(geo, CREASE);
 }
 
+/* A pane's outline is the edges that belong to exactly ONE triangle.
+
+   EdgesGeometry with a low threshold was being used instead, on the reasoning
+   that a pane is flat so every triangle boundary is part of its outline. That
+   is true of a pane made of two triangles and false of every other one. A
+   windshield here is sixteen, so it drew every internal diagonal as well, and
+   the result read as a cross-braced cage inside the car. A customer saw it and
+   called it a roll cage, which is exactly what it looked like.
+
+   Vertices are matched on their rounded position rather than their index,
+   because a pane arrives split into unshared corners often enough that index
+   comparison finds no shared edges at all and returns the whole triangulation
+   again. */
+function boundaryOf(geometry, material) {
+  const pos = geometry.attributes.position;
+  const index = geometry.index;
+  const count = index ? index.count : pos.count;
+  const at = i => (index ? index.getX(i) : i);
+
+  // Quantised to a tenth of a millimetre: far finer than any real gap here,
+  // far coarser than the float noise that stops two corners matching.
+  const Q = 1e4;
+  const ids = new Map();
+  const idOf = v => {
+    const k = Math.round(pos.getX(v) * Q) + ',' +
+              Math.round(pos.getY(v) * Q) + ',' +
+              Math.round(pos.getZ(v) * Q);
+    let id = ids.get(k);
+    if (id === undefined) { id = ids.size; ids.set(k, id); }
+    return id;
+  };
+
+  const seen = new Map();
+  for (let i = 0; i < count; i += 3) {
+    const v = [at(i), at(i + 1), at(i + 2)];
+    const a = [idOf(v[0]), idOf(v[1]), idOf(v[2])];
+    for (let e = 0; e < 3; e++) {
+      const p = a[e], q = a[(e + 1) % 3];
+      const key = p < q ? p + '_' + q : q + '_' + p;
+      const hit = seen.get(key);
+      if (hit) hit.n++;
+      else seen.set(key, { n: 1, a: v[e], b: v[(e + 1) % 3] });
+    }
+  }
+
+  const pts = [];
+  seen.forEach(edge => {
+    if (edge.n !== 1) return;              // shared: interior, not outline
+    pts.push(pos.getX(edge.a), pos.getY(edge.a), pos.getZ(edge.a),
+             pos.getX(edge.b), pos.getY(edge.b), pos.getZ(edge.b));
+  });
+
+  const g = new LineSegmentsGeometry();
+  g.setPositions(pts);
+  const seg = new LineSegments2(g, material);
+  seg.computeLineDistances();
+  return seg;
+}
+
 /* Pulls a panel's corners toward its own centre so neighbouring panes never
    touch. The dark greenhouse shows through the gap and reads as the pillar
    between them, which is what gives the selection a clean edge. */
@@ -498,8 +572,8 @@ function glassMesh(geo, panelId) {
   /* Its own outline, brighter and heavier than the body, because the windows
      are the thing being chosen and everything else is context. threshold 1 on a
      flat pane returns exactly its boundary. */
-  const outlineMat = lineMat(0xffffff, 2.6, 1.0);
-  const outline = edgesOf(geo, outlineMat, 1);
+  const outlineMat = lineMat(PANE_LINE, 2.6, 1.0);
+  const outline = boundaryOf(geo, outlineMat);
   outline.raycast = () => {};
   m.userData.outline = outline;
   m.userData.outlineMat = outlineMat;
@@ -560,8 +634,8 @@ export function buildVehicle(archetypeId, cab, wanted) {
   /* One shared material per line weight, so the picker can set `resolution` on
      all of them in one pass when the stage resizes. */
   const lines = {
-    frame:  lineMat(0xdfe7ee, 2.0, 0.92),   // the vehicle's own structure
-    detail: lineMat(0x8b97a3, 1.4, 0.75)    // wheels, mirrors, lamps
+    frame:  lineMat(LINE.frame, 2.0, 0.92),
+    detail: lineMat(LINE.detail, 1.4, 0.75)
   };
   group.userData.lineMaterials = Object.values(lines);
 
@@ -747,4 +821,4 @@ export function archetypeIds() {
 /* Shared with vehicles.js, which builds the same look from a GLB instead of
    from a profile table. Both paths must produce identical materials and line
    weights or the two halves of the fleet would not look like one fleet. */
-export { ARCHETYPES, MAT, lineMat, edgesOf, glassMesh };
+export { ARCHETYPES, MAT, lineMat, edgesOf, boundaryOf, glassMesh, LINE };

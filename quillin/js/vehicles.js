@@ -15,7 +15,7 @@
 
 import * as THREE from '../vendor/three/three.module.js';
 import { GLTFLoader } from '../vendor/three/GLTFLoader.js';
-import { MAT, lineMat, edgesOf } from './model.js?v=0b4ff2a8';
+import { MAT, lineMat, edgesOf, boundaryOf, LINE } from './model.js?v=c1c2f461';
 
 /* Which archetypes have a real model, and which file.
 
@@ -72,8 +72,8 @@ export function loadVehicle(archetypeId, cab, wanted) {
     const group = new THREE.Group();
     const panels = {};
     const lines = {
-      frame: lineMat(0xdfe7ee, 2.0, 0.92),
-      detail: lineMat(0x8b97a3, 1.4, 0.75)
+      frame: lineMat(LINE.frame, 2.0, 0.92),
+      detail: lineMat(LINE.detail, 1.4, 0.75)
     };
     group.userData.lineMaterials = [lines.frame, lines.detail];
 
@@ -97,10 +97,11 @@ export function loadVehicle(archetypeId, cab, wanted) {
         mesh.name = pid;
         mesh.userData.panel = pid;
         mesh.userData.glassMat = mat;
-        const outlineMat = lineMat(0xffffff, 2.6, 1.0);
-        /* threshold 1, the same as the generated panes: on a pane this shallow
-           every triangle boundary IS part of its outline. */
-        const outline = edgesOf(geo, outlineMat, 1);
+        const outlineMat = lineMat(LINE.pane, 2.6, 1.0);
+        /* The boundary ring, not EdgesGeometry. A windshield here is sixteen
+           triangles, and drawing every triangle boundary cross-hatched the
+           glass into something a customer reasonably called a roll cage. */
+        const outline = boundaryOf(geo, outlineMat);
         outline.raycast = () => {};
         mesh.userData.outline = outline;
         mesh.userData.outlineMat = outlineMat;

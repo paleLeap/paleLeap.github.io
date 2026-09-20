@@ -242,19 +242,31 @@
 
   /* Fallback path for customers without a VIN in reach.
      vehicletype filters out the motorcycles and trailers vPIC otherwise returns. */
+  /* Returns [{ name, types }]. The TYPES are the point, and they were being
+     thrown away: this already asks vPIC three separate questions, one per
+     vehicle type, and then merged the answers into a flat list of names. Which
+     list a model came back in is vPIC telling us what kind of thing it is. An
+     Elantra comes back under 'car' and never under 'truck', so there is no
+     reason to ask a customer whether their Elantra is a pickup. */
   function modelsFor(make, year) {
     var types = ['car', 'truck', 'mpv'];
     return Promise.all(types.map(function (t) {
       return json(API + '/GetModelsForMakeYear/make/' + encodeURIComponent(make) +
                   '/modelyear/' + encodeURIComponent(year) +
                   '/vehicletype/' + t + '?format=json')
-        .catch(function () { return { Results: [] }; });
+        .then(function (d) { return { type: t, rows: d.Results || [] }; })
+        .catch(function () { return { type: t, rows: [] }; });
     })).then(function (sets) {
       var seen = Object.create(null);
       sets.forEach(function (s) {
-        (s.Results || []).forEach(function (m) { seen[m.Model_Name] = true; });
+        s.rows.forEach(function (m) {
+          var n = m.Model_Name;
+          if (!n) return;
+          if (!seen[n]) seen[n] = { name: n, types: [] };
+          if (seen[n].types.indexOf(s.type) === -1) seen[n].types.push(s.type);
+        });
       });
-      return Object.keys(seen).sort();
+      return Object.keys(seen).sort().map(function (n) { return seen[n]; });
     });
   }
 
@@ -264,7 +276,20 @@
      "maybe", because the sensor may well be nowhere near the glass. "Standard"
      means the vehicle was built with it; "Optional" means this model could have
      been, which is a question for the customer and not a fact about their car. */
+  /* No windshield camera existed on anything a customer is likely to bring in
+     before about 2010: lane departure arrived on a handful of luxury cars in
+     2008 and spread from there. Asking the owner of a 1994 Camaro whether there
+     is a camera behind the mirror makes the site look like it is guessing,
+     because it is. */
+  var ADAS_FROM = 2010;
+
+  function tooOldForAdas(v) {
+    var y = parseInt((v && v.year) || '', 10);
+    return !isNaN(y) && y < ADAS_FROM;
+  }
+
   function adasState(v) {
+    if (tooOldForAdas(v)) return 'no';
     var a = (v && v.adas) || {};
     var camera = a.camera || [];
     var mixed = a.mixed || [];
@@ -298,6 +323,7 @@
     modelsFor: modelsFor,
     adasState: adasState,
     adasDetail: adasDetail,
+    tooOldForAdas: tooOldForAdas,
     yearFromVin: yearFromVin
   };
 

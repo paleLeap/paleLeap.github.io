@@ -146,7 +146,8 @@
     { value: 'week',  label: 'Sometime this week.' },
     { value: 'price', label: 'Just getting a price for now.' }
   ];
-  var lastLookup = '';     // guards against out-of-order responses
+  var lastLookup = '';
+  var modelTypes = Object.create(null);     // guards against out-of-order responses
 
   /* ---------- small helpers ---------- */
 
@@ -419,7 +420,11 @@
       if (lastLookup !== token) return;
       if (!models.length) { clearModels('No models found'); return; }
       clearModels('Model');
-      models.forEach(function (m) { el.mModel.add(new Option(m, m)); });
+      modelTypes = Object.create(null);
+      models.forEach(function (m) {
+        modelTypes[m.name] = m.types;
+        el.mModel.add(new Option(m.name, m.name));
+      });
       el.mModel.disabled = false;
     }).catch(function () {
       if (lastLookup === token) clearModels('Couldn’t load models');
@@ -435,6 +440,9 @@
       make: el.mMake.value,
       model: el.mModel.value,
       trim: '', bodyClass: '', doors: '', cab: '', vin: '',
+      /* What vPIC filed this model under: car, truck, mpv, or several. Not a
+         body style, but enough to stop us asking a stupid question about one. */
+      vpicTypes: modelTypes[el.mModel.value] || [],
       adas: { camera: [], mixed: [], elsewhere: [] },
       label: el.mYear.value + ' ' + el.mMake.value + ' ' + el.mModel.value,
       usable: true
@@ -485,6 +493,58 @@
     renderQuestion(v, noVin, questions);
   }
 
+  /* The body styles a vehicle could plausibly be, given what vPIC filed the
+     model under. Asking whether a Hyundai Elantra is a rig makes the site look
+     like it knows nothing about cars, and vPIC already answered that: an
+     Elantra comes back under 'car' and never under 'truck'.
+
+     A model can land in more than one bucket, a Ford Transit is both truck and
+     mpv, so the lists are unioned rather than picked between. With nothing to
+     go on the full list stands, which is the old behaviour. */
+  var BODY_BY_TYPE = {
+    car:   ['sedan', 'coupe', 'hatch', 'convertible'],
+    mpv:   ['suv', 'van', 'hatch'],
+    truck: ['pickup', 'van', 'suv', 'heavy']
+  };
+
+  var BODY_LABEL = {
+    sedan:       'Sedan, four doors',
+    coupe:       'Coupe, two doors',
+    hatch:       'Hatchback or wagon',
+    suv:         'SUV or crossover',
+    pickup:      'Pickup truck',
+    van:         'Van or minivan',
+    convertible: 'Convertible',
+    heavy:       'Rig, box truck or motorhome'
+  };
+
+  var BODY_ORDER = ['sedan', 'coupe', 'hatch', 'suv', 'pickup', 'van',
+                    'convertible', 'heavy'];
+
+  function bodyChoicesFor(v) {
+    var types = (v && v.vpicTypes) || [];
+    var allowed = Object.create(null);
+
+    types.forEach(function (t) {
+      (BODY_BY_TYPE[t] || []).forEach(function (b) { allowed[b] = true; });
+    });
+
+    /* Passenger car wins outright when it is one of the buckets. vPIC's older
+       data is loose enough that a 1994 Camaro comes back under 'mpv' as well as
+       'car', and unioning them offered SUV and van as answers for a Camaro.
+       Nothing that vPIC calls a passenger car is a van. */
+    if (types.indexOf('car') !== -1) {
+      allowed = Object.create(null);
+      BODY_BY_TYPE.car.forEach(function (b) { allowed[b] = true; });
+    }
+
+    var ids = Object.keys(allowed);
+    if (!ids.length) ids = BODY_ORDER.slice();      // nothing known, ask it all
+
+    return BODY_ORDER.filter(function (b) { return ids.indexOf(b) !== -1; })
+      .map(function (b) { return { value: b, label: BODY_LABEL[b] }; });
+  }
+
   /* What still needs asking, in the order it should be asked. One list, read by
      both the step that shows a question and the handler that answers one, so
      the two can never disagree about whether anything is left. */
@@ -498,24 +558,26 @@
        unknown, so every manually entered pickup and van was drawn as a saloon
        and the customer was asked to pick panes it does not have. */
     if (!answers.bodyStyle && Glass.resolve(v).needsBody) {
-      questions.push({
-        key: 'bodyStyle',
-        hint: 'What shape is your ' +
-              [v.year, v.make, v.model].filter(Boolean).join(' ') + '?',
-        options: [
-          { value: 'sedan',       label: 'Sedan, four doors' },
-          { value: 'coupe',       label: 'Coupe, two doors' },
-          { value: 'hatch',       label: 'Hatchback or wagon' },
-          { value: 'suv',         label: 'SUV or crossover' },
-          { value: 'pickup',      label: 'Pickup truck' },
-          { value: 'van',         label: 'Van or minivan' },
-          { value: 'convertible', label: 'Convertible' },
-          { value: 'heavy',       label: 'Rig, box truck or motorhome' }
-        ]
-      });
+      var choices = bodyChoicesFor(v);
+      if (choices.length === 1) {
+        /* Only one thing it can be, so do not ask. vPIC filed this model under
+           exactly one vehicle type and that type maps to one body style. */
+        v.bodyStyle = choices[0].value;
+      } else {
+        questions.push({
+          key: 'bodyStyle',
+          hint: 'What shape is your ' +
+                [v.year, v.make, v.model].filter(Boolean).join(' ') + '?',
+          options: choices
+        });
+      }
     }
 
-    if (!answers.adas && (state === 'maybe' || noVin)) {
+    /* The year gate applies to the no-VIN path too. Without it the `noVin` flag
+       forced the question on everything, so the owner of a 1994 Camaro was
+       asked whether there is a camera behind the mirror. There is not; there
+       was no such thing. */
+    if (!answers.adas && !VIN.tooOldForAdas(v) && (state === 'maybe' || noVin)) {
       questions.push({
         key: 'adas',
         hint: 'Some ' + [v.year, v.make, v.model].filter(Boolean).join(' ') +
@@ -613,7 +675,7 @@
      than imported per open so the five model files are only ever fetched once
      per visit however many times an earlier answer is edited. */
   var Vehicles = null;
-  import('./vehicles.js?v=aff0c90c').then(function (mod) { Vehicles = mod; },
+  import('./vehicles.js?v=5714e487').then(function (mod) { Vehicles = mod; },
     function (err) { console.error('Vehicle models unavailable:', err); });
 
   function teardownPicker() {
@@ -636,7 +698,7 @@
     // './' is required; a bare 'picker.js' would be read as a package name.
     // Two-argument then(), not then().catch(): a throw inside the success
     // handler must not be reported as a module load failure.
-    import('./picker.js?v=cdf35194').then(function (mod) {
+    import('./picker.js?v=16363b40').then(function (mod) {
       /* The real model is fetched HERE rather than inside the picker, so the
          picker itself stays synchronous. A body style we have no model for, or
          a fetch that fails, resolves to null and the picker falls back to the
