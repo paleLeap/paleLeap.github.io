@@ -38,13 +38,20 @@ export function hasModel(archetypeId) {
 /* One loader, and one cache keyed by file. The picker is rebuilt every time the
    customer edits an earlier answer, and refetching 42 KB to redraw the same
    saloon is waste the customer pays for in latency. */
+/* Stamped by bump.sh from the contents of assets/models. The GLBs are fetched
+   by a path built at runtime, so nothing in index.html points at them and
+   nothing was busting them: a re-converted model stayed cached and the fixes
+   never reached anyone. Found it when the live site kept serving a hatch whose
+   quarter glass was still 1.23m after that had been fixed and deployed. */
+const MODELS_V = '?v=b218eee0';
+
 const loader = new GLTFLoader();
 const cache = Object.create(null);
 
 function load(name) {
   if (!cache[name]) {
     cache[name] = new Promise((resolve, reject) => {
-      loader.load('assets/models/' + name + '.glb',
+      loader.load('assets/models/' + name + '.glb' + MODELS_V,
         gltf => resolve(gltf.scene), undefined, reject);
     }).catch(err => { delete cache[name]; throw err; });
   }

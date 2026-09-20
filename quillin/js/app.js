@@ -719,7 +719,7 @@
      than imported per open so the five model files are only ever fetched once
      per visit however many times an earlier answer is edited. */
   var Vehicles = null;
-  import('./vehicles.js?v=8506a6fa').then(function (mod) { Vehicles = mod; },
+  import('./vehicles.js?v=3119d0d4').then(function (mod) { Vehicles = mod; },
     function (err) { console.error('Vehicle models unavailable:', err); });
 
   function teardownPicker() {
