@@ -34,8 +34,6 @@
     chipLabel: $('chip-label'),
     chipLegend: $('chip-legend'),
     chipDone: $('chip-done'),
-    thatIt:    $('thatit'),
-    thatItWrap: $('thatit-wrap'),
     picker:    $('picker'),
     pickerStage: $('picker-stage'),
     pickerNote:  $('picker-note'),
@@ -271,8 +269,6 @@
       hide(el.photos);
       noPhotos = false;
       clearPhotos();
-      el.thatItWrap.hidden = true;
-      el.thatIt.disabled = true;
     }
     if (step <= 5) {
       hide(el.when);
@@ -888,10 +884,8 @@
       input.value = opt.value;
       input.addEventListener('change', function () {
         damageKind[next] = opt.value;
-        resetBelow(6);
         syncChipQuestion();      // straight on to the next piece of glass
-        syncThatIt();
-        restack();
+        advance();
       });
 
       var span = document.createElement('span');
@@ -937,7 +931,7 @@
   el.noPhotos.addEventListener('click', function () {
     noPhotos = true;
     clearPhotos();
-    afterDamageChange();
+    advance();
     say2(damageGiven()
       ? 'No problem! Let\'s continue...'
       : 'No problem. Tell us which glass is damaged above and we can carry on.');
@@ -1007,35 +1001,64 @@
      It also does not reset the timing step. Choosing a second broken window
      does not un-answer "when do you need this fixed"; only the review below is
      genuinely stale. */
-  function afterDamageChange() {
-    if (!damageGiven()) { resetBelow(5); syncThatIt(); restack(); return; }
-    resetBelow(6);
-    syncThatIt();
-    restack();
+  function afterDamageChange() { advance(); }
+
+  /* ---------- the flow ----------
+
+     What is on screen is DERIVED from what has been answered, rather than
+     pushed along by whichever button was pressed last.
+
+     This is the fix for going back. Editing an earlier answer used to call
+     resetBelow, which does not just hide the later steps, it CLEARS them: the
+     photographs, the timing, all of it. So a customer who went back to add a
+     second broken window lost every answer after it and, because nothing
+     re-revealed those steps, had no way forward either. Their progress was
+     gone and the page just sat there.
+
+     Now nothing is cleared. advance() only decides what is SHOWN, so every
+     answer below the edit survives it, and the moment the edit is complete the
+     rest of the flow reappears exactly as it was. */
+
+  function damageDone() {
+    if (!damageGiven()) return false;
+    // Every pane picked has to have been asked chip or crack.
+    if (!panels.every(function (id) { return !!damageKind[id]; })) return false;
+    return !!answers.cause;
   }
 
-  /* Offered once there is something to move on from, and retired once they
-     have moved on. */
-  function syncThatIt() {
-    // Every chosen piece of glass has to have been asked about, not just the
-    // windshield: the answers are what separate a repair from a replacement.
-    var allAsked = panels.every(function (id) { return !!damageKind[id]; });
-    var ready = damageGiven() && allAsked;
-    el.thatIt.disabled = !ready;
-    el.thatItWrap.hidden = !ready || !el.when.hidden;
+  function photosDone() { return photos.length > 0 || noPhotos; }
+
+  function setShown(node, on) {
+    if (on) { if (node.hidden) reveal(node); }
+    else if (!node.hidden) hide(node);
+  }
+
+  function advance() {
+    var described = damageDone();
+    setShown(el.cause, damageGiven());
+    setShown(el.photos, described);
+
+    var withPhotos = described && photosDone();
+    if (withPhotos) askWhen(); else setShown(el.when, false);
+
+    var timed = withPhotos && !!urgency;
+    el.submit.disabled = !timed;
+
+    /* The review closes only when something it depends on is missing. Left
+       open otherwise, and rebuilt, so a change made after reaching it shows up
+       there instead of quietly going stale. */
+    if (!timed) hide(el.review);
+    else if (!el.review.hidden) { buildSummary(); buildChannels(); }
+
+    restack();
   }
 
   el.causeSel.addEventListener('change', function () {
     answers.cause = el.causeSel.value || null;
-    syncThatIt();
-    restack();
+    advance();
   });
 
-  el.thatIt.addEventListener('click', function () {
-    askWhen();
-    syncThatIt();
-    restack();
-  });
+
 
   function say2(text, kind) {
     if (!text) { hide(el.photoNote); return; }
@@ -1119,9 +1142,7 @@
         input.value = opt.value;
         input.addEventListener('change', function () {
           urgency = opt;
-          resetBelow(6);
-          el.submit.disabled = false;
-          restack();
+          advance();
         });
 
         var span = document.createElement('span');
@@ -1310,7 +1331,6 @@
   }
 
   el.submit.addEventListener('click', function () {
-    resetBelow(6);
     buildSummary();
     buildChannels();
     reveal(el.review);
