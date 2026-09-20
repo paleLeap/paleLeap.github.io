@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="6af5f0b0c4">
+<meta name="build" content="7e4ad26b11">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=29b4fbd9">
+<link rel="stylesheet" href="css/style.css?v=e84ac85c">
 </head>
 <body>
 
@@ -35,7 +35,7 @@
        four sections; the logo itself is also the way back to the quote. -->
   <div class="brand">
     <a class="brand__logo" href="#quote" aria-label="Quillin Auto Glass, get a quote">
-      <img src="assets/img/logo.png" alt="" width="300" height="243">
+      <img src="assets/img/logo.png?v=9612b179" alt="" width="300" height="243">
     </a>
 
     <nav class="brandnav" aria-label="Sections">
@@ -435,29 +435,33 @@
     <h1 class="panel__title">About us</h1>
     <p class="panel__sub">Black owned and family operated.</p>
 
-    <!-- PLACEHOLDER COPY: this is the client's own wording from their live
-         site, lightly punctuated, sitting here so the page has something real
-         in it while they decide what they actually want to say. -->
+    <!-- Their own words, lightly punctuated. The photographs are their own
+         work, placed so the page has a rhythm rather than a gallery bolted on
+         the end: a lead, then a pair, then a row of three, each set following
+         the paragraph it belongs to. -->
     <div class="prose">
-      <figure class="shot shot--lead">
-        <img src="assets/img/about/aria-jacob.jpg" alt="Aria and Jacob Quillin"
-             width="675" height="900" loading="lazy" decoding="async">
-      </figure>
-
       <p>At Quillin Auto Glass, we believe in more than just fixing glass. We
         believe in providing service with a smile. Whether you are in need of a
         windshield replacement or a quick chip repair, our team is here to make
         the process easy, fast and friendly.</p>
 
+      <figure class="album album--lead">
+        <img src="assets/img/about/lead.jpg?v=fd22e702" width="900" height="600"
+             loading="lazy" decoding="async"
+             alt="Aria Quillin fitting a windshield to a Land Rover Defender in the shop">
+      </figure>
+
       <p>As a family owned business, we treat each customer like they are one of
         our own. Your satisfaction is our top priority, and we are dedicated to
         ensuring your experience is smooth, stress free and enjoyable.</p>
 
-      <figure class="shot shot--wide">
-        <img src="assets/img/about/chip.jpg" alt="A rock chip in a windshield,
-             sized against a coin" width="675" height="900" loading="lazy" decoding="async">
-        <img src="assets/img/about/door-glass.jpg" alt="A door glass frame being
-             lifted out of a vehicle" width="675" height="900" loading="lazy" decoding="async">
+      <figure class="album album--pair">
+        <img src="assets/img/about/transit.jpg?v=68cbce52" width="560" height="420"
+             loading="lazy" decoding="async"
+             alt="A Quillin technician walking back to a Ford Transit van on a job">
+        <img src="assets/img/about/tesla.jpg?v=7bc63d9c" width="560" height="420"
+             loading="lazy" decoding="async"
+             alt="A windshield lifted out of a car and set down on the driveway">
       </figure>
 
       <p>With over ten years of experience in the industry and a childlike
@@ -467,6 +471,18 @@
         their core values and beliefs and poured them into this company. The
         Quillins aim to serve the community that they grew up in with integrity,
         honesty and transparency.</p>
+
+      <figure class="album album--trio">
+        <img src="assets/img/about/chip.jpg?v=08150c6d" width="420" height="420"
+             loading="lazy" decoding="async"
+             alt="A rock chip in a windshield, sized against a quarter">
+        <img src="assets/img/about/fleet.jpg?v=86807d2a" width="420" height="420"
+             loading="lazy" decoding="async"
+             alt="A pickup and a food truck waiting outside the shop">
+        <img src="assets/img/about/sunroof.jpg?v=714fe519" width="420" height="420"
+             loading="lazy" decoding="async"
+             alt="A sunroof fitted into the roof of a car">
+      </figure>
 
       <p class="prose__sign">Let&rsquo;s get you back on the road.</p>
     </div>
@@ -563,7 +579,7 @@
   <a href="#about" class="nav--apart">about</a>
 </nav>
 
-<script src="js/backdrop.js?v=fa3fd3aa"></script>
+<script src="js/backdrop.js?v=797049a9"></script>
 <script src="js/landing.js?v=adea0fe6"></script>
 <script src="js/vin.js?v=546382b1"></script>
 <script src="js/glass.js?v=7b7553fa"></script>

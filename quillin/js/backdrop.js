@@ -36,6 +36,12 @@
   var CYCLE_MS = 5000;
   var FADE_MS = 1600;
 
+  /* Stamped by bump.sh from the contents of assets/img/city, for the same
+     reason the vehicle models carry one: these are fetched by a path built
+     here, so nothing in index.html points at them and nothing would bust them
+     if one were ever replaced. */
+  var SHOTS_V = '?v=83368062';
+
   var host = document.querySelector('.backdrop');
   if (!host) return;
 
@@ -59,7 +65,7 @@
   }
 
   function show(src, layer) {
-    layer.style.backgroundImage = 'url("' + src + '")';
+    layer.style.backgroundImage = 'url("' + src + SHOTS_V + '")';
   }
 
   /* Fetched one ahead rather than all at once. Ten photographs is 1.3 MB, and
@@ -68,7 +74,7 @@
   function warm(src) {
     var img = new Image();
     img.decoding = 'async';
-    img.src = src;
+    img.src = src + SHOTS_V;
   }
 
   function step() {
@@ -111,7 +117,7 @@
       timer = setInterval(step, CYCLE_MS);
     };
     img.onerror = function () { /* no backdrop is better than a broken one */ };
-    img.src = first;
+    img.src = first + SHOTS_V;
   }
 
   start();
