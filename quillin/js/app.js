@@ -184,18 +184,34 @@
   var MOTION_OK = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var EASE = 'cubic-bezier(.22,.61,.36,1)';
 
+  /* THE MARGIN HAS TO COME WITH IT.
+
+     These animated height alone, and a disclosure with a top margin therefore
+     collapsed to nothing while still holding its margin, sat there for a frame
+     occupying 20px of empty space, and then had that space taken away the
+     instant `hidden` was applied. That last step is not animated and cannot be:
+     it is a jump, and it is what the stutter at the end of every close was.
+
+     box-sizing is border-box throughout, so scrollHeight already accounts for
+     padding and only the margins need collecting separately. */
+  function slideBox(node) {
+    var cs = getComputedStyle(node);
+    return { h: node.scrollHeight, mt: cs.marginTop, mb: cs.marginBottom };
+  }
+
   function slideOpen(node) {
     if (!node || !node.hidden) return;
     node.hidden = false;
     if (!MOTION_OK) return;
 
     if (node._anim) { node._anim.cancel(); node._anim = null; }
-    var h = node.scrollHeight;
-    if (!h) return;
+    var box = slideBox(node);
+    if (!box.h) return;
 
     node.style.overflow = 'hidden';
     node._anim = node.animate(
-      [{ height: '0px', opacity: 0 }, { height: h + 'px', opacity: 1 }],
+      [{ height: '0px', marginTop: '0px', marginBottom: '0px', opacity: 0 },
+       { height: box.h + 'px', marginTop: box.mt, marginBottom: box.mb, opacity: 1 }],
       { duration: 340, easing: EASE }
     );
     node._anim.onfinish = function () {
@@ -209,11 +225,12 @@
     if (!MOTION_OK) { node.hidden = true; return; }
 
     if (node._anim) { node._anim.cancel(); node._anim = null; }
-    var h = node.scrollHeight;
+    var box = slideBox(node);
 
     node.style.overflow = 'hidden';
     node._anim = node.animate(
-      [{ height: h + 'px', opacity: 1 }, { height: '0px', opacity: 0 }],
+      [{ height: box.h + 'px', marginTop: box.mt, marginBottom: box.mb, opacity: 1 },
+       { height: '0px', marginTop: '0px', marginBottom: '0px', opacity: 0 }],
       { duration: 240, easing: EASE }
     );
     node._anim.onfinish = function () {
