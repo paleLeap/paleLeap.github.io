@@ -15,6 +15,7 @@
     note:      $('vin-note'),
     noVin:     $('no-vin'),
     manual:    $('manual'),
+    manualNote: $('manual-note'),
     mYear:     $('m-year'),
     mMake:     $('m-make'),
     mModel:    $('m-model'),
@@ -386,7 +387,10 @@
     /* Said out loud rather than just opening three dropdowns. Someone who has
        just told us they cannot find their VIN has already had one small
        failure; the next thing they see should not be another form. */
-    if (announce) say('No problem! Let\u2019s continue like this\u2026');
+    if (announce) {
+      el.manualNote.textContent = 'No problem! Let\u2019s continue like this\u2026';
+      show(el.manualNote);
+    }
     /* Populated BEFORE opening. scrollHeight is measured as the animation
        starts, so filling the dropdowns afterwards would animate to the height
        of an empty box and then jump to the real one. */
@@ -399,6 +403,7 @@
   function shutManual() {
     if (el.manual.hidden) return;
     slideShut(el.manual);
+    hide(el.manualNote);
     el.noVin.setAttribute('aria-expanded', 'false');
 
     /* Unlike the help panel, this one holds an ANSWER: which vehicle this is.
@@ -686,7 +691,7 @@
      than imported per open so the five model files are only ever fetched once
      per visit however many times an earlier answer is edited. */
   var Vehicles = null;
-  import('./vehicles.js?v=9478cb4a').then(function (mod) { Vehicles = mod; },
+  import('./vehicles.js?v=b1e1486f').then(function (mod) { Vehicles = mod; },
     function (err) { console.error('Vehicle models unavailable:', err); });
 
   function teardownPicker() {
@@ -1605,6 +1610,7 @@
        on the page animated, which read as the page breaking rather than
        clearing. slideShut returns immediately if it is already closed. */
     slideShut(el.manual);
+    hide(el.manualNote);
     el.noVin.setAttribute('aria-expanded', 'false');
     say('');
     resetBelow(2);            // cascades through damage, photos, timing, review

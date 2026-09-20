@@ -322,9 +322,14 @@ body.on-quote #step-vin .helppanel { order: 5; width: 100%; }
 
 body.on-quote #step-vin > p { order: 6; }
 
-body.on-quote #step-vin .manual { order: 7; width: 100%; }
+/* Directly under "I don't have my VIN", because it is that button's answer.
+   It used to go to the shared note at order 3, which put "No problem! Let's
+   continue like this..." ABOVE the thing it was replying to. */
+body.on-quote #step-vin #manual-note { order: 7; }
 
-body.on-quote #step-vin .under { order: 8; }
+body.on-quote #step-vin .manual { order: 8; width: 100%; }
+
+body.on-quote #step-vin .under { order: 9; }
 
 /* Last, explicitly. The reset is appended to whichever step is live, and on
    this step that is a flex column where everything carries an order. An
@@ -335,7 +340,7 @@ body.on-quote #step-vin .under { order: 8; }
    the reset was the one control on the site that moved when you reached it by
    this route. It belongs bottom left wherever it appears. */
 body.on-quote #step-vin .reset {
-  order: 9;
+  order: 10;
   align-self: flex-start;
   text-align: left;
 }

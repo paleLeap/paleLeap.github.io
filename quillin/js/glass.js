@@ -163,7 +163,16 @@
     // No cab string. Door count is the next best signal.
     if (doors >= 4) return 'crew';
     if (doors === 2) return 'regular';
-    return '';
+
+    /* Nothing at all, which is every pickup entered by hand: there is no cab
+       string and no door count either. Assume a crew cab.
+
+       Not a coin toss. Crew cabs are most of what is sold, and the two
+       mistakes are not equal: offering rear door glass to someone whose truck
+       has none costs them a glance, while withholding it from someone whose
+       rear window is the broken one leaves them unable to say so at all. The
+       caller marks this as not confident, so the flow still knows it guessed. */
+    return 'crew';
   }
 
   /* Returns { id, label, panels, cab, confident, why }.
@@ -229,13 +238,11 @@
     var cab = '';
 
     if (id === 'pickup') {
+      var toldCab = !!(v.cab || doors);
       cab = cabKind(v.cab, doors);
-      if (cab === 'crew') {
-        panels = panels.concat(P.rearDoors);
-      } else if (!cab) {
-        confident = false;
-      }
+      if (cab === 'crew') panels = panels.concat(P.rearDoors);
       if (cab === 'extended') panels = panels.concat(P.quarters);
+      if (!toldCab) confident = false;   // crew was assumed, not established
     }
 
     if (id === 'heavy') cab = cabKind(v.cab, doors);
