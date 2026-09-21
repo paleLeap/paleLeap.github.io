@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="d79328afa3">
+<meta name="build" content="b10350aedd">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=02ace56a">
+<link rel="stylesheet" href="css/style.css?v=2ba40f5e">
 </head>
 <body>
 
@@ -183,7 +183,7 @@
       <legend class="visually-hidden">Vehicle specifics</legend>
     </fieldset>
     <nav class="pagenav" aria-label="Step">
-      <button type="button" class="pageback" data-back>Back</button>
+      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
     </nav>
   </section>
 
@@ -196,7 +196,7 @@
       <button type="button" class="btn" id="confirm-yes">Yes, that&rsquo;s my vehicle</button>
     </p>
     <nav class="pagenav" aria-label="Step">
-      <button type="button" class="pageback" data-back>Back</button>
+      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
       <button type="button" class="plainlink" id="confirm-no">No, start over</button>
     </nav>
   </section>
@@ -224,8 +224,13 @@
 
     <div class="tellus" id="tellus" hidden>
       <label class="visually-hidden" for="tellus-text">Describe the damage</label>
-      <textarea id="tellus-text" rows="3"
-                placeholder="e.g. rock chip in the windshield on the passenger side, and the back door window on the driver's side is shattered"></textarea>
+      <!-- rows=2 is only the starting height. app.js grows it to fit what has
+           been typed, and the CSS turns off the drag handle: a box the customer
+           is invited to resize is a box they can make the wrong size, and it
+           was the one control on the site that still looked like a browser
+           default rather than part of this page. -->
+      <textarea id="tellus-text" rows="2"
+                placeholder="e.g. rock chip in the windshield, passenger side"></textarea>
       <p class="note" id="tellus-note" role="status" aria-live="polite" hidden></p>
     </div>
 
@@ -233,7 +238,7 @@
          pointing, not an act of finishing, and a second window may still be
          broken; the customer says when they are done. -->
     <nav class="pagenav" aria-label="Step">
-      <button type="button" class="pageback" data-back>Back</button>
+      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
       <button type="button" class="btn" data-next disabled>Continue</button>
     </nav>
   </section>
@@ -266,7 +271,7 @@
     </div>
 
     <nav class="pagenav" aria-label="Step">
-      <button type="button" class="pageback" data-back>Back</button>
+      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
       <button type="button" class="btn" data-next disabled>Continue</button>
     </nav>
   </section>
@@ -296,7 +301,7 @@
          forward; pressing it with nothing attached IS the answer "no", and the
          request still records that it was declined rather than skipped. -->
     <nav class="pagenav" aria-label="Step">
-      <button type="button" class="pageback" data-back>Back</button>
+      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
       <button type="button" class="btn" data-next>Continue</button>
     </nav>
   </section>
@@ -313,7 +318,7 @@
          settled two pages ago and this page has a single answer, so choosing
          one is finishing. -->
     <nav class="pagenav" aria-label="Step">
-      <button type="button" class="pageback" data-back>Back</button>
+      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
     </nav>
   </section>
 
@@ -332,7 +337,7 @@
       <button type="button" class="btn" id="review-yes">Yes, that&rsquo;s right</button>
     </p>
     <nav class="pagenav" aria-label="Step">
-      <button type="button" class="pageback" data-back>Back</button>
+      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
     </nav>
   </section>
 
@@ -356,7 +361,7 @@
     </p>
     <p class="note" id="send-note" role="status" aria-live="polite" hidden></p>
     <nav class="pagenav" aria-label="Step">
-      <button type="button" class="pageback" data-back>Back</button>
+      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
     </nav>
   </section>
 
@@ -693,6 +698,6 @@
 <script src="js/landing.js?v=adea0fe6"></script>
 <script src="js/vin.js?v=546382b1"></script>
 <script src="js/glass.js?v=7b7553fa"></script>
-<script src="js/app.js?v=c5dc5cb8"></script>
+<script src="js/app.js?v=a660b5a8"></script>
 </body>
 </html>

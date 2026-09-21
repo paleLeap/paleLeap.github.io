@@ -956,7 +956,24 @@ body.on-quote .dock { bottom: calc(var(--helpdock-h) + env(safe-area-inset-botto
   transition: color .2s var(--ease);
 }
 
-.pageback::before { content: "\2190"; font-size: 1.25em; line-height: 1; }
+/* A drawn arrow, not the character. As "\2190" it sat noticeably high against
+   the word: a glyph is positioned by the font's own metrics inside a line box
+   taller than itself, and no amount of line-height or vertical-align fixes that
+   reliably, it only moves the error around. An SVG has no baseline and no
+   metrics. Flexbox centres its box against the text box and the shape is
+   centred in its own viewBox, so the two line up by construction at any size.
+
+   currentColor, so it keeps following the hover and press colours for free. */
+.pageback__arrow {
+  width: 1.125em;
+  height: 1.125em;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
 .pageback:hover { color: var(--ink); }
 
@@ -1381,6 +1398,65 @@ a, button, label, select, input, textarea, summary {
 
 .picker--nogl .picker__stage { display: none; }
 
+/* ---------- "Or just tell us!" ----------
+
+   This was the only control on the site with no styling at all, so it rendered
+   as the browser's default: a white box, on a near-black page, with a drag
+   handle in the corner. Three things wrong with that, and the handle was the
+   worst. It invites the customer to decide how big their answer should look,
+   which is not a decision worth handing anybody, and dragging it leaves a box
+   the wrong size for the page for the rest of the visit.
+
+   So it sizes itself instead. resize is off, overflow is hidden so no scrollbar
+   ever appears inside it, and app.js sets its height from its own content on
+   every keystroke: it starts at two lines and grows downwards as lines are
+   added, which is what the box was pretending to offer with the handle. */
+.tellus { margin-top: 1.5rem; }
+
+.tellus textarea {
+  display: block;
+  width: 100%;
+  font: inherit;
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.6;
+  /* Centred, like the VIN field and the contact fields. The three places on
+     this site where somebody types free text now look like the same control. */
+  text-align: center;
+  color: var(--ink);
+  background: rgba(255, 255, 255, .02);
+  border: 0;
+  border-bottom: 1px solid var(--line-2);
+  border-radius: 2px 2px 0 0;
+  padding: 1rem 1.125rem;
+  /* The floor it grows from, and the reason the box does not jump.
+
+     A textarea's scrollHeight counts the PLACEHOLDER while the value is empty,
+     so an empty box measured this way comes out as tall as the example text
+     and then shrinks the moment the first character is typed. Growing downwards
+     that starts by shrinking is worse than not growing at all. A min-height
+     holds the empty and nearly-empty states at one size, and the measured
+     height only ever takes over once there is more text than that. */
+  min-height: 5.5rem;
+  resize: none;
+  overflow: hidden;
+  transition: border-color .25s var(--ease), background .25s var(--ease);
+}
+
+.tellus textarea:focus {
+  outline: none;
+  border-bottom-color: var(--orange);
+  background: rgba(255, 255, 255, .045);
+}
+
+.tellus textarea::placeholder {
+  color: var(--faint);
+  /* The placeholder is two lines of example text, so it needs the leading of a
+     paragraph rather than of a label, or it sets tighter than what replaces it
+     and the box jumps as the first character is typed. */
+  line-height: 1.6;
+}
+
 /* ---------- how to reach you ---------- */
 
 .reach__input {
@@ -1390,7 +1466,11 @@ a, button, label, select, input, textarea, summary {
   font-size: 1.0625rem;
   font-weight: 400;
   margin: 0;
-  padding: 1rem 1rem 1rem 1.75rem;
+  /* Even padding, because the text is centred now. The old 1.75rem on the left
+     was indenting it under the checkbox above, which put the words off centre
+     inside their own rule. */
+  padding: 1rem 1.125rem;
+  text-align: center;
   border: 0;
   border-bottom: 1px solid var(--line);
   background: rgba(255, 255, 255, .02);
@@ -1405,7 +1485,7 @@ a, button, label, select, input, textarea, summary {
 
 .reach__input--bad { border-bottom-color: #ef6b62; }
 
-.reach__error { margin: .5rem 0 0 1.75rem; font-size: 1rem; color: #ef6b62; }
+.reach__error { margin: .5rem 0 0; font-size: 1rem; color: #ef6b62; text-align: center; }
 
 .reach__error[hidden] { display: none; }
 

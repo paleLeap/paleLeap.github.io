@@ -319,6 +319,7 @@
       hide(el.tellus);
       el.justTell.hidden = false;
       el.tellText.value = '';
+      el.tellText.style.height = '';   // back to the rows= starting height
       hide(el.tellNote);
       panels = [];
       windshield = null;
@@ -980,10 +981,30 @@
   el.justTell.addEventListener('click', function () {
     el.justTell.hidden = true;
     slideOpen(el.tellus);
+    /* Measured after the panel has a size. Inside slideOpen it is still zero
+       height, so scrollHeight reads 0 and the box collapses to its padding. */
+    growTellus();
     el.tellText.focus();
   });
 
+  /* The box follows what has been typed into it.
+
+     height:auto first, then scrollHeight. Without the reset, scrollHeight can
+     never report LESS than the height already set, so the box would grow with
+     every line added and never shrink when one is deleted: a one word answer
+     left in a box six lines tall.
+
+     Guarded on being visible, because scrollHeight is 0 for a hidden element
+     and that would set the height to the padding alone. */
+  function growTellus() {
+    var t = el.tellText;
+    if (t.offsetParent === null) return;
+    t.style.height = 'auto';
+    t.style.height = t.scrollHeight + 'px';
+  }
+
   el.tellText.addEventListener('input', function () {
+    growTellus();
     var n = el.tellText.value.trim().length;
     if (!n) { hide(el.tellNote); } else {
       el.tellNote.textContent = 'Got it. Describe it however makes sense to you.';
@@ -1543,6 +1564,7 @@
      scattered through advance(), which is how a Back button would have found a
      page half assembled. */
   function prepare(id) {
+    if (id === 'step-glass') setTimeout(growTellus, 0);
     if (id === 'step-chip') syncChipQuestion();
     if (id === 'step-when') buildWhen();
     if (id === 'step-review') buildSummary();
