@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="9dc5edf958">
+<meta name="build" content="ba779f5961">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=6b1e02e9">
+<link rel="stylesheet" href="css/style.css?v=9f8d46b9">
 </head>
 <body>
 
@@ -186,6 +186,17 @@
       <label class="visually-hidden" for="m-model">Model</label>
       <select id="m-model" disabled><option value="">Model</option></select>
     </div>
+
+    <!-- This page carries the customer on by itself: decoding a VIN, or picking
+         the last dropdown, moves them. So there was no footer here at all, and
+         that was a dead end. Coming BACK to this page means the vehicle is
+         already settled, nothing is going to fire again, and there was nothing
+         on screen to press. syncNav only reveals this once there is a vehicle
+         to go forward with, so the opening fork is still just two buttons. -->
+    <nav class="pagenav" id="vin-nav" aria-label="Step" hidden>
+      <span></span>
+      <button type="button" class="btn" data-next disabled>Continue</button>
+    </nav>
   </section>
 
   <!-- step 2: specifics -->
@@ -195,8 +206,11 @@
     <fieldset class="choices" id="spec-choices">
       <legend class="visually-hidden">Vehicle specifics</legend>
     </fieldset>
+    <!-- Answering carries you on, so Continue is only ever needed by somebody
+         who came back here and finds the question already answered. -->
     <nav class="pagenav" aria-label="Step">
       <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
+      <button type="button" class="btn" data-next disabled>Continue</button>
     </nav>
   </section>
 
@@ -335,9 +349,11 @@
     <!-- "That it?" was here, meaning "is that the whole job". In a flow that
          shows one question at a time it has nothing left to ask: the job was
          settled two pages ago and this page has a single answer, so choosing
-         one is finishing. -->
+         one is finishing. Continue is the way on for somebody who came BACK and
+         finds their answer already given. -->
     <nav class="pagenav" aria-label="Step">
       <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
+      <button type="button" class="btn" data-next disabled>Continue</button>
     </nav>
   </section>
 
@@ -705,6 +721,6 @@
 <script src="js/landing.js?v=adea0fe6"></script>
 <script src="js/vin.js?v=546382b1"></script>
 <script src="js/glass.js?v=7b7553fa"></script>
-<script src="js/app.js?v=a0212f34"></script>
+<script src="js/app.js?v=582fc332"></script>
 </body>
 </html>

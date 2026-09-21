@@ -678,308 +678,73 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
   .greeting__alt .greeting__contact { padding: .625rem .875rem; }
 
-  .pagehelp { margin-top: 1.25rem; }
-}
-
-/* ---------- the section bar ---------- */
-
-/* Small, fixed, and out of the way. It is how you get to the parts of the site
-   that are not the job in hand, and it never takes attention from the job. */
-/* Hidden until the page is actually at its end. The logo strip is the nav for
-   everyday use; this is the one that catches you when you have read to the
-   bottom and are looking for what is next. */
-/* The permanent help strip lived here: a fixed bar along the bottom edge
-   carrying "How this works", with the section bar stacked on top of it. It was
-   the right answer while the quote was one long scrolling column, where there
-   is no reliable "bottom of what you are reading" to put anything at.
-
-   With one page on screen at a time there is. The control sits at the foot of
-   the live page now and travels with it, so it costs no fixed chrome at all:
-   that strip and the bar above it were taking 117px off a 320x640 screen, 18%
-   of it, on every question. See .pagehelp below and placeHelp in app.js. */
-
-.dock {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 10;
-  opacity: 0;
-  transform: translateY(.75rem);
-  pointer-events: none;
-  transition: opacity .35s var(--ease), transform .35s var(--ease);
-  display: flex;
-  justify-content: center;
-  gap: .25rem;
-  padding: .75rem 1rem calc(.75rem + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(to top, var(--bg) 55%, rgba(10, 12, 14, 0));
-}
-
-.dock a {
-  padding: .4375rem .875rem;
-  font-size: .75rem;
-  font-weight: 300;
-  letter-spacing: .1em;
-  color: var(--faint);
-  text-decoration: none;
-  border-radius: 2px;
-  transition: color .25s var(--ease), background .25s var(--ease), text-shadow .25s var(--ease);
-}
-
-.dock.is-shown { opacity: 1; transform: none; pointer-events: auto; }
-
-/* The bar has the bottom edge to itself again, on every view. It used to be
-   lifted clear of the help strip that was pinned underneath it. */
-
-/* About sits apart from the other four. They are all the service; this one is
-   the people behind it, so it gets its own side of a rule rather than queueing
-   with them. The bar is a flex row, so the separator is drawn on the item
-   rather than added as an element nothing would ever need to read. */
-.nav--apart { position: relative; margin-left: .875rem; }
-
-.nav--apart::before {
-  content: "";
-  position: absolute;
-  left: -.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 1px;
-  height: .875rem;
-  background: var(--line-2);
-}
-
-.dock a:hover { color: var(--ink-dim); }
-
-.dock a.is-on { color: var(--ink); background: rgba(255, 255, 255, .06); }
-
-.panel[hidden] { display: none; }
-
-/* ---------- common questions ----------
-   A disclosure list, on the same axis as everything else on the page. Closed
-   by default and quiet when closed: it is reference, not reading. */
-
-.faq__title {
-  margin: 3rem 0 0 calc(var(--title-fs) * .587);
-  font-size: .75rem;
-  font-weight: 500;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-}
-
-.faq { margin-left: calc(var(--title-fs) * .587); }
-
-/* The job a run of questions belongs to. Small caps and faint: it groups the
-   questions under it without competing with them for attention. */
-.faq__group {
-  margin: 1.75rem 0 .25rem;
-  font-size: .625rem;
-  font-weight: 500;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--faint);
-}
-
-.faq__item { border-top: 1px solid var(--line); }
-
-.faq__item summary {
-  list-style: none;                 /* the default triangle, gone */
-  cursor: pointer;
-  padding: .875rem 2rem .875rem 0;
-  position: relative;
-  font-size: .9375rem;
-  font-weight: 300;
-  color: var(--ink-dim);
-  transition: color .2s var(--ease);
-}
-
-.faq__item summary::-webkit-details-marker { display: none; }
-
-.faq__item summary:hover,
-.faq__item[open] summary { color: var(--ink); }
-
-/* A plus that becomes a minus. Two rules rather than a glyph, so it lines up
-   with the type at any size and never picks up a font's own metrics. */
-.faq__item summary::before,
-.faq__item summary::after {
-  content: "";
-  position: absolute;
-  right: .25rem;
-  top: 50%;
-  width: .625rem;
-  height: 1px;
-  background: var(--muted);
-  transition: transform .28s var(--ease), background .2s var(--ease);
-}
-
-.faq__item summary::after { transform: rotate(90deg); }
-
-.faq__item[open] summary::before,
-.faq__item[open] summary::after { background: var(--orange); }
-
-/* The upright stroke turns to lie on the horizontal one: plus becomes minus. */
-.faq__item[open] summary::after { transform: rotate(0deg); }
-
-.faq__a { overflow: hidden; }
-
-.faq__a p {
-  margin: 0;
-  padding: 0 1.5rem 1.125rem 0;
-  font-size: .9375rem;
-  font-weight: 300;
-  line-height: 1.65;
-  color: var(--muted);
-  max-width: 54ch;
-}
-
-/* The way out of a supporting page. Sits at the foot and on the RIGHT, where a
-   hand already is after scrolling and where a "next" or "done" control belongs;
-   the left edge of these pages is the reading axis and this is not something to
-   read. Quiet with it: a way back, not an invitation to leave. */
-.goback {
-  margin: 2.5rem 0 0;
-  text-align: right;
-}
-
-/* ---------- plain lists, used by the panels ---------- */
-
-.plain { list-style: none; margin: 0; padding: 0; }
-
-/* The subtitle hangs off the E of the title. The list hangs off the same axis,
-   so a page reads as one column stepped in from its heading instead of a
-   heading with a table parked underneath it. Same measured .587 advance, same
-   --title-fs, so it holds as the heading scales. */
-.panel .plain,
-.panel .prose { margin-left: calc(var(--title-fs) * .587); }
-
-/* The supporting sections sit one notch below the job in hand: the same type,
-   a touch dimmer, so the quote always reads as the brighter thing. */
-.plain li {
-  padding: 1.125rem 0;
-  border-top: 1px solid var(--line);
-  font-size: .9375rem;
-  font-weight: 300;
-  line-height: 1.6;
-  color: var(--muted);
-}
-
-.plain li b {
-  display: block;
-  font-size: 1rem;
-  font-weight: 300;
-  color: var(--ink);
-  margin-bottom: .3125rem;
-}
-
-/* Name in its own column, explanation beside it. A stack of bold-then-paragraph
-   reads as a blog post; two columns read as a list of services, and the names
-   become scannable down the left instead of buried in prose. */
-.plain--split li {
-  display: grid;
-  grid-template-columns: 10.5rem 1fr;
-  gap: 0 2rem;
-  align-items: baseline;
-}
-
-.plain--split li b { margin-bottom: 0; }
-
-.plain--split li span { display: block; max-width: 46ch; }
-
-@media (max-width: 46rem) {
-  .plain--split li { grid-template-columns: 1fr; gap: .375rem 0; }
-  .plain--split li b { margin-bottom: .125rem; }
-}
-
-.plain a { color: var(--ink-dim); text-decoration: none; border-bottom: 1px solid var(--line-2); }
-
-.plain a:hover { color: var(--orange); border-color: var(--orange); }
-
-.aside { margin: 1.25rem 0 0; font-size: 1rem; font-weight: 400; color: var(--muted); }
-
-
-/* ---------- steps ---------- */
-
-/* position: relative so a reopened step can carry its own close control in
-   the corner without that control joining the flow and shifting the layout. */
-/* ---------- a step is a page ----------
-
-   Steps used to stack: each one 3rem below the last, the answered ones folded
-   to a row, the whole request growing down the document as it was filled in.
-   One is on screen at a time now, so there is nothing to space it from. The
-   margin is gone and the page simply starts where the column starts.
-
-   min-height so a short question and a tall one do not make the footer jump up
-   and down the screen between pages. Not 100%: the header, the help strip and
-   the column's own padding are all outside it, and a page that reserves the
-   whole viewport pushes its own footer below the fold on a phone. */
-.step {
-  margin-top: 0;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-height: 26rem;
-}
-
-/* Each page arrives with a fade and nothing else. Movement would compete with
-   the thing being read, and there is no direction to travel in that means
-   anything: the customer pressed a button, the question changed. */
-.step.is-page { animation: fadeIn .28s var(--ease) both; }
-
-@media (prefers-reduced-motion: reduce) {
-  .step.is-page { animation: none; }
-}
-
-/* The question a page asks does not get a focus ring. It is given tabindex -1
-   and focused on every page change, so a screen reader announces the new
-   question, and an outline around a heading nobody clicked reads as an error
-   to everybody else. */
-.step__label:focus { outline: none; }
-
-/* ---------- "How this works", at the foot of the live page ----------
-
-   One element, moved by app.js to the bottom of whichever page is showing, so
-   it follows the customer through the flow instead of sitting on the glass in
-   front of them. Owner instruction: at the bottom of the information currently
-   being displayed, not as bright, and a button.
-
-   Below the Back / Continue row rather than in it. It is not part of the
-   decision those two are offering, and a third control in that row would read
-   as a third way onwards.
-
-   Dim on purpose, and dimmer than anything else here: --faint on the border,
-   --muted on the words. It has to be findable by somebody who has gone looking
-   and invisible to somebody who has not. */
-.pagehelp {
+  .pagehelp {
   display: flex;
   justify-content: center;
   margin: 1.75rem 0 0;
 }
 
+/* Two sizes, because it is doing two jobs.
+
+   On the opening screen it is one of three things to press and belongs to that
+   stack, so it is a control the size of its neighbours: same geometry as the
+   contact button above it, boxed, just dimmer than both. Somebody who has not
+   started yet is the most likely person in the whole flow to want it.
+
+   Once the flow starts it is not a choice any more, it is a way out of the
+   question in front of you, and it should not read as a third answer to that
+   question. So it loses the box and becomes an underlined word: findable by
+   somebody who has gone looking, invisible to somebody who has not. Owner
+   instruction, and it is the difference between furniture and an option. */
 .pagehelp__btn {
   display: inline-flex;
   align-items: center;
-  gap: .5rem;
+  justify-content: center;
   min-height: 2.75rem;
-  padding: .5rem 1.125rem;
-  border: 1px solid var(--faint);
-  border-radius: 2px;
+  padding: .5rem .25rem;
+  border: 0;
   background: none;
   font: inherit;
-  font-size: 1rem;
+  font-size: .9375rem;
   font-weight: 400;
   color: var(--muted);
-  text-decoration: none;
   cursor: pointer;
-  transition: color .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--faint);
+  text-underline-offset: .32em;
+  transition: color .2s var(--ease), text-decoration-color .2s var(--ease),
+              border-color .2s var(--ease), background .2s var(--ease);
 }
 
-.pagehelp__btn:hover {
+.pagehelp__btn:hover { color: var(--ink); text-decoration-color: var(--orange); }
+
+.pagehelp__btn:active { color: var(--orange); text-decoration-color: var(--orange); }
+
+/* The opening screen. Sized to the stack it joins rather than to the text in
+   it, and no underline, because here it IS a box. */
+.greeting .pagehelp { margin-top: 1.125rem; }
+
+.greeting .pagehelp__btn {
+  min-height: 3.25rem;
+  padding: 1rem 1.75rem;
+  font-size: 1.0625rem;
+  border-radius: 2px;
+  text-decoration: none;
+  box-shadow: inset 0 0 0 1px var(--faint);
+}
+
+.greeting .pagehelp__btn:hover {
   color: var(--ink);
-  border-color: var(--line-2);
-  background: rgba(255, 255, 255, .03);
+  background: rgba(255, 255, 255, .04);
+  box-shadow: inset 0 0 0 1px var(--line-2);
 }
 
-.pagehelp__btn:active { color: var(--orange); border-color: var(--orange); }
+.greeting .pagehelp__btn:active {
+  color: var(--orange);
+  background: rgba(240, 125, 42, .1);
+  box-shadow: inset 0 0 0 1px var(--orange);
+}
 
 /* ---------- answered pieces of glass ----------
 
@@ -1945,6 +1710,10 @@ a, button, label, select, input, textarea, summary {
      button with something smaller loose underneath it. Still obviously the
      lesser of the two: no fill, lighter weight, smaller type. */
   .greeting__alt .greeting__contact { display: flex; width: 100%; padding: .875rem 1rem; font-size: 1rem; }
+
+  /* Full width too, so the opening screen is three controls in one column
+     rather than two and a smaller one floating under them. */
+  .greeting .pagehelp__btn { display: flex; width: 100%; padding: .875rem 1rem; font-size: 1rem; }
 
   /* 16px was the phone size for the line that now carries the whole opening
      screen. It holds a narrow measure, it just does not shrink to fit. */

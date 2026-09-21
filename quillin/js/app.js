@@ -28,6 +28,7 @@
     specChoices: $('spec-choices'),
     glass:     $('step-glass'),
     onVehicle: $('on-vehicle'),
+    vinNav:    $('vin-nav'),
     chip:      $('step-chip'),
     glassLabel: $('glass-label'),
     declineNote: $('decline-note'),
@@ -514,7 +515,7 @@
        just told us they cannot find their VIN has already had one small
        failure; the next thing they see should not be another form. */
     if (announce) {
-      el.manualNote.textContent = 'No problem! Let\u2019s continue like this\u2026';
+      el.manualNote.textContent = 'No problem! Let\u2019s continue.';
       show(el.manualNote);
     }
     /* Populated BEFORE opening. scrollHeight is measured as the animation
@@ -636,7 +637,6 @@
       'or you think we have this wrong, leave us a message and we’ll come back to you.';
     el.declineNote.hidden = false;
     show(el.tellus);
-    goTo('step-glass');
   }
 
   /* Puts the damage step back to normal. Called before every fresh lookup,
@@ -795,8 +795,23 @@
      VIN read, says why it cannot be quoted and takes a message, and Back still
      returns to the VIN. So it redirects rather than dead ends, which was the
      property worth keeping. */
+  /* Called when the vehicle has just been established or changed, so the
+     clearing is right: a different car has different glass. Going BACK to the
+     VIN page and pressing Continue does NOT come through here, because nothing
+     about the vehicle changed and the damage below it must survive. That route
+     is plain navigation, and setupGlass below is what makes the page ready. */
   function askConfirm(v) {
     resetBelow(3);
+    goTo('step-glass');     // which prepares the page on the way in
+  }
+
+  /* Everything the damage page needs before it is looked at, from whichever
+     direction it is reached: forwards off the vehicle, or back off the chip
+     question. Idempotent, and openPicker already returns early once it has
+     built a list, so arriving here repeatedly costs nothing. */
+  function setupGlass() {
+    var v = vehicle;
+    if (!v) return;
 
     var r = Glass.resolve(v);
     if (r.unsupported) { declineVehicle(v, r); return; }
@@ -818,9 +833,27 @@
     name.textContent = v.label;
     el.onVehicle.appendChild(name);
     show(el.onVehicle);
-
-    goTo('step-glass');
     openPicker();
+  }
+
+  /* The way forward from a page that normally carries you on by itself.
+
+     Reported by the owners: go Back to "Do you know your VIN?" and there is no
+     way to progress. Quite right. Three pages in this flow advance on the
+     answer itself rather than on a button, which is smooth going forwards and a
+     dead end coming back: the vehicle is already decoded, the camera question
+     is already answered, the timing is already chosen, and not one of those
+     events is going to fire a second time just because you are looking at the
+     page again.
+
+     So each of them has a Continue, disabled until its own question is settled,
+     which on the forward pass is a control nobody ever needs to touch. */
+  function pageAnswered(id) {
+    if (id === 'step-vin') return !!vehicle;
+    if (id === 'step-specifics') {
+      return !!vehicle && !questionsFor(vehicle, !vehicle.vin).length;
+    }
+    return true;
   }
 
   /* ---------- step 4: the picker ---------- */
@@ -1650,7 +1683,13 @@
      scattered through advance(), which is how a Back button would have found a
      page half assembled. */
   function prepare(id) {
-    if (id === 'step-glass') setTimeout(growTellus, 0);
+    /* Nothing in here may navigate. prepare runs from inside goTo, so a goTo
+       in a prepare step is straight recursion: setupGlass did exactly that on
+       the first attempt at this, and the stack overflow was swallowed whole by
+       the catch on the VIN lookup, which then told the customer "we couldn't
+       reach the vehicle database". Prepare the page; let the caller decide
+       where anybody goes. */
+    if (id === 'step-glass') { setupGlass(); setTimeout(growTellus, 0); }
     if (id === 'step-chip') syncChipQuestion();
     if (id === 'step-when') buildWhen();
     if (id === 'step-review') buildSummary();
@@ -1699,7 +1738,6 @@
 
   function goTo(id) {
     if (PAGES.indexOf(id) === -1) return;
-    prepare(id);
     page = id;
 
     PAGES.forEach(function (p) {
@@ -1709,6 +1747,11 @@
       if (on) node.hidden = false; else node.hidden = true;
       node.classList.toggle('is-page', on);
     });
+
+    /* AFTER the swap, not before. openPicker mounts a WebGL canvas and
+       slideOpen measures scrollHeight, and both read zero inside an element
+       that is still display:none. */
+    prepare(id);
 
     syncNav();
 
@@ -1746,6 +1789,11 @@
   Array.prototype.forEach.call(document.querySelectorAll('[data-next]'),
     function (b) { b.addEventListener('click', function () {
       if (b.disabled) return;
+      /* Only the button on the page you are actually looking at may move you.
+         goNext() works from `page`, so without this a Continue belonging to
+         some other, hidden step would advance whatever is on screen instead. */
+      var owner = b.closest('.step');
+      if (!owner || owner.id !== page) return;
       if (page === 'step-photos' && !photos.length) noPhotos = true;
       goNext();
     }); });
@@ -1761,6 +1809,11 @@
     var next = node.querySelector('[data-next]');
     if (next) next.disabled = !pageDone(page);
 
+    /* The opening fork is two buttons and nothing else, so the VIN page's
+       footer stays away until there is actually a vehicle to go forward with,
+       which only ever happens on the way back. */
+    if (el.vinNav) el.vinNav.hidden = !(page === 'step-vin' && !!vehicle);
+
     el.send.disabled = Object.keys(reach).length === 0;
 
     placeReset(page === 'step-vin' && forkTaken ? node : null);
@@ -1771,6 +1824,7 @@
      pages that carry a Continue button need one; the rest either advance on the
      answer itself or carry their own worded button. */
   function pageDone(id) {
+    if (id === 'step-vin' || id === 'step-specifics') return pageAnswered(id);
     /* Something has to have been said about the damage, by any of the three
        routes: a pane tapped, a photograph, or a sentence. */
     if (id === 'step-glass') return damageGiven();
