@@ -26,12 +26,8 @@
     specifics: $('step-specifics'),
     specHint:  $('spec-hint'),
     specChoices: $('spec-choices'),
-    confirm:   $('step-confirm'),
-    cVehicle:  $('confirm-vehicle'),
-    cDetail:   $('confirm-detail'),
-    cYes:      $('confirm-yes'),
-    cNo:       $('confirm-no'),
     glass:     $('step-glass'),
+    onVehicle: $('on-vehicle'),
     chip:      $('step-chip'),
     glassLabel: $('glass-label'),
     declineNote: $('decline-note'),
@@ -313,7 +309,7 @@
 
   function resetBelow(step) {
     if (step <= 2) { hide(el.specifics); clearChoices(el.specChoices); answers = {}; }
-    if (step <= 3) hide(el.confirm);
+    if (step <= 3) hide(el.onVehicle);
     if (step <= 4) {
       hide(el.glass);
       hide(el.tellus);
@@ -758,33 +754,53 @@
 
   /* ---------- step 3: confirm ---------- */
 
+  /* Named, not asked about.
+
+     This was a page of its own: "Did we get that right?", the vehicle, and a
+     "Yes, that's my vehicle" button. The owners had it removed because people
+     found it annoying to confirm a vehicle they had only just chosen, which on
+     the year/make/model route is precisely what it was asking them to do.
+
+     So the vehicle is a line at the top of the damage page now. The customer
+     still sees what we read, which matters most on the VIN route where they
+     typed seventeen characters and never named a car; they just are not asked
+     to agree with it before carrying on. If it is wrong, Back is at the foot of
+     the page and the review names it again before anything is sent.
+
+     The decline check moved here with it. It used to sit behind the Yes button,
+     deliberately, so that a mistyped VIN landing on a motorcycle could be
+     corrected at the confirmation rather than dead-ending at the decode. With
+     no confirmation left, this is that point: the decline itself shows what the
+     VIN read, says why it cannot be quoted and takes a message, and Back still
+     returns to the VIN. So it redirects rather than dead ends, which was the
+     property worth keeping. */
   function askConfirm(v) {
     resetBelow(3);
-    el.cVehicle.textContent = 'So, you need repairs to a ' + v.label + '?';
 
-    var bits = [];
-    if (v.trim) bits.push(v.trim);
-    if (v.bodyClass) bits.push(Glass.resolve(v).label.replace(/^./, function (c) {
-      return c.toUpperCase();
-    }));
-    if (v.vin) bits.push('VIN ' + v.vin);
+    var r = Glass.resolve(v);
+    if (r.unsupported) { declineVehicle(v, r); return; }
 
-    /* No driver assist line here. See buildSummary: anything we infer about ADAS
-       from the VIN goes to Quillin, not to the customer. */
-    el.cDetail.textContent = bits.join(' · ');
-    goTo('step-confirm');
-  }
+    /* The year, make and model, and nothing else.
 
-  el.cYes.addEventListener('click', function () {
-    /* Checked here rather than at decode, so a mistyped VIN that lands on a
-       motorcycle can still be corrected at the confirm step instead of dead
-       ending before the customer has been shown what we read. */
-    var r = Glass.resolve(vehicle);
-    if (r.unsupported) { declineVehicle(vehicle, r); return; }
+       The confirmation page this replaces also listed the trim, the body style
+       and the VIN back at the customer. On a line at the top of the damage page
+       that came to three wrapped lines on a phone and 99px of height, on the one
+       page in the flow that is already too tall, and every part of it is either
+       redundant or already on screen: the VIN was typed two screens ago, the
+       body style is what the picker note underneath says out loud, and the trim
+       does not change any glass. The full detail is still on the review page.
+
+       No driver assist line either. See buildSummary: anything we infer about
+       ADAS from the VIN goes to Quillin, not to the customer. */
+    el.onVehicle.innerHTML = '';
+    var name = document.createElement('b');
+    name.textContent = v.label;
+    el.onVehicle.appendChild(name);
+    show(el.onVehicle);
 
     goTo('step-glass');
     openPicker();
-  });
+  }
 
   /* ---------- step 4: the picker ---------- */
 
@@ -1529,7 +1545,7 @@
      need; going back and changing an answer re-derives the rest rather than
      destroying it. */
 
-  var PAGES = ['step-vin', 'step-specifics', 'step-confirm', 'step-glass',
+  var PAGES = ['step-vin', 'step-specifics', 'step-glass',
                'step-chip', 'step-photos', 'step-when', 'step-review',
                'step-reach'];
 
@@ -1778,8 +1794,6 @@
     specificsAsked = false;
     goTo('step-vin');
   }
-
-  el.cNo.addEventListener('click', startOver);
 
   /* ---------- start over ----------
 

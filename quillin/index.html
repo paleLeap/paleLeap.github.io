@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="069993224a">
+<meta name="build" content="5ac52f00fe">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=df45520b">
+<link rel="stylesheet" href="css/style.css?v=6bdc5be8">
 </head>
 <body>
 
@@ -200,23 +200,29 @@
     </nav>
   </section>
 
-  <!-- step 3: confirm -->
-  <section class="step" id="step-confirm" hidden aria-labelledby="confirm-label">
-    <p class="step__label" id="confirm-label">Did we get that right?</p>
-    <p class="confirm__vehicle" id="confirm-vehicle"></p>
-    <p class="confirm__detail" id="confirm-detail"></p>
-    <p class="confirm__do">
-      <button type="button" class="btn" id="confirm-yes">Yes, that&rsquo;s my vehicle</button>
-    </p>
-    <nav class="pagenav" aria-label="Step">
-      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
-      <button type="button" class="plainlink" id="confirm-no">No, start over</button>
-    </nav>
-  </section>
+  <!-- There was a "Did we get that right?" page here, between the vehicle and
+       the damage. It showed what the VIN had decoded to, or what had been
+       chosen from the dropdowns, and asked the customer to press "Yes, that's
+       my vehicle" before going on.
+
+       Removed on owner feedback: people found it annoying to confirm a vehicle
+       they had only just chosen, which on the year/make/model route is exactly
+       what it was asking. A confirmation step that confirms the thing you did
+       one screen ago is a speed bump, not a check.
+
+       The information it carried has not gone. The damage page now names the
+       vehicle above the model, the review page lists it in full, and Back from
+       either returns to the VIN. What went is the click. -->
 
   <!-- step 4: glass selection (3d picker lands here) -->
   <section class="step" id="step-glass" hidden aria-labelledby="glass-label">
     <p class="step__label" id="glass-label">So&hellip; where&rsquo;s the damage?</p>
+    <!-- What the VIN decoded to, or what was picked from the dropdowns. This is
+         the only place the customer sees it between entering it and the review,
+         now that the confirmation page has gone, so it is a statement rather
+         than a question: here is the vehicle we are quoting, and Back is
+         underneath if it is wrong. -->
+    <p class="onvehicle" id="on-vehicle" hidden></p>
     <!-- Shown instead of the picker when the VIN decodes to something we do not
          do glass on. The message box below stays, so it is a redirection rather
          than a dead end. -->
@@ -696,6 +702,6 @@
 <script src="js/landing.js?v=adea0fe6"></script>
 <script src="js/vin.js?v=546382b1"></script>
 <script src="js/glass.js?v=7b7553fa"></script>
-<script src="js/app.js?v=36649463"></script>
+<script src="js/app.js?v=5778b697"></script>
 </body>
 </html>

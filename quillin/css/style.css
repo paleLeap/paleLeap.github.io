@@ -1041,10 +1041,42 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 .pageback:active { color: var(--orange); }
 
-/* The primary answer on the pages that word their own: "Yes, that's my
-   vehicle", "Yes, that's right", "Send my request". Above the footer, not in
-   it, because it is the answer to the question rather than a way out of it. */
+/* The primary answer on the pages that word their own: "Yes, that's right"
+   and "Send my request". Above the footer, not in it, because it is the answer
+   to the question rather than a way out of it. */
 .confirm__do { margin: 2rem 0 0; }
+
+/* ---------- the vehicle, named on the damage page ----------
+
+   There was a whole page for this: "Did we get that right?" with a button to
+   agree. The owners had it removed, because being asked to confirm a vehicle
+   you chose one screen ago is a speed bump rather than a check.
+
+   It is a statement now, directly under the question, sized so it reads as
+   context for the picker rather than as the heading. The name carries the
+   weight; the trim, body and VIN sit behind it, quieter, for the person who
+   wants to check the detail. */
+.onvehicle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .25rem .625rem;
+  margin: -.5rem 0 1.5rem;
+}
+
+.onvehicle[hidden] { display: none; }
+
+.onvehicle b {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--ink-dim);
+}
+
+.onvehicle span {
+  font-size: .9375rem;
+  font-weight: 400;
+  color: var(--muted);
+}
 
 /* The `hidden` attribute is only `display: none` in the USER AGENT stylesheet,
    which every author rule outranks. Any element given a display here, and most
