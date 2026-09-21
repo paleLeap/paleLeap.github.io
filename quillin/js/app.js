@@ -1654,6 +1654,10 @@
 
   var page = 'step-vin';
 
+  /* Assigned further down, next to the handler that opens it. Declared here so
+     goTo can close it without caring where it was built. */
+  var overUI = null;
+
   /* The pages this particular request actually has. Specifics is the only one
      that can drop out: it exists when there is something about the vehicle that
      neither the VIN nor the model name could settle, and most of the time there
@@ -1738,6 +1742,12 @@
 
   function goTo(id) {
     if (PAGES.indexOf(id) === -1) return;
+
+    /* Any move through the flow answers "start over?" by itself, so the prompt
+       must not still be sitting there afterwards. Declared further down the
+       file, but only ever reached from a click, by which point it exists. */
+    if (overUI) overUI.close();
+
     page = id;
 
     PAGES.forEach(function (p) {
@@ -1981,6 +1991,75 @@
 
     return { wrap: wrap, close: close };
   })();
+
+  /* ---------- pressing "quote" while a quote is already underway ----------
+
+     landing.js says the button was pressed; what it means is decided here,
+     because the answers live here. Owner instruction: it should ask "Start
+     over?".
+
+     It is genuinely ambiguous. Somebody reading the services page and pressing
+     "quote" wants to get back to what they were doing. Somebody on the photos
+     page pressing it has most likely decided to begin again. Asking is the only
+     honest answer, and the safe option is the one that keeps their work.
+
+     Nothing is asked when there is nothing to lose: the opening fork, or a
+     flow that was never started, just goes to the quote like any other link. */
+  function quoteUnderway() {
+    return started && (forkTaken || !!vehicle || el.vin.value.length > 0);
+  }
+
+  overUI = (function () {
+    var wrap = document.createElement('div');
+    wrap.className = 'startover';
+    wrap.hidden = true;
+
+    var msg = document.createElement('p');
+    msg.className = 'startover__msg';
+    msg.textContent = 'Start over?';
+
+    var sub = document.createElement('p');
+    sub.className = 'startover__sub';
+    sub.textContent = 'You have a request in progress.';
+
+    var row = document.createElement('p');
+    row.className = 'startover__do';
+
+    var no = document.createElement('button');
+    no.type = 'button';
+    no.className = 'btn';
+    no.textContent = 'No, carry on';
+
+    var yes = document.createElement('button');
+    yes.type = 'button';
+    yes.className = 'btn btn--alt';
+    yes.textContent = 'Yes, start over';
+
+    /* Carry on is the filled one, and it is first. The destructive answer to a
+       question the customer did not ask for should never be the easy one to
+       hit, and this prompt appears in front of somebody who may well have been
+       aiming at something else entirely. */
+    row.appendChild(no);
+    row.appendChild(yes);
+    wrap.appendChild(msg);
+    wrap.appendChild(sub);
+    wrap.appendChild(row);
+
+    function close() { wrap.hidden = true; }
+    no.addEventListener('click', close);
+    yes.addEventListener('click', function () { close(); startOver(); });
+
+    return { wrap: wrap, open: function () { wrap.hidden = false; no.focus(); }, close: close };
+  })();
+
+  document.addEventListener('quote:relaunch', function () {
+    if (!quoteUnderway()) { overUI.close(); return; }
+    var node = $(page);
+    if (!node) return;
+    if (overUI.wrap.parentNode !== node) node.insertBefore(overUI.wrap, node.firstChild);
+    overUI.open();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  });
 
   /* Shown once there is something worth losing. On an empty VIN step there is
      nothing to clear, and offering to clear it is just noise. */

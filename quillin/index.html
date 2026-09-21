@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="ba779f5961">
+<meta name="build" content="9065d525dc">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=9f8d46b9">
+<link rel="stylesheet" href="css/style.css?v=6472ddad">
 </head>
 <body>
 
@@ -34,11 +34,15 @@
   <!-- The logo is the handle. Hovering it grows the mark to the right into the
        four sections; the logo itself is also the way back to the quote. -->
   <div class="brand">
-    <a class="brand__logo" href="#quote" aria-label="Quillin Auto Glass, get a quote">
+    <!-- The menu handle, on every device. It was a link home on a pointer
+         device and a menu toggle on touch, which meant the biggest thing on the
+         page behaved differently depending on what you were holding. -->
+    <a class="brand__logo" href="#quote" aria-expanded="false" aria-controls="brandnav"
+       aria-label="Quillin Auto Glass, open the menu">
       <img src="assets/img/logo.png?v=9612b179" alt="" width="300" height="243">
     </a>
 
-    <nav class="brandnav" aria-label="Sections">
+    <nav class="brandnav" id="brandnav" aria-label="Sections">
       <a href="#quote"     style="--i:0">quote</a>
       <a href="#services"  style="--i:1">services</a>
       <a href="#guarantee" style="--i:2">guarantee</a>
@@ -718,9 +722,9 @@
 </nav>
 
 <script src="js/backdrop.js?v=797049a9"></script>
-<script src="js/landing.js?v=adea0fe6"></script>
+<script src="js/landing.js?v=0bd9ada2"></script>
 <script src="js/vin.js?v=546382b1"></script>
 <script src="js/glass.js?v=7b7553fa"></script>
-<script src="js/app.js?v=582fc332"></script>
+<script src="js/app.js?v=9bb1cf6d"></script>
 </body>
 </html>

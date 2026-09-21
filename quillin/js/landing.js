@@ -131,8 +131,19 @@
         e.preventDefault();
         /* Retract first, then swap. The row lifts away while the page is
            fading, so the two reads as one movement rather than two. */
-        if (brand) brand.classList.remove('is-open');
-        document.body.classList.remove('menu-open');
+        setMenu(false);
+
+        /* Pressing "quote" is ambiguous once a request is underway: it is
+           either "take me back to what I was doing" or "let me start again",
+           and only the customer knows which. app.js holds the answers, so it
+           is asked there; this just says that the button was pressed.
+
+           Dispatched BEFORE the already-here check below, because the most
+           likely time to press it is while standing on the quote itself. */
+        if (id === 'quote') {
+          document.dispatchEvent(new CustomEvent('quote:relaunch'));
+        }
+
         if (location.hash === '#' + id) return;   // already here
         // Write the hash without firing hashchange, so the transition runs once.
         history.pushState(null, '', '#' + id);
@@ -201,33 +212,41 @@
   new ResizeObserver(onScroll).observe(document.body);
 
   // back and forward get the same transition
-  /* ---- the logo opens the nav where there is no hover ---------------------
-     The strip is a hover affordance, and a phone has no hover, so on touch the
-     whole section navigation was unreachable. There, the logo becomes a toggle
-     instead of a link: first tap opens the words, a tap on one of them goes,
-     and a tap anywhere else closes it again. */
+  /* ---- the logo opens the menu, everywhere -------------------------------
+
+     It used to do two different things depending on the device. On touch it
+     opened the section words, because there is no hover there and the strip
+     was otherwise unreachable. On a pointer device it was a way home to the
+     quote instead, on the reasoning that hover had already shown the words.
+
+     Owner instruction: it should always open the menu. Which is the better
+     rule anyway, because the old one meant the most prominent thing on the
+     page did something different depending on what you were holding, and the
+     one person who could not discover that was the person on a laptop who
+     never thought to hover a logo.
+
+     Hover still opens the strip on a pointer device. Clicking now pins it
+     open, so it survives the mouse leaving, and clicking again or clicking
+     anywhere outside puts it away. */
   var brand = document.querySelector('.brand');
   var logo = document.querySelector('.brand__logo');
-  var canHover = window.matchMedia('(hover: hover)');
+
+  function setMenu(open) {
+    if (!brand) return;
+    brand.classList.toggle('is-open', open);
+    document.body.classList.toggle('menu-open', open);
+    if (logo) logo.setAttribute('aria-expanded', String(open));
+  }
 
   if (brand && logo) {
     logo.addEventListener('click', function (e) {
       e.preventDefault();
-      if (canHover.matches) {
-        // pointer devices: the strip is already open on hover, so this is home
-        if (location.hash !== '#quote') { history.pushState(null, '', '#quote'); go('quote'); }
-        return;
-      }
-      var open = !brand.classList.contains('is-open');
-      brand.classList.toggle('is-open', open);
-      document.body.classList.toggle('menu-open', open);
+      setMenu(!brand.classList.contains('is-open'));
     });
 
     document.addEventListener('click', function (e) {
-      if (canHover.matches) return;
       if (brand.contains(e.target)) return;
-      brand.classList.remove('is-open');
-      document.body.classList.remove('menu-open');
+      setMenu(false);
     });
   }
 

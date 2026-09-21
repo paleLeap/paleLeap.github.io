@@ -820,6 +820,58 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 .answered__row:active em { color: var(--ink); }
 
+/* ---------- "Start over?" ----------
+
+   Raised at the top of whichever page is showing, when "quote" is pressed and
+   a request is already underway. It has to interrupt, because it is asking
+   about work the customer is standing in the middle of, so it is the one thing
+   in this flow with a fill behind it. */
+.startover {
+  margin: 0 0 2rem;
+  padding: 1.25rem 1.25rem 1.375rem;
+  border-radius: 2px;
+  background: var(--raise);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  animation: fadeIn .25s var(--ease) both;
+}
+
+.startover[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .startover { animation: none; }
+}
+
+.startover__msg {
+  margin: 0;
+  font-size: 1.3125rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.startover__sub {
+  margin: .375rem 0 0;
+  font-size: 1.0625rem;
+  color: var(--ink-dim);
+}
+
+.startover__do {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin: 1.25rem 0 0;
+}
+
+/* "No, carry on" is filled and first. The destructive answer to a question the
+   customer did not ask should never be the easy one to hit, and this prompt
+   can appear in front of somebody who was aiming at something else. */
+.startover__do .btn { flex: 1 1 auto; justify-content: center; }
+
+@media (max-width: 30rem) {
+  .startover { padding: 1rem; }
+  .startover__do .btn { flex: 1 1 100%; }
+}
+
 /* ---------- the page footer ----------
 
    Back on the left, the way on at the right, on every page that has them. It
