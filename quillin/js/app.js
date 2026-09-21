@@ -130,6 +130,19 @@
 
      Checkboxes, not radios. Someone may well want a text and an email, and
      nothing about picking one rules out another. */
+  /* On the placeholders: the two phone fields read "(214) 555 0142" before.
+     555-01xx is the range reserved for fiction precisely so examples cannot
+     ring anybody, so it was safe, but safe is not the same as obviously an
+     example. It looked like a phone number, and the customer this is built for
+     is not reading it as a typographer: a real looking number in a box is a
+     number somebody might take for ours and try to call.
+
+     Xs instead, with the format kept, because the format is the useful half of
+     a placeholder for somebody who is unsure what to type. Owner instruction.
+
+     The email one is left as it is. example.com is reserved for exactly this
+     by RFC 2606 and "you@" is already addressed at the reader, so it reads as
+     an instruction rather than as somebody's address. */
   var CHANNELS = [
     {
       value: 'email', label: 'Email', type: 'email',
@@ -139,7 +152,7 @@
     },
     {
       value: 'text', label: 'Text message', type: 'tel',
-      placeholder: '(214) 555 0142', autocomplete: 'tel',
+      placeholder: '(214) xxx-xxxx', autocomplete: 'tel',
       clean: function (v) { return v.replace(/[^\d]/g, ''); },
       ok: function (v) {
         var d = v.replace(/[^\d]/g, '');
@@ -148,7 +161,7 @@
     },
     {
       value: 'call', label: 'A phone call', type: 'tel',
-      placeholder: '(214) 555 0142', autocomplete: 'tel',
+      placeholder: '(214) xxx-xxxx', autocomplete: 'tel',
       clean: function (v) { return v.replace(/[^\d]/g, ''); },
       ok: function (v) {
         var d = v.replace(/[^\d]/g, '');
