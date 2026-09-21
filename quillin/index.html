@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="230e1136d2">
+<meta name="build" content="069993224a">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=a6290271">
+<link rel="stylesheet" href="css/style.css?v=df45520b">
 </head>
 <body>
 
@@ -95,6 +95,19 @@
          same orange used by every other primary action in the flow. Once the
          flow starts, app.js replaces this with plain heading text. -->
     <h1><button type="button" class="starter" id="start-quote">Get your quote.</button></h1>
+
+    <!-- The other reason somebody lands here. Not everybody arriving at an auto
+         glass company wants a quote: some want to ask a question, chase a job
+         already booked, or talk to a person, and until now the only way to say
+         so from this screen was the small "Questions? Call us!" in the corner.
+
+         An anchor, not a button element, because it goes to the contact panel
+         and should still go there middle-clicked or with the script broken. It
+         is dressed as one, and deliberately outlined rather than filled: there
+         is one primary action on this screen and this is not it. -->
+    <p class="greeting__alt">
+      <a class="btn btn--alt greeting__contact" href="#contact" data-panel-link>Don&rsquo;t need a quote? Contact us.</a>
+    </p>
   </div>
 
   <section class="panel" id="quote">

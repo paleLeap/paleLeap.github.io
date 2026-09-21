@@ -438,6 +438,53 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 .starter:hover { background: var(--orange); }
 
+/* ---------- the other way off this screen ----------
+
+   Not everybody who lands here wants a quote. Outlined rather than filled and a
+   size down from the starter, because there is one primary action on this
+   screen and this is not it; sitting directly under it, because it is the
+   alternative to it rather than an afterthought somewhere else on the page. */
+.greeting__alt { margin: 1.125rem 0 0; }
+
+/* An anchor wearing .btn, so it needs the display and the underline handling a
+   <button> got for free. inline-flex rather than inline-block so min-height can
+   centre the words instead of just reserving space under them.
+
+   Written as .greeting__alt .greeting__contact ON PURPOSE. .btn and .btn--alt
+   live further down this file, and at equal specificity the later rule wins, so
+   a single class here quietly lost its colour, its ring and its weight back to
+   the generic button. The stylesheet has been caught by that once before, in
+   .btn--small, and fixed it by relying on source order instead; relying on the
+   order of two distant blocks is how it happens again. The extra class says
+   what is intended and holds wherever this rule ends up sitting.
+
+   Three tiers on this screen, and this is the middle one:
+     Get your quote.                 orange fill, white, weight 500
+     Don't need a quote?             outlined, --ink-dim, weight 400
+     How this works                  outlined, --muted, dimmest ring */
+.greeting__alt .greeting__contact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 400;
+  color: var(--ink-dim);
+  box-shadow: inset 0 0 0 1px var(--faint);
+}
+
+.greeting__alt .greeting__contact:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, .04);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+
+.greeting__alt .greeting__contact:active {
+  color: var(--orange);
+  background: rgba(240, 125, 42, .1);
+  box-shadow: inset 0 0 0 1px var(--orange);
+}
+
 /* Touch has no hover, so the press itself has to answer. */
 .starter:active { background: var(--orange); transform: translateY(1px); }
 
@@ -616,6 +663,22 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 @media (max-width: 30rem) {
   .album--trio { grid-template-columns: 1fr 1fr; }
   .album--trio img:last-child { grid-column: 1 / -1; }
+
+  /* The opening screen on the smallest phone still in use, 320x640.
+
+     "Don't need a quote? Contact us." wraps to two lines at this width, which
+     is fine in itself but took the one screen that fitted exactly and gave it
+     49px of scroll. The words are the owners' and are not being shortened to
+     make a number work, so the air around them comes in instead: this is the
+     only screen with three stacked controls and it can afford tighter spacing
+     more than it can afford the first thing anybody sees needing a scroll. */
+  .standfirst { margin-bottom: 1.25rem; }
+
+  .greeting__alt { margin-top: .75rem; }
+
+  .greeting__alt .greeting__contact { padding: .625rem .875rem; }
+
+  .pagehelp { margin-top: 1.25rem; }
 }
 
 /* ---------- the section bar ---------- */
@@ -1771,6 +1834,11 @@ a, button, label, select, input, textarea, summary {
   /* Full width on a phone. A centred button narrower than the column reads as
      one option among several; edge to edge it reads as the thing to press. */
   .starter { display: block; width: 100%; padding: 1.25rem 1rem; }
+
+  /* Matches the starter's width so the two stack as a pair rather than as a
+     button with something smaller loose underneath it. Still obviously the
+     lesser of the two: no fill, lighter weight, smaller type. */
+  .greeting__alt .greeting__contact { display: flex; width: 100%; padding: .875rem 1rem; font-size: 1rem; }
 
   /* 16px was the phone size for the line that now carries the whole opening
      screen. It holds a narrow measure, it just does not shrink to fit. */
