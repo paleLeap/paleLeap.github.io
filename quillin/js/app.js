@@ -1571,6 +1571,46 @@
     if (id === 'step-reach') buildChannels();
   }
 
+  /* "How this works", built once and moved.
+
+     It used to be a fixed strip along the bottom edge of the window, which was
+     the right answer while the quote was one long scrolling column: there was
+     no reliable "bottom of what you are reading" to attach anything to, so it
+     had to be attached to the window instead.
+
+     One page at a time gives us that bottom back. The control now rides at the
+     foot of whichever page is showing and travels with the customer, which
+     also hands back the 117px of permanent bottom furniture the strip and the
+     section bar were costing between them on a small phone.
+
+     An anchor rather than a button element, because it goes somewhere and
+     should still go there with the script broken, middle-clicked or opened in
+     a new tab. It is dressed as a button, which is what was asked for and what
+     the rest of this flow does with anything worth pressing. */
+  var helpUI = (function () {
+    var wrap = document.createElement('p');
+    wrap.className = 'pagehelp';
+
+    var link = document.createElement('a');
+    link.className = 'pagehelp__btn';
+    link.href = '#help';
+    link.setAttribute('data-panel-link', '');
+    link.textContent = 'How this works';
+
+    wrap.appendChild(link);
+    return wrap;
+  })();
+
+  /* Moved rather than rebuilt, so there is only ever one of these in the
+     document however many times the customer goes back and forth. */
+  function placeHelp(node) {
+    if (!node) {
+      if (helpUI.parentNode) helpUI.parentNode.removeChild(helpUI);
+      return;
+    }
+    if (helpUI.parentNode !== node) node.appendChild(helpUI);
+  }
+
   function goTo(id) {
     if (PAGES.indexOf(id) === -1) return;
     prepare(id);
@@ -1638,6 +1678,7 @@
     el.send.disabled = Object.keys(reach).length === 0;
 
     placeReset(page === 'step-vin' && forkTaken ? node : null);
+    placeHelp(node);
   }
 
   /* Whether the page showing has been answered well enough to leave. Only the
@@ -1699,6 +1740,14 @@
 
   PAGES.forEach(function (p) { var node = $(p); if (node) node.hidden = true; });
   if (el.start) el.start.addEventListener('click', startQuote);
+
+  /* The opening screen is not one of the pages, so syncNav never reaches it.
+     It is also the screen where "How this works" earns its place most: the
+     panel behind it answers "do I have to use this" and "does anything send
+     before I say so", which are the questions somebody has BEFORE they press
+     anything. From the first press onwards syncNav takes over and carries it
+     from page to page. */
+  if (el.greeting && el.greeting.parentNode) placeHelp(el.greeting.parentNode);
 
   // Temporary, until a channel is wired: lets the outgoing record be inspected.
   window.__lastRequest = function () { return lastRequest; };

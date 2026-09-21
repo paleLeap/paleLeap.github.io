@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="b10350aedd">
+<meta name="build" content="550b8a9f36">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=2ba40f5e">
+<link rel="stylesheet" href="css/style.css?v=a6290271">
 </head>
 <body>
 
@@ -666,25 +666,10 @@
 <!-- Bottom right corner, in the logo's orange, very faint. -->
 <a class="aboutcorner" href="#about">About us.</a>
 
-<!-- Pinned to the bottom edge for the whole of the quote, gate included, and
-     it never moves: it is the one thing on the page whose entire job is to be
-     there at the moment somebody stops being sure.
-
-     Owner instruction, and the reasoning is theirs: "if at any point they get
-     confused or apprehensive they can open it". A link that has to be scrolled
-     to is not that. It answers the questions people actually stall on, which
-     are "do I have to use this", "does anything send before I say so" and "is
-     that car mine", so it earns a permanent place in a way no other secondary
-     link on this site does.
-
-     It sits BELOW the section bar rather than above it. The section bar comes
-     and goes with the scroll; this does not, so the constant thing takes the
-     fixed edge and the intermittent thing stacks on top of it. The other way
-     round, the help link would shift up the screen every time the bar faded
-     in, which is exactly what "constant" rules out. -->
-<div class="helpdock">
-  <a class="helpdock__link" href="#help" data-panel-link>How this works</a>
-</div>
+<!-- "How this works" was a fixed strip pinned along the bottom edge here. It
+     rides with the flow now instead: app.js moves one control to the foot of
+     whichever page is showing, so it follows the customer through rather than
+     sitting on the glass in front of them. See placeHelp in app.js. -->
 
 <nav class="dock" aria-label="Sections">
   <a href="#quote">quote</a>
@@ -698,6 +683,6 @@
 <script src="js/landing.js?v=adea0fe6"></script>
 <script src="js/vin.js?v=546382b1"></script>
 <script src="js/glass.js?v=7b7553fa"></script>
-<script src="js/app.js?v=a660b5a8"></script>
+<script src="js/app.js?v=36649463"></script>
 </body>
 </html>

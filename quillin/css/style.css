@@ -61,10 +61,6 @@
   --ease: cubic-bezier(.22, .61, .36, 1);
   --col: 44rem;
 
-  /* The height of the permanent help strip. Two fixed elements stack on this
-     one number, so it lives here rather than being written out twice and
-     drifting. Overridden on a phone, where the strip is trimmed. */
-  --helpdock-h: 3.25rem;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -231,10 +227,9 @@ body {
   transition: opacity .17s ease;
   max-width: var(--col);
   margin: 0 auto;
-  /* The bottom value clears the fixed furniture: the permanent help strip, and
-     the section bar stacked on top of it. Without it the last answer in the
-     flow sits underneath them and cannot be scrolled to. */
-  padding: clamp(2.5rem, 8vh, 5rem) clamp(1.5rem, 5vw, 2rem) 9rem;
+  /* The bottom value clears the section bar, which is fixed. It was 9rem when
+     a help strip was pinned underneath that bar as well. */
+  padding: clamp(2.5rem, 8vh, 5rem) clamp(1.5rem, 5vw, 2rem) 7rem;
 }
 
 .flow.is-leaving { opacity: 0; }
@@ -630,56 +625,15 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 /* Hidden until the page is actually at its end. The logo strip is the nav for
    everyday use; this is the one that catches you when you have read to the
    bottom and are looking for what is next. */
-/* ---------- the permanent help strip ----------
+/* The permanent help strip lived here: a fixed bar along the bottom edge
+   carrying "How this works", with the section bar stacked on top of it. It was
+   the right answer while the quote was one long scrolling column, where there
+   is no reliable "bottom of what you are reading" to put anything at.
 
-   Always on, for the whole of the quote. See the note in the markup for why
-   this one link gets treatment nothing else on the site gets.
-
-   Shown only while the quote is open. On services, guarantee, about or contact
-   there is no flow to be lost in, and on the help panel itself it would be a
-   link to the page you are already reading. */
-.helpdock {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 9;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  /* Pinned to --helpdock-h rather than sized by its contents, because the
-     section bar is positioned off that number and the two must not disagree.
-     The safe area is added on top, outside the height the bar sits above. */
-  height: var(--helpdock-h);
-  padding: 0 1rem env(safe-area-inset-bottom, 0px);
-  background: var(--bg);
-  border-top: 1px solid var(--line);
-}
-
-body.on-quote .helpdock { display: flex; }
-
-/* Stretched to the full height of the strip rather than sized by its own text.
-   Centred vertically it came out 36px tall, under the 44px floor this site
-   holds every other target to, and this one is meant to be easy to hit by
-   somebody who is already unsure. */
-.helpdock__link {
-  display: flex;
-  align-items: center;
-  align-self: stretch;
-  font-size: 1.0625rem;
-  font-weight: 400;
-  color: var(--ink-dim);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-decoration-color: var(--line-2);
-  text-underline-offset: .32em;
-  padding: 0 .75rem;
-  transition: color .2s var(--ease), text-decoration-color .2s var(--ease);
-}
-
-.helpdock__link:hover { color: var(--ink); text-decoration-color: var(--orange); }
-
-.helpdock__link:active { color: var(--orange); text-decoration-color: var(--orange); }
+   With one page on screen at a time there is. The control sits at the foot of
+   the live page now and travels with it, so it costs no fixed chrome at all:
+   that strip and the bar above it were taking 117px off a 320x640 screen, 18%
+   of it, on every question. See .pagehelp below and placeHelp in app.js. */
 
 .dock {
   position: fixed;
@@ -711,9 +665,8 @@ body.on-quote .helpdock { display: flex; }
 
 .dock.is-shown { opacity: 1; transform: none; pointer-events: auto; }
 
-/* Only on the quote, because that is the only place the strip below it is
-   drawn. Anywhere else the bar keeps the bottom edge to itself. */
-body.on-quote .dock { bottom: calc(var(--helpdock-h) + env(safe-area-inset-bottom, 0px)); }
+/* The bar has the bottom edge to itself again, on every view. It used to be
+   lifted clear of the help strip that was pinned underneath it. */
 
 /* About sits apart from the other four. They are all the service; this one is
    the people behind it, so it gets its own side of a rule rather than queueing
@@ -918,6 +871,52 @@ body.on-quote .dock { bottom: calc(var(--helpdock-h) + env(safe-area-inset-botto
    question, and an outline around a heading nobody clicked reads as an error
    to everybody else. */
 .step__label:focus { outline: none; }
+
+/* ---------- "How this works", at the foot of the live page ----------
+
+   One element, moved by app.js to the bottom of whichever page is showing, so
+   it follows the customer through the flow instead of sitting on the glass in
+   front of them. Owner instruction: at the bottom of the information currently
+   being displayed, not as bright, and a button.
+
+   Below the Back / Continue row rather than in it. It is not part of the
+   decision those two are offering, and a third control in that row would read
+   as a third way onwards.
+
+   Dim on purpose, and dimmer than anything else here: --faint on the border,
+   --muted on the words. It has to be findable by somebody who has gone looking
+   and invisible to somebody who has not. */
+.pagehelp {
+  display: flex;
+  justify-content: center;
+  margin: 1.75rem 0 0;
+}
+
+.pagehelp__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  min-height: 2.75rem;
+  padding: .5rem 1.125rem;
+  border: 1px solid var(--faint);
+  border-radius: 2px;
+  background: none;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease);
+}
+
+.pagehelp__btn:hover {
+  color: var(--ink);
+  border-color: var(--line-2);
+  background: rgba(255, 255, 255, .03);
+}
+
+.pagehelp__btn:active { color: var(--orange); border-color: var(--orange); }
 
 /* ---------- the page footer ----------
 
@@ -1762,15 +1761,10 @@ a, button, label, select, input, textarea, summary {
   .top__tel { font-size: .875rem; }
 
   /* Clears the persistent bar plus the home indicator. */
-  /* The bar is permanent on a phone, so the flow clears the bar AND the strip
-     under it at all times, not only at the end of a scroll. */
-  .flow { padding-top: 2rem; padding-bottom: 10.5rem; }
+  /* The bar is permanent on a phone, so the flow clears it at all times rather
+     than only at the end of a scroll. */
+  .flow { padding-top: 2rem; padding-bottom: 7.5rem; }
 
-  /* Trimmed, because here it is the second piece of permanent bottom chrome
-     rather than the only one. */
-  :root { --helpdock-h: 2.875rem; }
-
-  .helpdock__link { font-size: 1rem; }
 
   .greeting h1 { font-size: clamp(1.75rem, 9vw, 2.25rem); }
 
