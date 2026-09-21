@@ -366,9 +366,6 @@ body.on-quote #step-vin .helppanel { max-width: 26rem; margin-left: auto; margin
 
 body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-right: auto; text-align: left; }
 
-/* once folded, the VIN row is a record again and sits left like the rest */
-body.on-quote #step-vin.is-folded { text-align: left; }
-
 /* .under is still used by the "That it?" button further down the flow. The
    VIN step's contact link, which also wore it, has gone back to the top right
    corner where it was already being offered. */
@@ -888,7 +885,87 @@ body.on-quote .dock { bottom: calc(var(--helpdock-h) + env(safe-area-inset-botto
 
 /* position: relative so a reopened step can carry its own close control in
    the corner without that control joining the flow and shifting the layout. */
-.step { margin-top: 3rem; position: relative; }
+/* ---------- a step is a page ----------
+
+   Steps used to stack: each one 3rem below the last, the answered ones folded
+   to a row, the whole request growing down the document as it was filled in.
+   One is on screen at a time now, so there is nothing to space it from. The
+   margin is gone and the page simply starts where the column starts.
+
+   min-height so a short question and a tall one do not make the footer jump up
+   and down the screen between pages. Not 100%: the header, the help strip and
+   the column's own padding are all outside it, and a page that reserves the
+   whole viewport pushes its own footer below the fold on a phone. */
+.step {
+  margin-top: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 26rem;
+}
+
+/* Each page arrives with a fade and nothing else. Movement would compete with
+   the thing being read, and there is no direction to travel in that means
+   anything: the customer pressed a button, the question changed. */
+.step.is-page { animation: fadeIn .28s var(--ease) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .step.is-page { animation: none; }
+}
+
+/* The question a page asks does not get a focus ring. It is given tabindex -1
+   and focused on every page change, so a screen reader announces the new
+   question, and an outline around a heading nobody clicked reads as an error
+   to everybody else. */
+.step__label:focus { outline: none; }
+
+/* ---------- the page footer ----------
+
+   Back on the left, the way on at the right, on every page that has them. It
+   sits at the BOTTOM of the page box rather than under the content, so it is in
+   the same place on the short pages and the tall ones. */
+.pagenav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 2.5rem;
+}
+
+/* Only Back, so it stays left rather than stretching across. */
+.pagenav:has(> :only-child) { justify-content: flex-start; }
+
+/* Quiet, and it carries an arrow because "Back" on its own is a word and an
+   arrow is a direction. Not a .plainlink: an underline here would make it look
+   like the same kind of thing as "Need help finding your VIN?", which opens
+   something rather than leaving. */
+.pageback {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  min-height: 2.75rem;
+  padding: .5rem .75rem .5rem 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 1.0625rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color .2s var(--ease);
+}
+
+.pageback::before { content: "\2190"; font-size: 1.25em; line-height: 1; }
+
+.pageback:hover { color: var(--ink); }
+
+.pageback:active { color: var(--orange); }
+
+/* The primary answer on the pages that word their own: "Yes, that's my
+   vehicle", "Yes, that's right", "Send my request". Above the footer, not in
+   it, because it is the answer to the question rather than a way out of it. */
+.confirm__do { margin: 2rem 0 0; }
 
 /* The `hidden` attribute is only `display: none` in the USER AGENT stylesheet,
    which every author rule outranks. Any element given a display here, and most
@@ -970,101 +1047,12 @@ a, button, label, select, input, textarea, summary {
   to   { opacity: 1; }
 }
 
-/* ---------- folded steps ----------
-   Answered, a step is one line: what it was, and what you said. */
-
-.step__folded {
-  display: none;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: 0;
-  border-top: 1px solid var(--line);
-  padding: .8125rem 0;
-  margin: 0;
-  font: inherit;
-  cursor: pointer;
-  align-items: baseline;
-  gap: 1.5rem;
-  transition: border-color .3s var(--ease);
-}
-
-.step.is-folded { margin-top: 0; }
-
-.step.is-folded > .step__folded { display: flex; }
-
-.step.is-folded > *:not(.step__folded) { display: none; }
-
-/* 10px capitals at .18em tracking in the faintest grey on the page. These rows
-   are how a customer finds the answer they want to change, so they have to be
-   readable, not merely present. Kept as capitals because they are a structural
-   label rather than a sentence, but at a size and a tracking that can be read
-   at a glance. */
-.step__folded-name {
-  flex: none;
-  width: 7rem;
-  font-size: .8125rem;
-  font-weight: 500;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  transition: color .25s var(--ease);
-}
-
-/* A folded step is a record, not a question, so it sits dimmer than the live
-   one above it. */
-.step__folded-value {
-  font-size: 1.0625rem;
-  font-weight: 400;
-  color: var(--ink-dim);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transition: color .25s var(--ease);
-}
-
-/* The third column of a folded row. The row was already a button, but nothing
-   on it said so, so a stack of answered steps read as a receipt rather than as
-   a set of previous questions you can still go back into. */
-.step__folded-do {
-  flex: none;
-  margin-left: auto;
-  font-size: .9375rem;
-  font-weight: 500;
-  letter-spacing: 0;
-  color: var(--orange);
-  transition: color .25s var(--ease);
-}
-
-.step__folded:hover { border-color: var(--line-2); }
-.step__folded:hover .step__folded-name { color: var(--orange); }
-.step__folded:hover .step__folded-value { color: var(--ink); }
-.step__folded:hover .step__folded-do { color: var(--ink); }
-
-/* Reopened, a previous step needs a way back. Hidden unless the step is
-   actually being edited: on the live question there is nothing to close, and
-   on a folded one the whole row already is the control. */
-.step__collapse {
-  display: none;
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 1;
-  background: none;
-  border: 0;
-  padding: .4375rem 0 .4375rem .875rem;
-  font: inherit;
-  font-size: .9375rem;
-  font-weight: 500;
-  letter-spacing: 0;
-  color: var(--muted);
-  cursor: pointer;
-  transition: color .2s var(--ease);
-}
-
-.step__collapse:hover { color: var(--orange); }
-
-.step.is-editing > .step__collapse { display: block; }
+/* The folded-step block lived here: an answered step collapsed to one row
+   showing what it was and what you said, clickable to reopen. It went with the
+   stacking flow it belonged to. In a page-at-a-time wizard there is nothing to
+   fold, because there is never more than one step on screen, and going back to
+   change an answer is the Back button rather than a row you have to know is a
+   control. See notes/01-decisions.md. */
 
 /* ---------- the vin ---------- */
 
@@ -1541,7 +1529,7 @@ a, button, label, select, input, textarea, summary {
 
   .choice { min-height: 3.75rem; padding: 1.125rem 1rem; }
 
-  .choice--compact { min-height: 3.25rem; padding: .875rem; font-size: 1.0625rem; }
+  .choice--compact { min-height: 3rem; padding: .625rem .5rem; font-size: 1.0625rem; }
 
   .brandnav a { padding: .75rem .875rem; }
 
@@ -1550,18 +1538,6 @@ a, button, label, select, input, textarea, summary {
   .btn { padding: 1rem 1.5rem; }
 
   .btn--small { padding: .75rem 1.125rem; }
-
-  /* The third column costs width, and a 17 character VIN was the first thing
-     to lose it: the value started truncating on a phone where it used to read
-     in full. The label column and the gaps give the room back. */
-  .step__folded { padding: 1rem 0; gap: 1rem; }
-
-  /* Narrower than the desktop 7rem, because the third column costs width and a
-     17 character VIN is the first thing to lose it. Still wide enough for the
-     longest label at the new size. */
-  .step__folded-name { width: 5.5rem; }
-
-  .step__collapse { padding: .875rem 0 .875rem 1.25rem; min-height: 2.75rem; }
 
   /* An inline link inside a sentence cannot be made 44px tall without opening
      up the line spacing around it. Padding grows the hit area and an equal
@@ -1584,7 +1560,26 @@ a, button, label, select, input, textarea, summary {
   /* dvh, not vh. Mobile browser chrome grows and shrinks, and vh is frozen to
      the largest viewport, so a vh-sized stage pushes content under the toolbar
      on first paint and then jumps. */
-  .picker__stage { height: clamp(15rem, 42dvh, 20rem); }
+  /* Cut hard on a phone. The picker page is the one screen in the flow that
+     cannot be made to fit: a 3D model plus eleven named windows plus a way to
+     describe it in words instead is more than 812px however it is arranged.
+     So the model gets the smallest height it is still usable at, and the page
+     is allowed to scroll rather than the list being made unreadable to save
+     it. Measured at 375x812: 1089px before this, ~900 after. */
+  .picker__stage { height: clamp(9rem, 24dvh, 12.5rem); }
+
+  /* The footer does not need 40px of air above it on a phone. */
+  .pagenav { padding-top: 1.5rem; }
+
+  /* Two lines of a wrapped pane name do not need 14px above and below them. */
+  .choice--compact { padding: .625rem .5rem; }
+
+  /* The confirmation page is a list to be read down, so some scroll here is
+     honest rather than a failure. It still should not be padded like a desktop
+     table. */
+  .summary dt { padding: .625rem 0 .125rem; }
+
+  .summary dd { padding-bottom: .625rem; }
 
   /* Two narrow columns rather than one long one. Eleven panels in a single
      column put the list at about 500px under an already tall canvas. */

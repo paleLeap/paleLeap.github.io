@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="211d731b0e">
+<meta name="build" content="d79328afa3">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=7159767c">
+<link rel="stylesheet" href="css/style.css?v=02ace56a">
 </head>
 <body>
 
@@ -182,6 +182,9 @@
     <fieldset class="choices" id="spec-choices">
       <legend class="visually-hidden">Vehicle specifics</legend>
     </fieldset>
+    <nav class="pagenav" aria-label="Step">
+      <button type="button" class="pageback" data-back>Back</button>
+    </nav>
   </section>
 
   <!-- step 3: confirm -->
@@ -189,8 +192,13 @@
     <p class="step__label" id="confirm-label">Did we get that right?</p>
     <p class="confirm__vehicle" id="confirm-vehicle"></p>
     <p class="confirm__detail" id="confirm-detail"></p>
-    <button type="button" class="btn" id="confirm-yes">Yes, that&rsquo;s my vehicle</button>
-    <button type="button" class="btn btn--quiet" id="confirm-no">No, start over</button>
+    <p class="confirm__do">
+      <button type="button" class="btn" id="confirm-yes">Yes, that&rsquo;s my vehicle</button>
+    </p>
+    <nav class="pagenav" aria-label="Step">
+      <button type="button" class="pageback" data-back>Back</button>
+      <button type="button" class="plainlink" id="confirm-no">No, start over</button>
+    </nav>
   </section>
 
   <!-- step 4: glass selection (3d picker lands here) -->
@@ -221,12 +229,33 @@
       <p class="note" id="tellus-note" role="status" aria-live="polite" hidden></p>
     </div>
 
-    <!-- Only when the windshield is among the chosen glass. A chip and a
-         replacement are the same workflow but very different jobs, and it is
-         the single most common question the shop has to ask back. -->
-    <!-- Asked once per piece of glass the customer picked, in order, and each
-         answer collapses to a line so the question can be reused for the next
-         one. -->
+    <!-- This page cannot advance on its own. Picking a pane is an act of
+         pointing, not an act of finishing, and a second window may still be
+         broken; the customer says when they are done. -->
+    <nav class="pagenav" aria-label="Step">
+      <button type="button" class="pageback" data-back>Back</button>
+      <button type="button" class="btn" data-next disabled>Continue</button>
+    </nav>
+  </section>
+
+  <!-- step 4b: chip or crack, one piece of glass at a time.
+
+       This used to hang off the bottom of the picker page, under the model and
+       the list of eleven windows. That page was the one place in the flow that
+       still could not be seen without scrolling on a phone, and this was most
+       of the reason why: a second question, with its own three answers and its
+       own running list of what had already been settled, below a question that
+       was already the tallest on the site.
+
+       It is also just a different question. A chip and a replacement are the
+       same workflow and very different jobs, and it is the single most common
+       thing the shop has to ring back about, so it deserves being asked on its
+       own rather than underneath something else.
+
+       Answered pieces collapse to a line at the top and the question re-asks
+       itself for the next one, so somebody with three broken windows sees one
+       set of radio buttons three times instead of three sets at once. -->
+  <section class="step" id="step-chip" hidden aria-labelledby="chip-label">
     <ul class="answered plain" id="chip-done" hidden></ul>
 
     <div class="subq" id="chipq" hidden>
@@ -236,6 +265,10 @@
       </fieldset>
     </div>
 
+    <nav class="pagenav" aria-label="Step">
+      <button type="button" class="pageback" data-back>Back</button>
+      <button type="button" class="btn" data-next disabled>Continue</button>
+    </nav>
   </section>
 
   <!-- There was a "What kind of damage will we be repairing?" dropdown here,
@@ -248,14 +281,24 @@
   <!-- step 4c: photographs -->
   <section class="step" id="step-photos" hidden aria-labelledby="photos-label">
     <p class="step__label" id="photos-label">Photos help the most, have any?</p>
+    <p class="step__hint">One clear picture of the break tells us more than
+      anything else you can send. If you haven&rsquo;t got one, carry on.</p>
 
     <p style="margin:0">
-      <button type="button" class="btn" id="add-photos">Upload images</button>
-      <button type="button" class="btn btn--quiet" id="no-photos">No images</button>
+      <button type="button" class="btn btn--alt" id="add-photos">Upload images</button>
     </p>
     <input type="file" id="photo-input" accept="image/*" multiple hidden>
     <ul class="shots" id="shots" hidden></ul>
     <p class="note" id="photo-note" role="status" aria-live="polite" hidden></p>
+
+    <!-- "No images" used to be a button of its own beside "Upload images",
+         which made two ways forward out of one question. Continue is the way
+         forward; pressing it with nothing attached IS the answer "no", and the
+         request still records that it was declined rather than skipped. -->
+    <nav class="pagenav" aria-label="Step">
+      <button type="button" class="pageback" data-back>Back</button>
+      <button type="button" class="btn" data-next>Continue</button>
+    </nav>
   </section>
 
   <!-- step 5: timing -->
@@ -265,30 +308,56 @@
       <legend class="visually-hidden">How soon do you need this fixed?</legend>
     </fieldset>
 
-    <!-- "That it?" lives here now, after the photographs and after the timing,
-         so it asks the question it sounds like it is asking: is that the whole
-         job? It used to sit under the glass picker, where it only ever meant
-         "finished picking windows". -->
-    <p style="margin:1.25rem 0 0">
-      <button type="button" class="btn" id="submit-damage" disabled>That it?</button>
-    </p>
+    <!-- "That it?" was here, meaning "is that the whole job". In a flow that
+         shows one question at a time it has nothing left to ask: the job was
+         settled two pages ago and this page has a single answer, so choosing
+         one is finishing. -->
+    <nav class="pagenav" aria-label="Step">
+      <button type="button" class="pageback" data-back>Back</button>
+    </nav>
   </section>
 
-  <!-- step 6: review -->
+  <!-- step 6: the confirmation page.
+
+       The last place a wrong answer can be caught before it reaches somebody
+       standing in a driveway with the wrong windshield. It asks one question
+       about the whole request and does nothing else: how to reach you is its
+       own page, after this one is agreed. -->
   <section class="step" id="step-review" hidden aria-labelledby="review-label">
-    <p class="step__label" id="review-label">Here&rsquo;s what we have</p>
+    <p class="step__label" id="review-label">Does this look right?</p>
 
     <dl class="summary" id="summary"></dl>
 
-    <p class="step__label" style="margin:1.5rem 0 .625rem">How would you like to receive your quote?</p>
+    <p class="confirm__do">
+      <button type="button" class="btn" id="review-yes">Yes, that&rsquo;s right</button>
+    </p>
+    <nav class="pagenav" aria-label="Step">
+      <button type="button" class="pageback" data-back>Back</button>
+    </nav>
+  </section>
+
+  <!-- step 7: how to reach you.
+
+       Split off the review, where it used to sit underneath the summary. It is
+       a different question from "is this correct", it is the one thing the shop
+       cannot work without, and on its own page it gets asked properly instead
+       of being the small print at the bottom of a receipt. -->
+  <section class="step" id="step-reach" hidden aria-labelledby="reach-label">
+    <p class="step__label" id="reach-label">How would you like to receive your quote?</p>
+    <p class="step__hint">Pick any that suit you. We only use this to send your
+      quote back.</p>
+
     <fieldset class="choices" id="send-where">
       <legend class="visually-hidden">How would you like to receive your quote?</legend>
     </fieldset>
 
-    <p style="margin:1.25rem 0 0">
-      <button type="button" class="btn" id="send-request" disabled>Looks right, send it</button>
+    <p class="confirm__do">
+      <button type="button" class="btn" id="send-request" disabled>Send my request</button>
     </p>
     <p class="note" id="send-note" role="status" aria-live="polite" hidden></p>
+    <nav class="pagenav" aria-label="Step">
+      <button type="button" class="pageback" data-back>Back</button>
+    </nav>
   </section>
 
   </section>
@@ -624,6 +693,6 @@
 <script src="js/landing.js?v=adea0fe6"></script>
 <script src="js/vin.js?v=546382b1"></script>
 <script src="js/glass.js?v=7b7553fa"></script>
-<script src="js/app.js?v=85386180"></script>
+<script src="js/app.js?v=c5dc5cb8"></script>
 </body>
 </html>

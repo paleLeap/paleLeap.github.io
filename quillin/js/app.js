@@ -32,6 +32,7 @@
     cYes:      $('confirm-yes'),
     cNo:       $('confirm-no'),
     glass:     $('step-glass'),
+    chip:      $('step-chip'),
     glassLabel: $('glass-label'),
     declineNote: $('decline-note'),
     chipQ:     $('chipq'),
@@ -49,13 +50,13 @@
     tellNote:  $('tellus-note'),
     when:      $('step-when'),
     whenChoices: $('when-choices'),
+    reach:     $('step-reach'),
+    reviewYes: $('review-yes'),
     photos:    $('step-photos'),
     addPhotos: $('add-photos'),
-    noPhotos:  $('no-photos'),
     photoInput: $('photo-input'),
     shots:     $('shots'),
     photoNote: $('photo-note'),
-    submit:    $('submit-damage'),
     review:    $('step-review'),
     greeting:  document.querySelector('.greeting h1'),
     start:     $('start-quote'),
@@ -117,7 +118,30 @@
 
      Checkboxes, not radios. Someone may well want a text and an email, and
      nothing about picking one rules out another. */
+  /* How Quillin gets back to the customer, and the detail needed to do it.
+
+     Three, and the owners named them: email, text, call. Instagram and Facebook
+     were here too, on the reasoning that a shop which gets messages there should
+     be able to answer there. They are gone. A quote is a number and a date, and
+     the two handles were the only options on this list that could not carry one
+     reliably, which made them four ways to say the same thing rather than three
+     clear ones.
+
+     This is the shop reaching OUT, not the customer choosing a postbox, so each
+     option carries the customer's own handle rather than Quillin's. It is the
+     contact information the request had been missing all along: a perfect glass
+     specification with no way to reach anybody is not an actionable job.
+
+     Checkboxes, not radios. Someone may well want a text and an email, and
+     nothing about picking one rules out another. */
   var CHANNELS = [
+    {
+      value: 'email', label: 'Email', type: 'email',
+      placeholder: 'you@example.com', autocomplete: 'email',
+      clean: function (v) { return v.trim(); },
+      ok: function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()); },
+      error: 'That does not look like an email address.'
+    },
     {
       value: 'text', label: 'Text message', type: 'tel',
       placeholder: '(214) 555 0142', autocomplete: 'tel',
@@ -129,25 +153,14 @@
       error: 'That needs to be a 10 digit number.'
     },
     {
-      value: 'email', label: 'Email', type: 'email',
-      placeholder: 'you@example.com', autocomplete: 'email',
-      clean: function (v) { return v.trim(); },
-      ok: function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()); },
-      error: 'That does not look like an email address.'
-    },
-    {
-      value: 'instagram', label: 'Instagram', type: 'text',
-      placeholder: '@yourhandle', autocomplete: 'off',
-      clean: function (v) { return v.trim().replace(/^@+/, ''); },
-      ok: function (v) { return /^[\w.]{1,30}$/.test(v.trim().replace(/^@+/, '')); },
-      error: 'Add your Instagram handle.'
-    },
-    {
-      value: 'facebook', label: 'Facebook', type: 'text',
-      placeholder: 'Your name on Facebook', autocomplete: 'off',
-      clean: function (v) { return v.trim(); },
-      ok: function (v) { return v.trim().length >= 2; },
-      error: 'Add the name on your Facebook account.'
+      value: 'call', label: 'A phone call', type: 'tel',
+      placeholder: '(214) 555 0142', autocomplete: 'tel',
+      clean: function (v) { return v.replace(/[^\d]/g, ''); },
+      ok: function (v) {
+        var d = v.replace(/[^\d]/g, '');
+        return d.length === 10 || (d.length === 11 && d.charAt(0) === '1');
+      },
+      error: 'That needs to be a 10 digit number.'
     }
   ];
 
@@ -321,7 +334,6 @@
     if (step <= 5) {
       hide(el.when);
       urgency = null;
-      el.submit.disabled = true;
       Array.prototype.forEach.call(
         el.whenChoices.querySelectorAll('input'),
         function (i) { i.checked = false; }
@@ -329,11 +341,12 @@
     }
     if (step <= 6) {
       hide(el.review);
+      hide(el.reach);
       el.summary.innerHTML = '';
       hide(el.sendNote);
       reach = {};
       el.send.disabled = true;
-      el.send.textContent = 'Looks right, send it';
+      el.send.textContent = 'Send my request';
       Array.prototype.forEach.call(
         el.sendWhere.querySelectorAll('input'),
         function (i) { if (i.type === 'checkbox') i.checked = false; else i.value = ''; }
@@ -390,7 +403,7 @@
     takeFork();
     show(el.field);
     show(el.helpask);
-    restack();
+    syncNav();
     /* Not on a touch screen: a keyboard thrown up the instant the button is
        released covers the branch that was just revealed. Same reasoning as the
        start button. */
@@ -492,7 +505,7 @@
     fillManual();
     slideOpen(el.manual);
     el.noVin.setAttribute('aria-expanded', 'true');
-    restack();
+    syncNav();
   }
 
   function shutManual() {
@@ -511,7 +524,7 @@
     el.mModel.disabled = true;
     vehicle = null;
     resetBelow(2);
-    restack();
+    syncNav();
   }
 
   function fillManual() {
@@ -604,10 +617,8 @@
       ' is not work we take on. If there’s another vehicle we can help with, ' +
       'or you think we have this wrong, leave us a message and we’ll come back to you.';
     el.declineNote.hidden = false;
-    reveal(el.glass);
     show(el.tellus);
-    show(el.photos);
-    restack();
+    goTo('step-glass');
   }
 
   /* Puts the damage step back to normal. Called before every fresh lookup,
@@ -730,7 +741,6 @@
            confirm: body style first, then anything still outstanding. */
         if (questionsFor(v, noVin).length) { askSpecifics(v, noVin); return; }
         askConfirm(v);
-        restack();
       });
 
       var span = document.createElement('span');
@@ -741,7 +751,8 @@
       el.specChoices.appendChild(label);
     });
 
-    reveal(el.specifics);
+    specificsAsked = true;
+    goTo('step-specifics');
   }
 
   /* ---------- step 3: confirm ---------- */
@@ -760,7 +771,7 @@
     /* No driver assist line here. See buildSummary: anything we infer about ADAS
        from the VIN goes to Quillin, not to the customer. */
     el.cDetail.textContent = bits.join(' · ');
-    reveal(el.confirm);
+    goTo('step-confirm');
   }
 
   el.cYes.addEventListener('click', function () {
@@ -770,14 +781,8 @@
     var r = Glass.resolve(vehicle);
     if (r.unsupported) { declineVehicle(vehicle, r); return; }
 
-    reveal(el.glass);
+    goTo('step-glass');
     openPicker();
-    /* Shown at the same time as the picker, not gated behind it. Photographs are
-       the most useful thing a customer can send, so the ask sits in plain view
-       from the start rather than appearing only after they have done something
-       else, and anyone who would rather send a picture than rotate a car can do
-       exactly that. */
-    show(el.photos);
   });
 
   /* ---------- step 4: the picker ---------- */
@@ -889,7 +894,6 @@
     panels = next || [];
     syncChipQuestion();
     afterDamageChange();
-    restack();
   }
 
   /* Asked only when it can matter. Nobody picking a door glass should be shown
@@ -956,7 +960,7 @@
       input.addEventListener('change', function () {
         damageKind[next] = opt.value;
         syncChipQuestion();      // straight on to the next piece of glass
-        advance();
+        syncNav();
       });
 
       var span = document.createElement('span');
@@ -999,14 +1003,12 @@
   /* An explicit no. The heading asks a question, so it needs a second answer;
      without one the only way past is to ignore the step, which leaves the
      customer unsure whether they have missed something. */
-  el.noPhotos.addEventListener('click', function () {
-    noPhotos = true;
-    clearPhotos();
-    advance();
-    say2(damageGiven()
-      ? 'No problem! Let\'s continue...'
-      : 'No problem. Tell us which glass is damaged above and we can carry on.');
-  });
+  /* There was a "No images" button beside "Upload images" here, which made two
+     ways forward out of one question. Continue is the only way forward now, and
+     pressing it with nothing attached IS the answer "no": see the [data-next]
+     handler, which sets noPhotos in exactly that case. The request still tells
+     the two apart, because "said no" and "never got this far" are different
+     things to a shop reading it. */
 
   el.photoInput.addEventListener('change', function () {
     addPhotos(Array.prototype.slice.call(el.photoInput.files));
@@ -1036,7 +1038,6 @@
 
     drawPhotos();
     afterDamageChange();
-    restack();
 
     if (skipped.length) {
       say2(skipped.slice(0, 2).join('. ') + '.', 'warn');
@@ -1098,28 +1099,21 @@
 
   function photosDone() { return photos.length > 0 || noPhotos; }
 
-  function setShown(node, on) {
-    if (on) { if (node.hidden) reveal(node); }
-    else if (!node.hidden) hide(node);
-  }
+  /* Called whenever an answer changes. It no longer decides what is on screen,
+     because the router does that; it decides whether the way OFF the page you
+     are standing on is open yet, and it keeps the summary honest.
 
+     The split matters. Deciding what is reachable and deciding where somebody
+     is standing were the same function in the old flow, which is why changing
+     an answer could move the page out from under you. They are separate now,
+     and only a button press moves anybody. */
   function advance() {
-    var described = damageDone();
-    setShown(el.photos, described);
+    syncNav();
 
-    var withPhotos = described && photosDone();
-    if (withPhotos) askWhen(); else setShown(el.when, false);
-
-    var timed = withPhotos && !!urgency;
-    el.submit.disabled = !timed;
-
-    /* The review closes only when something it depends on is missing. Left
-       open otherwise, and rebuilt, so a change made after reaching it shows up
-       there instead of quietly going stale. */
-    if (!timed) hide(el.review);
-    else if (!el.review.hidden) { buildSummary(); buildChannels(); }
-
-    restack();
+    /* Rebuilt rather than left to go stale. Going Back from the confirmation
+       page to change a pane and returning has to show the change, and the
+       summary is cheap enough to rebuild on every answer. */
+    if (!el.review.hidden) buildSummary();
   }
 
   function say2(text, kind) {
@@ -1161,8 +1155,6 @@
     });
     if (photos.length) slideOpen(el.shots); else slideShut(el.shots);
     el.addPhotos.textContent = photos.length ? 'Add more images' : 'Upload images';
-    // "No images" makes no sense once there are images
-    el.noPhotos.hidden = photos.length > 0;
   }
 
   function removePhoto(i) {
@@ -1181,14 +1173,12 @@
     el.shots.innerHTML = '';
     el.shots.hidden = true;
     el.addPhotos.textContent = 'Upload images';
-    el.noPhotos.hidden = false;
     hide(el.photoNote);
   }
 
   /* ---------- step 5: timing ---------- */
 
-  function askWhen() {
-    if (!el.when.hidden) return;
+  function buildWhen() {
     // NB: the fieldset already contains a <legend>, so count inputs, not children.
     if (!el.whenChoices.querySelector('input')) {
       WHEN.forEach(function (opt) {
@@ -1204,7 +1194,11 @@
         input.value = opt.value;
         input.addEventListener('change', function () {
           urgency = opt;
-          advance();
+          /* One answer, and choosing it IS finishing this page, so it carries
+             the customer on rather than lighting up a button to press next. The
+             glass page deliberately does not do this: picking a pane is
+             pointing, not finishing, and a second window may still be broken. */
+          goTo('step-review');
         });
 
         var span = document.createElement('span');
@@ -1215,7 +1209,6 @@
         el.whenChoices.appendChild(label);
       });
     }
-    reveal(el.when);
   }
 
   /* A chip is repaired, not replaced. The customer's summary already said so;
@@ -1385,10 +1378,11 @@
     };
   }
 
-  el.submit.addEventListener('click', function () {
-    buildSummary();
-    buildChannels();
-    reveal(el.review);
+  /* "Does this look right?" agreed. The contact question is its own page from
+     here, which is the point of splitting it off: it is asked properly rather
+     than as the small print under a receipt. */
+  el.reviewYes.addEventListener('click', function () {
+    goTo('step-reach');
   });
 
   function buildChannels() {
@@ -1493,160 +1487,157 @@
      carries its own short noun for the folded state. The VIN row keeps the VIN
      and the confirm row keeps the vehicle, so the two never say the same thing
      twice. */
-  var DIGEST = {
-    'step-vin': { name: 'VIN', value: function () {
-      if (vehicle && !vehicle.vin) return 'Entered by hand';
-      return el.vin.value || '';
-    } },
-    'step-specifics': { name: 'Mirror', value: function () {
-      return { yes: 'Camera fitted', no: 'No camera', unsure: 'Not sure' }[answers.adas] || '';
-    } },
-    'step-confirm': { name: 'Vehicle', value: function () {
-      return vehicle ? vehicle.label : '';
-    } },
-    'step-glass': { name: 'Damage', value: function () {
-      var bits = [];
-      if (panels.length) {
-        var names = Glass.labelsFor(panels);
-        if (windshield === 'chip') names[panels.indexOf('windshield')] = 'Windshield chip';
-        bits.push(names.join(', '));
-      }
-      var typed = el.tellText.value.trim();
-      if (typed) bits.push(typed.length > 54 ? typed.slice(0, 51) + '\u2026' : typed);
-      return bits.join('. ');
-    } },
-    'step-photos': { name: 'Photos', value: function () {
-      if (photos.length) return photos.length + (photos.length === 1 ? ' image' : ' images');
-      return noPhotos ? 'None' : '';
-    } },
-    'step-when': { name: 'Timing', value: function () {
-      return urgency ? urgency.label.replace(/\.$/, '') : '';
-    } },
-    'step-review': { name: 'Review', value: function () { return ''; } }
-  };
+  /* ---------- the router ----------
 
-  function foldLine(step) {
-    var line = step.querySelector('.step__folded');
-    if (!line) {
-      line = document.createElement('button');
-      line.type = 'button';
-      line.className = 'step__folded';
-      line.addEventListener('click', function () {
-        var editing = step.classList.toggle('is-editing');
-        restack();
-        if (editing) step.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      });
-      step.insertBefore(line, step.firstChild);
-    }
+     One page on screen at a time, and the page is the question. Owner
+     instruction: "it should move page to page depending on what information is
+     needed, a smooth workflow and UX, nothing to scroll up and down to."
 
-    /* The way back out. Opening a folded answer used to be a one way door:
-       nothing on screen closed it again, and it stayed open until some later
-       answer happened to fold it. Built alongside the folded line because only
-       a step that has folded can ever be reopened. */
-    if (!step.querySelector('.step__collapse')) {
-      var shut = document.createElement('button');
-      shut.type = 'button';
-      shut.className = 'step__collapse';
-      shut.textContent = 'Close';
-      shut.addEventListener('click', function () {
-        step.classList.remove('is-editing');
-        restack();
-        /* Put the eye back on whatever is now the live question, but only if
-           it is off screen; the same rule reveal() uses, for the same reason. */
-        var open = Array.prototype.filter.call(
-          document.querySelectorAll('.step'),
-          function (x) { return !x.hidden && !x.classList.contains('is-folded'); });
-        var live = open[open.length - 1];
-        if (live) {
-          var r = live.getBoundingClientRect();
-          var vh = window.innerHeight || document.documentElement.clientHeight;
-          if (r.top < 0 || r.bottom > vh) {
-            live.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }
-        }
-      });
-      step.insertBefore(shut, step.firstChild);
-    }
+     What this replaces: every step used to stay on the page, and an answered
+     one folded down to a single row you could click to reopen. That is a good
+     design for somebody comfortable with a long form, and it is the wrong one
+     here. It meant the page grew with every answer, the thing being asked was
+     never in the same place twice, and by the timing question you were reading
+     the fifth screenful of a document whose first four screens were already
+     settled. Folding made it shorter; it did not make it one thing at a time.
 
-    var d = DIGEST[step.id] || { name: '', value: function () { return ''; } };
-    var name = d.name;
-    var value = d.value();
+     The rule the old flow was built on survives intact, and it is the reason
+     this could be swapped underneath it at all: what is on screen is DERIVED
+     from what has been answered, and nothing is ever cleared by moving. PAGES
+     below is the whole order; pagesFor() drops the ones this request does not
+     need; going back and changing an answer re-derives the rest rather than
+     destroying it. */
 
-    line.innerHTML = '';
-    var k = document.createElement('span');
-    k.className = 'step__folded-name';
-    k.textContent = name;
-    var val = document.createElement('span');
-    val.className = 'step__folded-value';
-    val.textContent = value;
-    /* Third column: what you can do about it. Without it the row read as a
-       receipt and nothing suggested the answer was still yours to change. */
-    var act = document.createElement('span');
-    act.className = 'step__folded-do';
-    act.textContent = 'Change';
-    line.appendChild(k);
-    line.appendChild(val);
-    line.appendChild(act);
-    line.setAttribute('aria-label', 'Change: ' + name +
-      (value ? ', currently ' + value : ''));
+  var PAGES = ['step-vin', 'step-specifics', 'step-confirm', 'step-glass',
+               'step-chip', 'step-photos', 'step-when', 'step-review',
+               'step-reach'];
+
+  var page = 'step-vin';
+
+  /* The pages this particular request actually has. Specifics is the only one
+     that can drop out: it exists when there is something about the vehicle that
+     neither the VIN nor the model name could settle, and most of the time there
+     is not. */
+  function pagesFor() {
+    return PAGES.filter(function (id) {
+      if (id === 'step-specifics') return !el.specifics.hidden || specificsAsked;
+      /* No panes picked means nothing to ask chip or crack about: somebody who
+         only described the break in words, or only sent a photograph, skips
+         this page in both directions. */
+      if (id === 'step-chip') return panels.length > 0;
+      return true;
+    });
   }
 
-  /* A step folds when it has been ANSWERED and something later is open.
+  /* Set when a question has actually been rendered into the specifics page, so
+     Back from the confirm page returns to it rather than skipping over a
+     question the customer answered. */
+  var specificsAsked = false;
 
-     Not "everything except the last visible step": the picker and the photo
-     question are revealed together, and that rule folded the picker the instant
-     it appeared, so the 3D model was never seen at all. An unanswered step is
-     still a question and stays open no matter what is below it. */
-  function restack() {
-    var steps = Array.prototype.filter.call(
-      document.querySelectorAll('.step'), function (s) { return !s.hidden; });
-    var last = steps[steps.length - 1];
+  /* Whatever a page needs in place before it is looked at.
 
-    /* The damage and photo steps are peers, revealed together, and neither is
-       finished until the customer presses "That it?". Without this they folded
-       the instant a pane was picked, which took the car off the screen mid
-       decision: the same complaint as auto-advancing, by another route. */
-    var stillChoosing = el.when.hidden;
+     This is here rather than spread across the handlers that navigate, because
+     a page can be arrived at from more than one direction: the timing page from
+     the photos page going forward and from the confirmation page going back,
+     and both have to find its choices built. The old flow had the same job
+     scattered through advance(), which is how a Back button would have found a
+     page half assembled. */
+  function prepare(id) {
+    if (id === 'step-chip') syncChipQuestion();
+    if (id === 'step-when') buildWhen();
+    if (id === 'step-review') buildSummary();
+    if (id === 'step-reach') buildChannels();
+  }
 
-    steps.forEach(function (s) {
-      var d = DIGEST[s.id];
-      var answered = !!(d && d.value());
-      var held = stillChoosing && (s === el.glass || s === el.photos);
-      var fold = answered && !held && s !== last && !s.classList.contains('is-editing');
-      if (fold) foldLine(s);
-      s.classList.toggle('is-folded', fold);
-      if (s === last) s.classList.remove('is-editing');
-      s.classList.toggle('is-live', !fold);
+  function goTo(id) {
+    if (PAGES.indexOf(id) === -1) return;
+    prepare(id);
+    page = id;
+
+    PAGES.forEach(function (p) {
+      var node = $(p);
+      if (!node) return;
+      var on = (p === id);
+      if (on) node.hidden = false; else node.hidden = true;
+      node.classList.toggle('is-page', on);
     });
 
-    var open = steps.filter(function (x) { return !x.classList.contains('is-folded'); });
-    placeReset(open[open.length - 1]);
-    greet();
+    syncNav();
+
+    /* Top of the page, every time. The whole point of this rework is that the
+       question is always in the same place, and landing halfway down a page
+       because the previous one was taller defeats that. Instant rather than
+       smooth: a smooth scroll on a page that has just been swapped underneath
+       you reads as the content sliding away. */
+    window.scrollTo({ top: 0, behavior: 'auto' });
+
+    /* Announced, because for a screen reader nothing about this looks like
+       navigation: the document did not change and focus did not move. */
+    var label = $(id).querySelector('.step__label');
+    if (label) {
+      label.setAttribute('tabindex', '-1');
+      label.focus({ preventScroll: true });
+    }
   }
 
-  /* The heading follows the flow. Once the review is on screen there is nothing
-     left to get; what is in front of you is the thing itself, waiting to be
-     checked. Driven from restack rather than from the reveal, so every way back
-     out of the review, start over, reopening an earlier step, puts the original
-     wording back without any of those having to know about it. */
-  var GREETINGS = { get: 'Get your quote.', review: 'Review your quote.' };
-
-  function greet() {
-    if (!el.greeting || !started) return;
-    var want = el.review.hidden ? GREETINGS.get : GREETINGS.review;
-    if (el.greeting.textContent === want) return;   // restack runs constantly
-
-    if (!MOTION_OK) { el.greeting.textContent = want; return; }
-
-    /* Swapped at the dip rather than on the spot: at this size a word changing
-       under you mid-scroll catches the eye harder than the review appearing. */
-    if (el.greeting._swap) el.greeting._swap.cancel();
-    el.greeting._swap = el.greeting.animate(
-      [{ opacity: 1 }, { opacity: 0 }, { opacity: 0 }, { opacity: 1 }],
-      { duration: 460, easing: 'ease-in-out' }
-    );
-    setTimeout(function () { el.greeting.textContent = want; }, 170);
+  function stepFrom(delta) {
+    var list = pagesFor();
+    var i = list.indexOf(page);
+    if (i === -1) return null;
+    return list[i + delta] || null;
   }
+
+  function goNext() { var to = stepFrom(1); if (to) goTo(to); }
+  function goBack() { var to = stepFrom(-1); if (to) goTo(to); }
+
+  /* Every Back button on every page, wired once. They are identical and there
+     is nothing page-specific about going back one. */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-back]'),
+    function (b) { b.addEventListener('click', goBack); });
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-next]'),
+    function (b) { b.addEventListener('click', function () {
+      if (b.disabled) return;
+      if (page === 'step-photos' && !photos.length) noPhotos = true;
+      goNext();
+    }); });
+
+  /* Enables or disables the way forward on whichever page is showing, and puts
+     "Start over" where it belongs. It does NOT move anybody: deciding what is
+     reachable and deciding where you are standing are two different jobs, and
+     conflating them is what made the old flow yank the page around. */
+  function syncNav() {
+    var node = $(page);
+    if (!node) return;
+
+    var next = node.querySelector('[data-next]');
+    if (next) next.disabled = !pageDone(page);
+
+    el.send.disabled = Object.keys(reach).length === 0;
+
+    placeReset(page === 'step-vin' && forkTaken ? node : null);
+  }
+
+  /* Whether the page showing has been answered well enough to leave. Only the
+     pages that carry a Continue button need one; the rest either advance on the
+     answer itself or carry their own worded button. */
+  function pageDone(id) {
+    /* Something has to have been said about the damage, by any of the three
+       routes: a pane tapped, a photograph, or a sentence. */
+    if (id === 'step-glass') return damageGiven();
+    // every pane picked has to have been asked
+    if (id === 'step-chip') return damageDone();
+    if (id === 'step-photos') return true;     // "no photos" is a valid answer
+    if (id === 'step-when') return !!urgency;
+    return true;
+  }
+
+  /* The greeting used to sit above the flow on every screen and change its
+     wording as you went. It is gone the moment the flow starts. On a
+     page-at-a-time wizard it was a second heading above the real one,
+     restating the name of the thing you were already doing, and it cost the
+     top third of a phone screen on every single question. The page's own label
+     is the heading now. */
 
   /* ---------- the gate ----------
 
@@ -1661,21 +1652,20 @@
      buttons and a bordered button were all competing before a single question
      had been answered. Behind one button there is exactly one thing to do.
 
-     `started` also guards greet(), which writes textContent into the heading
-     and would otherwise destroy the start button the first time restack() ran. */
+     `started` is also what stops the start button being written over: it lives
+     inside the heading the flow replaces. */
   var started = false;
 
   function startQuote() {
     if (started) return;
     started = true;
 
-    /* The heading stops being the control and goes back to being a heading.
-       greet() owns the wording from here on, so it is set through the same
-       constant rather than repeated as a literal. */
-    el.greeting.textContent = GREETINGS.get;
+    /* The greeting has done its job. From here the page's own question is the
+       heading, and the space it was taking is the difference between a question
+       fitting on a phone screen and not. */
+    if (el.greeting && el.greeting.parentNode) el.greeting.parentNode.hidden = true;
 
-    reveal(el.vinStep);
-    restack();
+    goTo('step-vin');
     /* Not on a touch screen. Focusing an input there throws a keyboard over the
        bottom half of the page the instant the button is released, which hides
        the very hint that explains what a VIN is. On a pointer device the caret
@@ -1685,14 +1675,8 @@
 
   var COARSE = window.matchMedia('(pointer: coarse)').matches;
 
-  hide(el.vinStep);
+  PAGES.forEach(function (p) { var node = $(p); if (node) node.hidden = true; });
   if (el.start) el.start.addEventListener('click', startQuote);
-
-  /* Catches every reveal and every reset without those having to know about
-     any of this. Value changes are pushed in by the handlers that make them. */
-  new MutationObserver(restack).observe(document.querySelector('.flow'), {
-    attributes: true, attributeFilter: ['hidden'], subtree: true
-  });
 
   // Temporary, until a channel is wired: lets the outgoing record be inspected.
   window.__lastRequest = function () { return lastRequest; };
@@ -1719,8 +1703,9 @@
        this, starting over from the year/make/model route left those dropdowns
        as the only thing on the step and the VIN route unreachable. */
     resetFork();
-    restack();
-    window.scrollTo({ top: 0, behavior: MOTION_OK ? 'smooth' : 'auto' });
+    noPhotos = false;
+    specificsAsked = false;
+    goTo('step-vin');
   }
 
   el.cNo.addEventListener('click', startOver);
