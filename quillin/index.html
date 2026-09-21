@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="7e4ad26b11">
+<meta name="build" content="211d731b0e">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=e84ac85c">
+<link rel="stylesheet" href="css/style.css?v=7159767c">
 </head>
 <body>
 
@@ -74,32 +74,73 @@
 
 <main class="flow">
 
+  <!-- The page opens closed. Who Quillin are, one control, and a quiet way to
+       read how the thing works. Nothing else is on screen until "Get a quote."
+       is pressed, at which point the VIN step appears below and the heading
+       goes back to being a heading.
+
+       Owner feedback, from people who do not use a phone or a PC often: the
+       first screen had a headline, an input, a hint with a link in it, two
+       disclosure buttons and a bordered button, all at once, and it read as
+       "too much going on" before a single question had been answered. One
+       thing to press is the fix. -->
   <div class="greeting">
     <p class="standfirst">Servicing Dallas Metroplex auto glass needs since
       <span data-placeholder="founded">20xx</span>. Family owned and operated.
       Let&rsquo;s get you back on the road.</p>
-    <h1>Get your quote.</h1>
+
+    <!-- The heading IS the button. A filled control rather than a headline that
+         happens to be clickable: the people this was rebuilt for should never
+         have to work out whether a piece of text is a control, and this is the
+         same orange used by every other primary action in the flow. Once the
+         flow starts, app.js replaces this with plain heading text. -->
+    <h1><button type="button" class="starter" id="start-quote">Get a quote.</button></h1>
   </div>
 
   <section class="panel" id="quote">
 
-  <!-- step 1: vin -->
-  <section class="step" id="step-vin" aria-labelledby="vin-label">
-    <label class="step__label visually-hidden" id="vin-label" for="vin">Start with your VIN</label>
-    <p class="step__hint">This tells us the exact glass your vehicle was built
-      with, nothing more. Need more help? <a href="#help">Click here!</a></p>
+  <!-- step 1: vin
 
-    <div class="field" id="vin-field">
+       A fork, not a form. The step opens as a question and two answers and
+       nothing else: whichever one is pressed, only that branch's controls are
+       revealed, and the other branch never appears at all.
+
+       Third owner correction on this step, and the sharpest: "it keeps
+       displaying TOO much information". Every previous version put the field,
+       the explanation, the way out and the disclosure on screen together and
+       asked the customer to work out which of them applied to their situation.
+       Asking first, and showing one thing after, is the difference between a
+       question and a form.
+
+       The explanatory line that used to sit under the field is gone with it.
+       "Why do you want my VIN?" is already answered, in more detail and in
+       better words, in the How this works panel, which is now pinned to the
+       bottom of every screen in the quote. -->
+  <section class="step" id="step-vin" aria-labelledby="vin-label">
+    <label class="step__label" id="vin-label" for="vin">Do you know your VIN?</label>
+
+    <!-- The whole of the step at rest. Two answers to one question, the same
+         size as each other because neither is a footnote to the other, and
+         told apart by fill rather than by size: one of them leads to a better
+         quote, both of them lead to a quote. -->
+    <div class="vinfork" id="vin-fork">
+      <button type="button" class="btn" id="yes-vin">I know my VIN</button>
+      <button type="button" class="btn btn--alt" id="no-vin"
+              aria-expanded="false" aria-controls="manual">I don&rsquo;t know my VIN</button>
+    </div>
+
+    <div class="field" id="vin-field" hidden>
       <input id="vin" name="vin" type="text" inputmode="latin" autocomplete="off"
              spellcheck="false" maxlength="17" placeholder="e.g. 1HGCM82633A004352"
              aria-describedby="vin-note">
     </div>
 
-    <!-- Asks the question in words instead of leaving a symbol to be
-         interpreted. Sits under the input because that is where you look once
-         you have tried to find the number and could not. Clicking it again
-         puts it away. -->
-    <p class="helpask">
+    <p class="note" id="vin-note" role="status" aria-live="polite" hidden></p>
+
+    <!-- Only on the branch where somebody has said they know it and is now
+         looking for it. Hidden on the fork, because at that point it is
+         answering a question nobody has asked yet. -->
+    <p class="helpask" hidden>
       <button type="button" class="plainlink" id="vin-help-btn"
               aria-expanded="false" aria-controls="vin-help">Need help finding your VIN?</button>
     </p>
@@ -111,22 +152,18 @@
         <li>The sticker in the driver&rsquo;s door jamb, visible with the door open.</li>
         <li>The corner of the dash on the driver&rsquo;s side, read through the windshield.</li>
       </ol>
+      <!-- The way across to the other branch, for the person who said they knew
+           it and then could not find it. It lives in here rather than on the
+           step, because at rest it would be a third control on a screen that
+           exists to have two. -->
+      <p class="helppanel__out">
+        <button type="button" class="plainlink" id="give-up-vin">Cannot find it? Pick your vehicle from a list instead.</button>
+      </p>
     </div>
 
-    <p class="note" id="vin-note" role="status" aria-live="polite" hidden></p>
-
-    <p style="margin:.875rem 0 0">
-      <button type="button" class="plainlink" id="no-vin"
-              aria-expanded="false" aria-controls="manual">I don&rsquo;t have my VIN</button>
-    </p>
-
-    <!-- Belongs to the button above it, so it sits under it and appears only
-         when that button is pressed. -->
+    <!-- Belongs to "I don't know my VIN", so it sits above the dropdowns that
+         button reveals and answers it in words before showing another form. -->
     <p class="note" id="manual-note" role="status" aria-live="polite" hidden></p>
-
-    <p class="under">
-      <a class="btn btn--small" href="#contact">Contact us!</a>
-    </p>
 
     <div class="manual" id="manual" hidden>
       <label class="visually-hidden" for="m-year">Year</label>
@@ -201,28 +238,12 @@
 
   </section>
 
-  <!-- step 4b: what happened.
-       Sits between the glass and the photographs because it is the question the
-       shop would ask next on the phone, and because the answer changes what gets
-       quoted: a chip is a repair, a break-in is a replacement plus vacuuming out
-       the door, a regulator fault is not glass work at all. -->
-  <section class="step" id="step-cause" hidden aria-labelledby="cause-label">
-    <p class="step__label" id="cause-label">What kind of damage will we be repairing?</p>
-    <label class="visually-hidden" for="cause">What kind of damage will we be repairing?</label>
-    <select id="cause">
-      <option value="">Choose the closest</option>
-      <option value="rock-chip">Rock chip or star break</option>
-      <option value="crack">Crack, or a chip that spread</option>
-      <option value="break-in">Break-in or vandalism</option>
-      <option value="accident">Accident or collision</option>
-      <option value="hail">Hail or storm damage</option>
-      <option value="road-debris">Road debris hit it</option>
-      <option value="scratched">Scratched or pitted glass</option>
-      <option value="leak">Leaking, wind noise or bad seal</option>
-      <option value="regulator">Window will not go up or down</option>
-      <option value="unknown">Not sure</option>
-    </select>
-  </section>
+  <!-- There was a "What kind of damage will we be repairing?" dropdown here,
+       between the glass and the photographs. The owners called it irrelevant
+       and it is gone: the shop already learns the job from the panes picked,
+       the chip-or-crack answer on each one, the photographs and the free text
+       box, and a ten item dropdown of causes was one more thing to read past.
+       See LOG.md. -->
 
   <!-- step 4c: photographs -->
   <section class="step" id="step-photos" hidden aria-labelledby="photos-label">
@@ -571,6 +592,26 @@
 <!-- Bottom right corner, in the logo's orange, very faint. -->
 <a class="aboutcorner" href="#about">About us.</a>
 
+<!-- Pinned to the bottom edge for the whole of the quote, gate included, and
+     it never moves: it is the one thing on the page whose entire job is to be
+     there at the moment somebody stops being sure.
+
+     Owner instruction, and the reasoning is theirs: "if at any point they get
+     confused or apprehensive they can open it". A link that has to be scrolled
+     to is not that. It answers the questions people actually stall on, which
+     are "do I have to use this", "does anything send before I say so" and "is
+     that car mine", so it earns a permanent place in a way no other secondary
+     link on this site does.
+
+     It sits BELOW the section bar rather than above it. The section bar comes
+     and goes with the scroll; this does not, so the constant thing takes the
+     fixed edge and the intermittent thing stacks on top of it. The other way
+     round, the help link would shift up the screen every time the bar faded
+     in, which is exactly what "constant" rules out. -->
+<div class="helpdock">
+  <a class="helpdock__link" href="#help" data-panel-link>How this works</a>
+</div>
+
 <nav class="dock" aria-label="Sections">
   <a href="#quote">quote</a>
   <a href="#services">services</a>
@@ -583,6 +624,6 @@
 <script src="js/landing.js?v=adea0fe6"></script>
 <script src="js/vin.js?v=546382b1"></script>
 <script src="js/glass.js?v=7b7553fa"></script>
-<script src="js/app.js?v=bb9ee73c"></script>
+<script src="js/app.js?v=85386180"></script>
 </body>
 </html>

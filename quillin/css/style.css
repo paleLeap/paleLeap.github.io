@@ -36,9 +36,22 @@
   --bg:      #0a0c0e;
   --raise:   #12161a;
   --ink:     #edf0f2;
-  --ink-dim: #b9c0c7;
-  --muted:   #7d868f;
-  --faint:   #4d555d;
+  --ink-dim: #c4cbd1;
+  /* Lifted, all three. Every tester the owners put in front of this said the
+     text was "faded", and these carried most of the words on the page.
+
+     Measured against --bg #0a0c0e, not eyeballed:
+       --ink-dim  10.66:1 -> 11.95:1
+       --muted     5.30:1 ->  7.66:1
+       --faint     2.59:1 ->  5.02:1
+
+     --faint is the one that mattered. At 2.59:1 it was below the 4.5:1 floor
+     outright, and it was carrying folded step labels, the review's own labels,
+     the picker note and the detail column of a choice row. None of those are
+     decoration. It clears AA now, and the things that were never body text in
+     the first place, placeholders and disabled selects, still read as quiet. */
+  --muted:   #9aa3ac;
+  --faint:   #79828b;
   --line:    rgba(255, 255, 255, .09);
   --line-2:  rgba(255, 255, 255, .16);
 
@@ -47,6 +60,11 @@
 
   --ease: cubic-bezier(.22, .61, .36, 1);
   --col: 44rem;
+
+  /* The height of the permanent help strip. Two fixed elements stack on this
+     one number, so it lives here rather than being written out twice and
+     drifting. Overridden on a phone, where the strip is trimmed. */
+  --helpdock-h: 3.25rem;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -59,7 +77,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font: 400 17px/1.6 'Inter var', ui-sans-serif, -apple-system, BlinkMacSystemFont,
+  font: 400 18px/1.65 'Inter var', ui-sans-serif, -apple-system, BlinkMacSystemFont,
         "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   font-synthesis-weight: none;
@@ -213,7 +231,10 @@ body {
   transition: opacity .17s ease;
   max-width: var(--col);
   margin: 0 auto;
-  padding: clamp(2.5rem, 8vh, 5rem) clamp(1.5rem, 5vw, 2rem) 7rem;
+  /* The bottom value clears the fixed furniture: the permanent help strip, and
+     the section bar stacked on top of it. Without it the last answer in the
+     flow sits underneath them and cannot be scrolled to. */
+  padding: clamp(2.5rem, 8vh, 5rem) clamp(1.5rem, 5vw, 2rem) 9rem;
 }
 
 .flow.is-leaving { opacity: 0; }
@@ -300,36 +321,32 @@ body.on-quote #step-vin .field input { text-align: center; }
    for, so nothing sits between it and the heading that announces it. */
 body.on-quote #step-vin { display: flex; flex-direction: column; align-items: center; }
 
-body.on-quote #step-vin .field { order: 1; width: 100%; }
+/* The order of this step, top to bottom. At rest only two of these are on
+   screen: the question and the fork. Everything below is revealed by whichever
+   answer was pressed, and the branch that was not chosen is never drawn.
 
-body.on-quote #step-vin .step__hint {
-  order: 2;
-  margin: 1rem auto 0;
-  font-size: .8125rem;
-  color: var(--muted);
-}
+   Every child carries an explicit order because this is a flex column and an
+   unordered child defaults to 0, which lands it above the question. There is a
+   catch-all on `> p` at the end so a new child cannot silently appear at the
+   top of the step. */
+body.on-quote #step-vin .vinfork { order: 1; }
+
+body.on-quote #step-vin .field { order: 2; width: 100%; }
 
 body.on-quote #step-vin .note { order: 3; }
 
-/* The disclosure opens directly beneath the line that asks the question and
-   above the next choice down, so the answer lands where the eye already is
-   instead of pushing past "I don't have my VIN" to appear underneath it.
-   .helpask is itself a `> p`, so it needs its own order or it would inherit
-   the shared one below and sit on the wrong side of the panel. */
 body.on-quote #step-vin .helpask { order: 4; }
 
 body.on-quote #step-vin .helppanel { order: 5; width: 100%; }
 
-body.on-quote #step-vin > p { order: 6; }
-
-/* Directly under "I don't have my VIN", because it is that button's answer.
-   It used to go to the shared note at order 3, which put "No problem! Let's
+/* Directly under "I don't know my VIN", because it is that button's answer. It
+   used to go to the shared note at order 3, which put "No problem! Let's
    continue like this..." ABOVE the thing it was replying to. */
-body.on-quote #step-vin #manual-note { order: 7; }
+body.on-quote #step-vin #manual-note { order: 6; }
 
-body.on-quote #step-vin .manual { order: 8; width: 100%; }
+body.on-quote #step-vin .manual { order: 7; width: 100%; }
 
-body.on-quote #step-vin .under { order: 9; }
+body.on-quote #step-vin > p { order: 8; }
 
 /* Last, explicitly. The reset is appended to whichever step is live, and on
    this step that is a flex column where everything carries an order. An
@@ -352,12 +369,10 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 /* once folded, the VIN row is a record again and sits left like the rest */
 body.on-quote #step-vin.is-folded { text-align: left; }
 
+/* .under is still used by the "That it?" button further down the flow. The
+   VIN step's contact link, which also wore it, has gone back to the top right
+   corner where it was already being offered. */
 .under { margin: 2.25rem 0 0; }
-
-/* Scoped to the VIN step. This hides the "Contact us!" button once the customer
-   is past the VIN, and it must NOT reach the "That it?" button further down,
-   which shares the class and only appears once earlier steps HAVE folded. */
-.flow:has(.step.is-folded) #step-vin .under { display: none; }
 
 /* Small and wide, sitting above the page like a plate on a door. The name is
    not the thing the customer came for, so it does not get the big type. */
@@ -370,6 +385,8 @@ body.on-quote #step-vin.is-folded { text-align: left; }
   color: var(--muted);
 }
 
+/* The heading holds the start button until the flow begins, at which point
+   app.js replaces its contents with plain text. Both states are styled here. */
 .greeting h1 {
   margin: 0;
   font-size: clamp(2.25rem, 6vw, 3.5rem);
@@ -381,19 +398,56 @@ body.on-quote #step-vin.is-folded { text-align: left; }
   max-width: 20ch;
 }
 
-/* Sits above the heading and runs wider than it: one long quiet line that sets
-   the scene before the page asks for anything. Dim enough that "Get your quote."
-   underneath is still what the eye lands on. */
+/* On the closed page this is now the ONLY prose on screen, so it stops being a
+   quiet line that sets the scene and becomes the thing being read. Up from
+   17-22px at weight 200 in --muted, which is exactly the combination the
+   owners' testers described as faded: a hairline weight is what makes small
+   light text on black look washed out, more than the colour does. */
 .standfirst {
-  margin: 0 auto 1.5rem;
-  max-width: 56ch;
-  font-size: clamp(1.0625rem, 2.4vw, 1.375rem);
+  margin: 0 auto 2rem;
+  max-width: 52ch;
+  font-size: clamp(1.25rem, 2.8vw, 1.625rem);
   line-height: 1.5;
-  font-weight: 200;
+  font-weight: 300;
   letter-spacing: -.008em;
-  color: var(--muted);
+  color: var(--ink-dim);
   text-wrap: balance;
 }
+
+/* ---------- the start button ----------
+
+   The one control on the closed page, and it is deliberately the least subtle
+   thing on the whole site.
+
+   The rest of this design says hierarchy comes from size and space, not from
+   boxes, and that holds everywhere a person is already reading. It does not
+   hold here. The people this rework is for do not use a phone or a PC often,
+   and for them the question "is that text, or is that a button" has a real
+   cost: they stand on the page and do nothing. A filled orange rectangle asks
+   nothing of them. It is the same orange every other committing action in the
+   flow already uses, so it is consistent as well as obvious. */
+.starter {
+  font: inherit;
+  font-size: clamp(1.25rem, 3.2vw, 1.625rem);
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.2;
+  /* Comfortably past the 44px floor. This is the one target on the screen, so
+     there is no reason for it to be tight. */
+  padding: 1.25rem 2.5rem;
+  min-height: 4rem;
+  border: 0;
+  border-radius: 2px;
+  background: var(--brand-orange);
+  color: #fff;
+  cursor: pointer;
+  transition: background .2s var(--ease), transform .12s var(--ease);
+}
+
+.starter:hover { background: var(--orange); }
+
+/* Touch has no hover, so the press itself has to answer. */
+.starter:active { background: var(--orange); transform: translateY(1px); }
 
 /* Marks the founding year as something nobody has told us yet, so it is
    greppable and cannot quietly ship as "20xx". */
@@ -406,7 +460,7 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 .reset { margin-top: 2.25rem; }
 
-.reset__ask { font-size: .75rem; color: var(--faint); border-bottom-color: transparent; }
+.reset__ask { font-size: .9375rem; color: var(--muted); border-bottom-color: transparent; }
 
 .reset__ask:hover { color: var(--muted); border-bottom-color: var(--line-2); }
 
@@ -423,7 +477,7 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 .reset__confirm[hidden] { display: none; }
 
-.reset__msg { font-size: .875rem; font-weight: 300; color: var(--ink-dim); }
+.reset__msg { font-size: 1.0625rem; font-weight: 400; color: var(--ink-dim); }
 
 /* The destructive option is not the loud one. It is a small outlined button
    next to a plain "keep it", and focus lands on keeping. */
@@ -431,7 +485,7 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 .reset__yes:hover { color: #ef6b62; border-color: #ef6b62; background: none; }
 
-.reset__no { font-size: .8125rem; }
+.reset__no { font-size: 1rem; }
 
 /* ---------- the backdrop ----------
 
@@ -579,6 +633,57 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 /* Hidden until the page is actually at its end. The logo strip is the nav for
    everyday use; this is the one that catches you when you have read to the
    bottom and are looking for what is next. */
+/* ---------- the permanent help strip ----------
+
+   Always on, for the whole of the quote. See the note in the markup for why
+   this one link gets treatment nothing else on the site gets.
+
+   Shown only while the quote is open. On services, guarantee, about or contact
+   there is no flow to be lost in, and on the help panel itself it would be a
+   link to the page you are already reading. */
+.helpdock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  /* Pinned to --helpdock-h rather than sized by its contents, because the
+     section bar is positioned off that number and the two must not disagree.
+     The safe area is added on top, outside the height the bar sits above. */
+  height: var(--helpdock-h);
+  padding: 0 1rem env(safe-area-inset-bottom, 0px);
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+}
+
+body.on-quote .helpdock { display: flex; }
+
+/* Stretched to the full height of the strip rather than sized by its own text.
+   Centred vertically it came out 36px tall, under the 44px floor this site
+   holds every other target to, and this one is meant to be easy to hit by
+   somebody who is already unsure. */
+.helpdock__link {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  font-size: 1.0625rem;
+  font-weight: 400;
+  color: var(--ink-dim);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--line-2);
+  text-underline-offset: .32em;
+  padding: 0 .75rem;
+  transition: color .2s var(--ease), text-decoration-color .2s var(--ease);
+}
+
+.helpdock__link:hover { color: var(--ink); text-decoration-color: var(--orange); }
+
+.helpdock__link:active { color: var(--orange); text-decoration-color: var(--orange); }
+
 .dock {
   position: fixed;
   left: 0;
@@ -608,6 +713,10 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 }
 
 .dock.is-shown { opacity: 1; transform: none; pointer-events: auto; }
+
+/* Only on the quote, because that is the only place the strip below it is
+   drawn. Anywhere else the bar keeps the bottom edge to itself. */
+body.on-quote .dock { bottom: calc(var(--helpdock-h) + env(safe-area-inset-bottom, 0px)); }
 
 /* About sits apart from the other four. They are all the service; this one is
    the people behind it, so it gets its own side of a rule rather than queueing
@@ -772,7 +881,7 @@ body.on-quote #step-vin.is-folded { text-align: left; }
 
 .plain a:hover { color: var(--orange); border-color: var(--orange); }
 
-.aside { margin: 1.25rem 0 0; font-size: .8125rem; font-weight: 300; color: var(--faint); }
+.aside { margin: 1.25rem 0 0; font-size: 1rem; font-weight: 400; color: var(--muted); }
 
 
 /* ---------- steps ---------- */
@@ -820,14 +929,19 @@ a, button, label, select, input, textarea, summary {
 
 /* Section headings: the question being asked. Brighter than the answers
    beneath them, which is the whole hierarchy on a page with no boxes. */
+/* This is the QUESTION, and it was 12px of letter-spaced capitals in a dimmed
+   grey. Capitals with .16em of tracking are the worst case for anyone whose
+   near vision is going: word shape is gone, the letters read one at a time, and
+   at 12px there is nothing to fall back on. Sentence case at 21px in full --ink
+   is the single biggest change in this pass. */
 .step__label {
   display: block;
-  font-size: .75rem;
+  font-size: 1.3125rem;
   font-weight: 500;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-  margin: 0 0 1.125rem;
+  line-height: 1.3;
+  letter-spacing: -.01em;
+  color: var(--ink);
+  margin: 0 0 1rem;
 }
 
 .step__hint a {
@@ -839,12 +953,12 @@ a, button, label, select, input, textarea, summary {
 .step__hint a:hover { color: var(--ink); }
 
 .step__hint {
-  font-size: 1rem;
-  font-weight: 300;
+  font-size: 1.0625rem;
+  font-weight: 400;
   line-height: 1.6;
-  color: var(--muted);
-  margin: -.5rem 0 1.375rem;
-  max-width: 40ch;
+  color: var(--ink-dim);
+  margin: -.25rem 0 1.5rem;
+  max-width: 46ch;
 }
 
 /* Steps fade rather than travel. Movement across the page competes with the
@@ -881,23 +995,28 @@ a, button, label, select, input, textarea, summary {
 
 .step.is-folded > *:not(.step__folded) { display: none; }
 
+/* 10px capitals at .18em tracking in the faintest grey on the page. These rows
+   are how a customer finds the answer they want to change, so they have to be
+   readable, not merely present. Kept as capitals because they are a structural
+   label rather than a sentence, but at a size and a tracking that can be read
+   at a glance. */
 .step__folded-name {
   flex: none;
-  width: 5.5rem;
-  font-size: .625rem;
+  width: 7rem;
+  font-size: .8125rem;
   font-weight: 500;
-  letter-spacing: .18em;
+  letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--muted);
   transition: color .25s var(--ease);
 }
 
 /* A folded step is a record, not a question, so it sits dimmer than the live
    one above it. */
 .step__folded-value {
-  font-size: .9375rem;
-  font-weight: 300;
-  color: var(--muted);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  color: var(--ink-dim);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -910,18 +1029,17 @@ a, button, label, select, input, textarea, summary {
 .step__folded-do {
   flex: none;
   margin-left: auto;
-  font-size: .625rem;
+  font-size: .9375rem;
   font-weight: 500;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--faint);
+  letter-spacing: 0;
+  color: var(--orange);
   transition: color .25s var(--ease);
 }
 
 .step__folded:hover { border-color: var(--line-2); }
 .step__folded:hover .step__folded-name { color: var(--orange); }
 .step__folded:hover .step__folded-value { color: var(--ink); }
-.step__folded:hover .step__folded-do { color: var(--orange); }
+.step__folded:hover .step__folded-do { color: var(--ink); }
 
 /* Reopened, a previous step needs a way back. Hidden unless the step is
    actually being edited: on the live question there is nothing to close, and
@@ -936,11 +1054,10 @@ a, button, label, select, input, textarea, summary {
   border: 0;
   padding: .4375rem 0 .4375rem .875rem;
   font: inherit;
-  font-size: .625rem;
+  font-size: .9375rem;
   font-weight: 500;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--faint);
+  letter-spacing: 0;
+  color: var(--muted);
   cursor: pointer;
   transition: color .2s var(--ease);
 }
@@ -986,7 +1103,7 @@ a, button, label, select, input, textarea, summary {
   letter-spacing: .02em;
   text-transform: none;
   color: var(--faint);
-  font-size: .9375rem;
+  font-size: 1.0625rem;
 }
 
 .field input:focus { outline: none; border-bottom-color: var(--orange); }
@@ -996,28 +1113,26 @@ a, button, label, select, input, textarea, summary {
 .helppanel {
   margin: 1.25rem 0 0;
   padding: 0;
-  font-size: .875rem;
-  font-weight: 300;
+  font-size: 1.0625rem;
+  font-weight: 400;
 }
 
 .helppanel[hidden] { display: none; }
 
 .helppanel p {
-  margin: 0 0 .625rem;
-  font-size: .625rem;
+  margin: 0 0 .75rem;
+  font-size: 1.0625rem;
   font-weight: 500;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--faint);
+  color: var(--ink);
 }
 
 .helppanel ol { margin: 0; padding-left: 1.125rem; color: var(--ink-dim); }
 
-.helppanel li { margin-bottom: .375rem; }
+.helppanel li { margin-bottom: .625rem; line-height: 1.55; }
 
 /* ---------- messages ---------- */
 
-.note { font-size: .8125rem; font-weight: 300; margin: .875rem 0 0; color: var(--muted); }
+.note { font-size: 1rem; font-weight: 400; margin: .875rem 0 0; color: var(--ink-dim); }
 
 .note[hidden] { display: none; }
 
@@ -1032,9 +1147,9 @@ a, button, label, select, input, textarea, summary {
   border: 0;
   padding: 0;
   font: inherit;
-  font-size: .8125rem;
-  font-weight: 300;
-  color: var(--muted);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  color: var(--ink-dim);
   cursor: pointer;
   /* text-decoration rather than a border. The border sat on the bottom edge of
      the BOX, and on a touch screen the box is padded out to 44px, so the rule
@@ -1059,15 +1174,13 @@ a, button, label, select, input, textarea, summary {
 
 .manual[hidden] { display: none; }
 
-/* The cause dropdown wears the same clothes as the year/make/model selects: a
-   rule under the words, nothing else. Sharing the selector rather than copying
-   it means the two can never drift. */
-.manual select,
-#cause {
+/* A rule under the words, nothing else. (The cause dropdown shared this
+   selector until the owners called that question irrelevant; see LOG.md.) */
+.manual select {
   font: inherit;
-  font-size: .9375rem;
-  font-weight: 300;
-  padding: .75rem 0;
+  font-size: 1.125rem;
+  font-weight: 400;
+  padding: .9375rem 0;
   border: 0;
   border-bottom: 1px solid var(--line);
   background: none;
@@ -1077,10 +1190,7 @@ a, button, label, select, input, textarea, summary {
 
 .manual select:disabled { color: var(--faint); cursor: default; }
 
-#cause { width: 100%; max-width: 26rem; }
-
-.manual select option,
-#cause option { background: var(--raise); color: var(--ink); }
+.manual select option { background: var(--raise); color: var(--ink); }
 
 /* ---------- choices ----------
    Rows, not boxes. A hairline between them and a mark down the left when
@@ -1092,14 +1202,15 @@ a, button, label, select, input, textarea, summary {
   display: flex;
   align-items: center;
   gap: .875rem;
-  padding: 1.0625rem .875rem;
+  padding: 1.1875rem 1rem;
+  min-height: 3.75rem;
   border: 0;
   border-bottom: 1px solid var(--line);
-  border-left: 2px solid transparent;
+  border-left: 3px solid transparent;
   background: none;
   cursor: pointer;
-  font-size: 1.0625rem;
-  font-weight: 300;
+  font-size: 1.1875rem;
+  font-weight: 400;
   color: var(--ink-dim);
   transition: color .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
 }
@@ -1114,19 +1225,30 @@ a, button, label, select, input, textarea, summary {
   background: rgba(240, 125, 42, .06);
 }
 
-.choice input { accent-color: var(--orange); margin: 0; flex: none; }
+/* The default radio renders at about 13px. It is both the thing you aim at and
+   the thing that tells you what you picked, and at that size it does neither
+   job for the people this was rebuilt for. */
+.choice input {
+  accent-color: var(--orange);
+  margin: 0;
+  flex: none;
+  width: 1.375rem;
+  height: 1.375rem;
+}
 
-.choice__detail { margin-left: auto; font-size: .8125rem; color: var(--faint); }
+.choice__detail { margin-left: auto; font-size: 1rem; color: var(--muted); }
 
 /* ---------- buttons ---------- */
 
+/* Same reasoning as .step__label. 12px tracked capitals on the one control
+   that commits an answer is the last place to be saving space. */
 .btn {
   font: inherit;
-  font-size: .75rem;
+  font-size: 1.0625rem;
   font-weight: 500;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  padding: .9375rem 1.75rem;
+  letter-spacing: 0;
+  padding: 1rem 1.75rem;
+  min-height: 3.25rem;
   border: 0;
   border-radius: 2px;
   background: var(--brand-orange);
@@ -1148,19 +1270,78 @@ a, button, label, select, input, textarea, summary {
 
 /* Declared AFTER .btn on purpose. Same specificity, so order is what decides
    it, and when this sat higher up the file .btn's orange fill won and the small
-   quiet link rendered as a full call to action. */
+   quiet link rendered as a full call to action.
+
+   This is the shape of a second-best answer: unmistakably a button, and
+   unmistakably not the orange one. Outlined rather than filled, and a size
+   down. --ink-dim rather than --muted, because it is now a real choice being
+   offered rather than a footnote: the testers did not read an underlined link
+   as an equal alternative to a text field, and a grey-on-black button they can
+   barely read is the same failure with a border around it. */
 .btn--small {
   display: inline-block;
   text-decoration: none;
-  font-size: .6875rem;
-  letter-spacing: .12em;
-  padding: .5625rem 1rem;
+  /* The same size as the quiet link below it, not smaller. It came out at 16px
+     against that link's 17px, which had the second-best answer reading as less
+     important than the last-resort disclosure under it. The border and the box
+     carry the hierarchy here; the type does not need to as well. */
+  font-size: 1.0625rem;
+  letter-spacing: 0;
+  min-height: 2.75rem;
+  padding: .625rem 1.25rem;
   background: none;
-  color: var(--muted);
+  color: var(--ink-dim);
   border: 1px solid var(--line-2);
 }
 
 .btn--small:hover { background: none; color: var(--ink); border-color: var(--orange); }
+
+.btn--small:active { background: rgba(240, 125, 42, .1); color: var(--ink); border-color: var(--orange); }
+
+/* ---------- the VIN fork ----------
+
+   Two answers to one question. Stacked rather than side by side, and the same
+   width as each other: a row of two reads as a toolbar, a stack of two reads as
+   a list of the things you are allowed to say, which is what it is.
+
+   Same size as each other, too. Neither is a footnote to the other, and the
+   only difference between them is fill: one leads to a better quote, both lead
+   to a quote. */
+.vinfork {
+  order: 1;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  width: 100%;
+  max-width: 22rem;
+  margin: 1.75rem auto 0;
+}
+
+.vinfork[hidden] { display: none; }
+
+.vinfork .btn { width: 100%; }
+
+/* The outlined half of the pair. Same geometry as .btn so the two read as one
+   control with two answers; .btn--small is the wrong tool here because its
+   whole point is being a size down, and nothing in this pair is subordinate. */
+.btn--alt {
+  background: none;
+  color: var(--ink-dim);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+
+.btn--alt:hover { background: rgba(255, 255, 255, .04); color: var(--ink); box-shadow: inset 0 0 0 1px var(--orange); }
+
+.btn--alt:active { background: rgba(240, 125, 42, .1); color: var(--ink); box-shadow: inset 0 0 0 1px var(--orange); }
+
+/* The crossing to the other branch, at the bottom of the help panel. Separated
+   by a rule because it is a different kind of thing from the three places to
+   look above it: those are information, this one acts. */
+.helppanel__out {
+  margin: 1.125rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
 
 .btn[disabled] { opacity: .3; cursor: default; }
 
@@ -1192,15 +1373,15 @@ a, button, label, select, input, textarea, summary {
 
 .picker__note {
   margin: 0 0 1.25rem;
-  font-size: .75rem;
-  font-weight: 300;
+  font-size: 1rem;
+  font-weight: 400;
   line-height: 1.6;
-  color: var(--faint);
+  color: var(--ink-dim);
 }
 
 .picker .choices { grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
 
-.choice--compact { padding: .6875rem .75rem; font-size: .8125rem; }
+.choice--compact { padding: .875rem .875rem; min-height: 3.25rem; font-size: 1.0625rem; }
 
 /* One accent in here and it is red, matching the model. */
 .picker .choice input { accent-color: var(--pick-off); }
@@ -1218,10 +1399,10 @@ a, button, label, select, input, textarea, summary {
   display: block;
   width: 100%;
   font: inherit;
-  font-size: 1rem;
-  font-weight: 300;
+  font-size: 1.0625rem;
+  font-weight: 400;
   margin: 0;
-  padding: .875rem .875rem .875rem 1.75rem;
+  padding: 1rem 1rem 1rem 1.75rem;
   border: 0;
   border-bottom: 1px solid var(--line);
   background: rgba(255, 255, 255, .02);
@@ -1236,7 +1417,7 @@ a, button, label, select, input, textarea, summary {
 
 .reach__input--bad { border-bottom-color: #ef6b62; }
 
-.reach__error { margin: .5rem 0 0 1.75rem; font-size: .8125rem; color: #ef6b62; }
+.reach__error { margin: .5rem 0 0 1.75rem; font-size: 1rem; color: #ef6b62; }
 
 .reach__error[hidden] { display: none; }
 
@@ -1268,8 +1449,8 @@ a, button, label, select, input, textarea, summary {
   justify-content: center;
   height: 100%;
   padding: .5rem;
-  font-size: .625rem;
-  color: var(--muted);
+  font-size: .8125rem;
+  color: var(--ink-dim);
   word-break: break-all;
   text-align: center;
 }
@@ -1299,18 +1480,21 @@ a, button, label, select, input, textarea, summary {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: 5.5rem 1fr;
+  grid-template-columns: 7.5rem 1fr;
   gap: 0;
-  font-size: .9375rem;
+  font-size: 1.0625rem;
 }
 
+/* The review is the last thing between a customer and sending their own
+   details off, so it is the last place on the site that should be read with a
+   squint. Labels up from 10px, values up from 16px at weight 300. */
 .summary dt {
-  color: var(--faint);
-  font-size: .625rem;
+  color: var(--muted);
+  font-size: .8125rem;
   font-weight: 500;
-  letter-spacing: .18em;
+  letter-spacing: .08em;
   text-transform: uppercase;
-  padding: .875rem 0;
+  padding: 1rem 0;
   border-top: 1px solid var(--line);
 }
 
@@ -1319,8 +1503,8 @@ a, button, label, select, input, textarea, summary {
   padding: 1rem 0;
   border-top: 1px solid var(--line);
   color: var(--ink);
-  font-size: 1rem;
-  font-weight: 300;
+  font-size: 1.125rem;
+  font-weight: 400;
 }
 
 .summary dd b { font-weight: 400; color: var(--ink); }
@@ -1355,24 +1539,27 @@ a, button, label, select, input, textarea, summary {
 
   .aboutcorner { padding: .875rem 0 .875rem .875rem; }
 
-  .choice { min-height: 3rem; padding: .9375rem .875rem; }
+  .choice { min-height: 3.75rem; padding: 1.125rem 1rem; }
 
-  .choice--compact { min-height: 2.75rem; padding: .75rem; font-size: .875rem; }
+  .choice--compact { min-height: 3.25rem; padding: .875rem; font-size: 1.0625rem; }
 
   .brandnav a { padding: .75rem .875rem; }
 
   .shot__drop { width: 2rem; height: 2rem; font-size: 1rem; }
 
-  .btn { padding: .9375rem 1.5rem; }
+  .btn { padding: 1rem 1.5rem; }
 
-  .btn--small { padding: .8125rem 1.125rem; }
+  .btn--small { padding: .75rem 1.125rem; }
 
   /* The third column costs width, and a 17 character VIN was the first thing
      to lose it: the value started truncating on a phone where it used to read
      in full. The label column and the gaps give the room back. */
   .step__folded { padding: 1rem 0; gap: 1rem; }
 
-  .step__folded-name { width: 4.25rem; }
+  /* Narrower than the desktop 7rem, because the third column costs width and a
+     17 character VIN is the first thing to lose it. Still wide enough for the
+     longest label at the new size. */
+  .step__folded-name { width: 5.5rem; }
 
   .step__collapse { padding: .875rem 0 .875rem 1.25rem; min-height: 2.75rem; }
 
@@ -1403,7 +1590,7 @@ a, button, label, select, input, textarea, summary {
      column put the list at about 500px under an already tall canvas. */
   .picker .choices { grid-template-columns: repeat(2, 1fr); gap: .25rem; }
 
-  .choice--compact { font-size: .8125rem; padding: .75rem .5rem; gap: .4375rem; }
+  .choice--compact { font-size: 1rem; padding: .875rem .625rem; gap: .5rem; }
 
   /* The header is the logo and the phone. The social icons are the first thing
      to go: they are the least urgent item on the screen for someone whose
@@ -1500,11 +1687,25 @@ a, button, label, select, input, textarea, summary {
   .top__tel { font-size: .875rem; }
 
   /* Clears the persistent bar plus the home indicator. */
-  .flow { padding-top: 2rem; padding-bottom: 7.5rem; }
+  /* The bar is permanent on a phone, so the flow clears the bar AND the strip
+     under it at all times, not only at the end of a scroll. */
+  .flow { padding-top: 2rem; padding-bottom: 10.5rem; }
+
+  /* Trimmed, because here it is the second piece of permanent bottom chrome
+     rather than the only one. */
+  :root { --helpdock-h: 2.875rem; }
+
+  .helpdock__link { font-size: 1rem; }
 
   .greeting h1 { font-size: clamp(1.75rem, 9vw, 2.25rem); }
 
-  .standfirst { font-size: 1rem; max-width: 30ch; }
+  /* Full width on a phone. A centred button narrower than the column reads as
+     one option among several; edge to edge it reads as the thing to press. */
+  .starter { display: block; width: 100%; padding: 1.25rem 1rem; }
+
+  /* 16px was the phone size for the line that now carries the whole opening
+     screen. It holds a narrow measure, it just does not shrink to fit. */
+  .standfirst { font-size: 1.1875rem; max-width: 34ch; }
 
   .summary { grid-template-columns: 1fr; gap: 0; }
 
@@ -1609,8 +1810,6 @@ a, button, label, select, input, textarea, summary {
   .reach__input { font-size: 1rem; }   /* under 16px iOS zooms the page on focus */
 
   .manual select,
-  #cause { font-size: 1rem; }
-
   .tellus textarea { font-size: 1rem; }
 }
 

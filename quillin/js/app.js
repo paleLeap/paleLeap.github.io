@@ -9,6 +9,10 @@
 
   var el = {
     field:     $('vin-field'),
+    fork:      $('vin-fork'),
+    yesVin:    $('yes-vin'),
+    helpask:   document.querySelector('.helpask'),
+    giveUpVin: $('give-up-vin'),
     vin:       $('vin'),
     helpBtn:   $('vin-help-btn'),
     help:      $('vin-help'),
@@ -45,8 +49,6 @@
     tellNote:  $('tellus-note'),
     when:      $('step-when'),
     whenChoices: $('when-choices'),
-    cause:     $('step-cause'),
-    causeSel:  $('cause'),
     photos:    $('step-photos'),
     addPhotos: $('add-photos'),
     noPhotos:  $('no-photos'),
@@ -56,6 +58,8 @@
     submit:    $('submit-damage'),
     review:    $('step-review'),
     greeting:  document.querySelector('.greeting h1'),
+    start:     $('start-quote'),
+    vinStep:   $('step-vin'),
     summary:   $('summary'),
     sendWhere: $('send-where'),
     send:      $('send-request'),
@@ -210,15 +214,39 @@
     if (!box.h) return;
 
     node.style.overflow = 'hidden';
-    node._anim = node.animate(
+    var anim = node.animate(
       [{ height: '0px', marginTop: '0px', marginBottom: '0px', opacity: 0 },
        { height: box.h + 'px', marginTop: box.mt, marginBottom: box.mb, opacity: 1 }],
       { duration: 340, easing: EASE }
     );
-    node._anim.onfinish = function () {
+    node._anim = anim;
+
+    function done() {
+      // superseded by a later open or close; that run owns the end state now
+      if (node._anim !== anim) return;
       node.style.overflow = '';
       node._anim = null;
-    };
+    }
+    anim.onfinish = done;
+    settle(done, 340);
+  }
+
+  /* The backstop behind every one of these animations.
+
+     A Web Animations callback is driven by the document timeline, and that
+     timeline does not advance in a tab the browser has stopped painting. This
+     project has already been bitten once by state released inside
+     requestAnimationFrame, where a transition lock stuck true forever if a
+     phone slept mid-fade and navigation silently stopped working. onfinish has
+     exactly the same exposure, and it is worse here because what it releases is
+     an element's `hidden`: a panel left open beside the question it was meant
+     to replace reads as the page being broken.
+
+     setTimeout keeps running when a tab is backgrounded, throttled but alive,
+     so it is the guarantee. The good path is still the callback; this only ever
+     fires second, and done() is written to be safe to run twice. */
+  function settle(fn, duration) {
+    setTimeout(fn, duration + 120);
   }
 
   function slideShut(node) {
@@ -229,16 +257,21 @@
     var box = slideBox(node);
 
     node.style.overflow = 'hidden';
-    node._anim = node.animate(
+    var anim = node.animate(
       [{ height: box.h + 'px', marginTop: box.mt, marginBottom: box.mb, opacity: 1 },
        { height: '0px', marginTop: '0px', marginBottom: '0px', opacity: 0 }],
       { duration: 240, easing: EASE }
     );
-    node._anim.onfinish = function () {
+    node._anim = anim;
+
+    function done() {
+      if (node._anim !== anim) return;
       node.hidden = true;
       node.style.overflow = '';
       node._anim = null;
-    };
+    }
+    anim.onfinish = done;
+    settle(done, 240);
   }
 
   function reveal(node) {
@@ -281,9 +314,6 @@
       el.chipDone.innerHTML = '';
       el.chipDone.hidden = true;
       teardownPicker();
-      hide(el.cause);
-      el.causeSel.value = '';
-      answers.cause = null;
       hide(el.photos);
       noPhotos = false;
       clearPhotos();
@@ -315,7 +345,72 @@
     }
   }
 
-  /* ---------- step 1: VIN ---------- */
+  /* ---------- step 1: the fork ----------
+
+     The step is a question with two answers, and pressing one reveals only
+     that answer's controls. Owner instruction, after three rounds of the same
+     complaint: "it keeps displaying TOO much information".
+
+     forkTaken is the flag the rest of the step reads. It is what tells
+     placeReset there is a decision worth undoing on a VIN step where nothing
+     has been typed yet, which is how somebody who pressed the wrong one gets
+     back: the existing "Start over" control, which already asks before it
+     clears anything. */
+  var forkTaken = false;
+
+  function takeFork() {
+    if (forkTaken) return;
+    forkTaken = true;
+    hide(el.fork);
+  }
+
+  /* Back to the question itself. Called by startOver, so every route that
+     clears the request also puts this step back to two buttons rather than
+     leaving it on a branch nobody chose this time round. */
+  function resetFork() {
+    forkTaken = false;
+    show(el.fork);
+    hide(el.field);
+    hide(el.helpask);
+    shutHelp();
+  }
+
+  /* hide(), not slideShut(). slideShut sets `hidden` from an animation's
+     onfinish, and both callers here are removing the control that opened this
+     panel in the same breath: animating a disclosure closed while its own
+     trigger disappears above it is motion for nothing, and it makes the panel's
+     final state depend on a callback that does not run in a tab the browser has
+     stopped painting. Direct is both calmer and safer. */
+  function shutHelp() {
+    hide(el.help);
+    el.helpBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  el.yesVin.addEventListener('click', function () {
+    takeFork();
+    show(el.field);
+    show(el.helpask);
+    restack();
+    /* Not on a touch screen: a keyboard thrown up the instant the button is
+       released covers the branch that was just revealed. Same reasoning as the
+       start button. */
+    if (!COARSE) el.vin.focus();
+  });
+
+  /* The crossing from one branch to the other, offered inside the help panel
+     for somebody who said they knew their VIN and then could not find it. */
+  el.giveUpVin.addEventListener('click', function () {
+    hide(el.field);
+    hide(el.helpask);
+    shutHelp();
+    el.vin.value = '';
+    el.field.classList.remove('field--ok');
+    say('');
+    vehicle = null;
+    resetBelow(2);
+    openManual(true);
+    if (!COARSE) el.mYear.focus();
+  });
 
   el.helpBtn.addEventListener('click', function () {
     var open = el.help.hidden;
@@ -429,13 +524,14 @@
     MAKES.forEach(function (m) { el.mMake.add(new Option(m, m)); });
   }
 
+  /* One of the two answers now, not a disclosure. It used to toggle, because it
+     sat on a screen that also held the field and could be pressed by mistake;
+     from the fork it is a choice, and the way back out of a choice is "Start
+     over" rather than pressing the same button again. */
   el.noVin.addEventListener('click', function () {
-    if (el.manual.hidden) {
-      openManual(true);
-      el.mYear.focus();
-    } else {
-      shutManual();
-    }
+    takeFork();
+    openManual(true);
+    if (!COARSE) el.mYear.focus();
   });
 
   el.mYear.addEventListener('change', function () {
@@ -676,7 +772,6 @@
 
     reveal(el.glass);
     openPicker();
-    show(el.cause);
     /* Shown at the same time as the picker, not gated behind it. Photographs are
        the most useful thing a customer can send, so the ask sits in plain view
        from the start rather than appearing only after they have done something
@@ -998,8 +1093,7 @@
   function damageDone() {
     if (!damageGiven()) return false;
     // Every pane picked has to have been asked chip or crack.
-    if (!panels.every(function (id) { return !!damageKind[id]; })) return false;
-    return !!answers.cause;
+    return panels.every(function (id) { return !!damageKind[id]; });
   }
 
   function photosDone() { return photos.length > 0 || noPhotos; }
@@ -1011,7 +1105,6 @@
 
   function advance() {
     var described = damageDone();
-    setShown(el.cause, damageGiven());
     setShown(el.photos, described);
 
     var withPhotos = described && photosDone();
@@ -1028,13 +1121,6 @@
 
     restack();
   }
-
-  el.causeSel.addEventListener('change', function () {
-    answers.cause = el.causeSel.value || null;
-    advance();
-  });
-
-
 
   function say2(text, kind) {
     if (!text) { hide(el.photoNote); return; }
@@ -1175,8 +1261,6 @@
 
     if (v.vin) rows.push(['VIN', v.vin, 'vin']);
 
-    if (answers.cause) rows.push(['Cause', CAUSE_LABEL[answers.cause]]);
-
     var damage = [];
     if (panels.length) damage.push(Glass.labelsFor(panels).join(', '));
     var typed = el.tellText.value.trim();
@@ -1257,11 +1341,6 @@
       damage: {
         panels: panels.slice(),
         panelLabels: Glass.labelsFor(panels),
-        /* What the customer says happened. Changes the job, not just the part:
-           a chip is a repair, a break-in is a replacement plus clearing the
-           fragments out of the door, a regulator fault is not glass at all. */
-        cause: answers.cause || null,
-        causeLabel: CAUSE_LABEL[answers.cause] || null,
         description: el.tellText.value.trim() || null,
         photos: photos.length,
         /* Distinguishes "said no" from "never engaged with the question", which
@@ -1414,21 +1493,6 @@
      carries its own short noun for the folded state. The VIN row keeps the VIN
      and the confirm row keeps the vehicle, so the two never say the same thing
      twice. */
-  /* Kept next to the markup's own wording so the folded line, the review and the
-     record all say the same thing the customer picked. */
-  var CAUSE_LABEL = {
-    'rock-chip': 'Rock chip or star break',
-    'crack': 'Crack, or a chip that spread',
-    'break-in': 'Break-in or vandalism',
-    'accident': 'Accident or collision',
-    'hail': 'Hail or storm damage',
-    'road-debris': 'Road debris',
-    'scratched': 'Scratched or pitted glass',
-    'leak': 'Leaking, wind noise or bad seal',
-    'regulator': 'Window will not go up or down',
-    'unknown': 'Not sure, or something else'
-  };
-
   var DIGEST = {
     'step-vin': { name: 'VIN', value: function () {
       if (vehicle && !vehicle.vin) return 'Entered by hand';
@@ -1450,9 +1514,6 @@
       var typed = el.tellText.value.trim();
       if (typed) bits.push(typed.length > 54 ? typed.slice(0, 51) + '\u2026' : typed);
       return bits.join('. ');
-    } },
-    'step-cause': { name: 'Cause', value: function () {
-      return CAUSE_LABEL[answers.cause] || '';
     } },
     'step-photos': { name: 'Photos', value: function () {
       if (photos.length) return photos.length + (photos.length === 1 ? ' image' : ' images');
@@ -1571,7 +1632,7 @@
   var GREETINGS = { get: 'Get your quote.', review: 'Review your quote.' };
 
   function greet() {
-    if (!el.greeting) return;
+    if (!el.greeting || !started) return;
     var want = el.review.hidden ? GREETINGS.get : GREETINGS.review;
     if (el.greeting.textContent === want) return;   // restack runs constantly
 
@@ -1586,6 +1647,46 @@
     );
     setTimeout(function () { el.greeting.textContent = want; }, 170);
   }
+
+  /* ---------- the gate ----------
+
+     The quote tool does not start until it is asked for. The page opens on the
+     company line and one control, and the VIN step is not on screen at all
+     until that control is pressed.
+
+     Why: every person the owners put in front of the old landing said the same
+     three things, in their words: the text was too small, too faded, and there
+     was "too much going on". The last one was not about any single control. It
+     was that a heading, a text field, a hint carrying a link, two disclosure
+     buttons and a bordered button were all competing before a single question
+     had been answered. Behind one button there is exactly one thing to do.
+
+     `started` also guards greet(), which writes textContent into the heading
+     and would otherwise destroy the start button the first time restack() ran. */
+  var started = false;
+
+  function startQuote() {
+    if (started) return;
+    started = true;
+
+    /* The heading stops being the control and goes back to being a heading.
+       greet() owns the wording from here on, so it is set through the same
+       constant rather than repeated as a literal. */
+    el.greeting.textContent = GREETINGS.get;
+
+    reveal(el.vinStep);
+    restack();
+    /* Not on a touch screen. Focusing an input there throws a keyboard over the
+       bottom half of the page the instant the button is released, which hides
+       the very hint that explains what a VIN is. On a pointer device the caret
+       lands where it should and nothing is covered. */
+    if (!COARSE) el.vin.focus();
+  }
+
+  var COARSE = window.matchMedia('(pointer: coarse)').matches;
+
+  hide(el.vinStep);
+  if (el.start) el.start.addEventListener('click', startQuote);
 
   /* Catches every reveal and every reset without those having to know about
      any of this. Value changes are pushed in by the handlers that make them. */
@@ -1614,8 +1715,11 @@
     el.noVin.setAttribute('aria-expanded', 'false');
     say('');
     resetBelow(2);            // cascades through damage, photos, timing, review
+    /* Back to the question, not to the branch that was just cleared. Without
+       this, starting over from the year/make/model route left those dropdowns
+       as the only thing on the step and the VIN route unreachable. */
+    resetFork();
     restack();
-    el.vin.focus();
     window.scrollTo({ top: 0, behavior: MOTION_OK ? 'smooth' : 'auto' });
   }
 
@@ -1687,10 +1791,11 @@
   /* Shown once there is something worth losing. On an empty VIN step there is
      nothing to clear, and offering to clear it is just noise. */
   function placeReset(live) {
-    /* Normally there is nothing to start over from on a bare VIN step. With the
-       manual panel open there is: three dropdowns, and whatever has been chosen
-       in them. So the VIN step keeps the button in that one case. */
-    if (!live || (live.id === 'step-vin' && el.manual.hidden)) {
+    /* On the fork there is nothing to start over from: no branch has been taken
+       and nothing has been answered. The moment one IS taken there is, and this
+       is the only way back to the question, so the control appears as soon as
+       either button is pressed. */
+    if (!live || (live.id === 'step-vin' && !forkTaken)) {
       if (resetUI.wrap.parentNode) resetUI.wrap.parentNode.removeChild(resetUI.wrap);
       return;
     }
