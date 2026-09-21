@@ -86,10 +86,21 @@
 
   /* Sized the way the trade sizes it, and the way a customer can actually
      check: a quarter and a dollar bill are in everyone's pocket. */
+  /* Two wordings each, and they are doing different jobs.
+
+     `label` is the ANSWER being offered, and it has to be decidable by somebody
+     looking at their own windscreen: a quarter is in everyone's pocket, which is
+     why the size is in the option rather than left to be judged.
+
+     `short` is the same answer once it is settled, on the running list above the
+     question. A row is a record, not a decision, and repeating the full wording
+     there wrapped every row to three lines on a phone: 90px each, 292px of
+     scroll on a four pane job. The long form is still what was chosen and still
+     what the shop is told. */
   var CHIP = [
-    { value: 'chip',   label: 'A chip, smaller than a quarter' },
-    { value: 'crack',  label: 'A crack, or bigger than that' },
-    { value: 'unsure', label: 'I am not sure' }
+    { value: 'chip',   label: 'A chip, smaller than a quarter', short: 'Chip' },
+    { value: 'crack',  label: 'A crack, or bigger than that',   short: 'Crack' },
+    { value: 'unsure', label: 'I am not sure',                  short: 'Not sure' }
   ];
 
   var urgency = null;      // step 5
@@ -930,6 +941,11 @@
     return '';
   }
 
+  function chipShortFor(value) {
+    for (var i = 0; i < CHIP.length; i++) if (CHIP[i].value === value) return CHIP[i].short;
+    return '';
+  }
+
   /* Walks the chosen glass, asking about one piece at a time.
 
      Each answer collapses to a line above the question and the question moves
@@ -943,16 +959,41 @@
     });
     windshield = damageKind.windshield || null;   // the rest of the app reads this
 
-    // The lines already settled.
+    /* The pieces already settled, each one a way back into its own question.
+
+       They used to be plain text. That was fine while this page always had a
+       live question under them, but it is reachable by Back now, and arriving
+       that way means every pane is answered, the question is closed, and a
+       list of flat text is the only thing on screen: somebody who came back
+       specifically to change an answer had no way to do it. */
     el.chipDone.innerHTML = '';
     var answered = panels.filter(function (id) { return damageKind[id]; });
     answered.forEach(function (id) {
       var li = document.createElement('li');
+      var row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'answered__row';
+
       var k = document.createElement('b');
       k.textContent = Glass.labelFor(id);
       var v = document.createElement('span');
-      v.textContent = chipLabelFor(damageKind[id]);
-      li.appendChild(k); li.appendChild(v);
+      v.textContent = chipShortFor(damageKind[id]);
+      var act = document.createElement('em');
+      act.textContent = 'Change';
+
+      row.appendChild(k); row.appendChild(v); row.appendChild(act);
+      row.setAttribute('aria-label',
+        'Change: ' + Glass.labelFor(id) + ', currently ' + chipLabelFor(damageKind[id]));
+      /* Full wording in the aria-label above, short on screen. Nothing is saved
+         by abbreviating for a screen reader, and "Crack" alone is thinner than
+         what was actually chosen. */
+      row.addEventListener('click', function () {
+        delete damageKind[id];
+        syncChipQuestion();      // which will now ask about this one again
+        syncNav();
+      });
+
+      li.appendChild(row);
       el.chipDone.appendChild(li);
     });
     el.chipDone.hidden = !answered.length;
@@ -988,6 +1029,20 @@
         damageKind[next] = opt.value;
         syncChipQuestion();      // straight on to the next piece of glass
         syncNav();
+
+        /* Answering the last piece finishes this page, so it carries on rather
+           than leaving a screen that only lists back what was just entered.
+
+           Owner instruction, and the same one that removed the vehicle
+           confirmation: if they have already said it, do not stop them to show
+           them that they said it. Before this, answering the final pane closed
+           the question and left the answered list and a Continue button, which
+           is a confirmation page by another name.
+
+           Deliberately NOT done from prepare(). Arriving here by Back means
+           everything is already answered, and advancing on that would bounce
+           the customer straight forward again and make the page unreachable. */
+        if (damageDone()) goNext();
       });
 
       var span = document.createElement('span');

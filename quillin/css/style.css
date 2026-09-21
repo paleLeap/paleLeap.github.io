@@ -981,6 +981,80 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 .pagehelp__btn:active { color: var(--orange); border-color: var(--orange); }
 
+/* ---------- answered pieces of glass ----------
+
+   The running list on the chip-or-crack page: what has been settled so far,
+   above the question asking about the next one. Each row is a button back into
+   its own question, because this page is reachable by Back and arriving that
+   way means every pane is answered and there is nothing else on screen to
+   press.
+
+   Rows with a hairline, like .choice, rather than boxes. It is the same kind of
+   thing: a list of pieces of glass, one line each. */
+.answered {
+  margin: 0 0 1.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.answered[hidden] { display: none; }
+
+.answered li { margin: 0; }
+
+.answered__row {
+  display: flex;
+  align-items: baseline;
+  gap: .5rem .875rem;
+  /* nowrap, now that the answer is a word rather than a sentence. Wrapping put
+     every row on three lines on a phone. */
+  flex-wrap: nowrap;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: .75rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .2s var(--ease);
+}
+
+.answered li:first-child .answered__row { border-top: 1px solid var(--line); }
+
+.answered__row b {
+  font-size: 1.0625rem;
+  font-weight: 500;
+  color: var(--ink-dim);
+}
+
+.answered__row span {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* The third thing on the row, and the reason it reads as a control rather than
+   as a receipt. Same lesson as the folded rows that used to be in this file:
+   without it, a stack of settled answers looks like a record of what happened
+   and nothing suggests it is still yours to change. */
+.answered__row em {
+  margin-left: auto;
+  font-style: normal;
+  font-size: .9375rem;
+  font-weight: 500;
+  color: var(--orange);
+  transition: color .2s var(--ease);
+}
+
+.answered__row:hover { border-bottom-color: var(--line-2); }
+
+.answered__row:hover b { color: var(--ink); }
+
+.answered__row:hover em { color: var(--ink); }
+
+.answered__row:active em { color: var(--ink); }
+
 /* ---------- the page footer ----------
 
    Back on the left, the way on at the right, on every page that has them. It
