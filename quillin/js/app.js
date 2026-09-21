@@ -135,8 +135,7 @@
       value: 'email', label: 'Email', type: 'email',
       placeholder: 'you@example.com', autocomplete: 'email',
       clean: function (v) { return v.trim(); },
-      ok: function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()); },
-      error: 'That does not look like an email address.'
+      ok: function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()); }
     },
     {
       value: 'text', label: 'Text message', type: 'tel',
@@ -145,8 +144,7 @@
       ok: function (v) {
         var d = v.replace(/[^\d]/g, '');
         return d.length === 10 || (d.length === 11 && d.charAt(0) === '1');
-      },
-      error: 'That needs to be a 10 digit number.'
+      }
     },
     {
       value: 'call', label: 'A phone call', type: 'tel',
@@ -155,8 +153,7 @@
       ok: function (v) {
         var d = v.replace(/[^\d]/g, '');
         return d.length === 10 || (d.length === 11 && d.charAt(0) === '1');
-      },
-      error: 'That needs to be a 10 digit number.'
+      }
     }
   ];
 
@@ -349,7 +346,7 @@
         function (i) { if (i.type === 'checkbox') i.checked = false; else i.value = ''; }
       );
       Array.prototype.forEach.call(
-        el.sendWhere.querySelectorAll('.reach__input, .reach__error'),
+        el.sendWhere.querySelectorAll('.reach__input'),
         function (n) { n.hidden = true; n.classList.remove('reach__input--bad'); }
       );
     }
@@ -1455,10 +1452,6 @@
       if (c.type === 'tel') field.inputMode = 'tel';
       field.hidden = true;
 
-      var err = document.createElement('p');
-      err.className = 'reach__error';
-      err.hidden = true;
-
       box.addEventListener('change', function () {
         field.hidden = !box.checked;
         if (box.checked) field.focus(); else field.value = '';
@@ -1467,15 +1460,25 @@
       field.addEventListener('input', check);
       field.addEventListener('blur', function () { check(true); });
 
+      /* There was a line of red text under each field here: "That needs to be
+         a 10 digit number", "That does not look like an email address". The
+         owners had it removed.
+
+         The CHECKING is untouched. A half typed number still does not count as
+         a way to reach anybody, so it is still kept out of `reach` and "Send my
+         request" stays disabled until at least one channel is properly filled
+         in. What has gone is the sentence saying so.
+
+         The rule under the field still turns red, so there is a signal without
+         a sentence, and it appears on the same terms the text did: once
+         something has been typed or the field has been left, never while
+         somebody is still partway through their first few digits. */
       function check(showError) {
         var raw = field.value;
         var good = box.checked && c.ok(raw);
         if (good) reach[c.value] = c.clean(raw); else delete reach[c.value];
 
-        // Only complain once they have typed something or left the field.
         var complain = box.checked && !good && (showError || raw.length > 0);
-        err.textContent = complain ? c.error : '';
-        err.hidden = !complain;
         field.classList.toggle('reach__input--bad', complain);
 
         syncSend();
@@ -1483,7 +1486,6 @@
 
       wrap.appendChild(label);
       wrap.appendChild(field);
-      wrap.appendChild(err);
       el.sendWhere.appendChild(wrap);
     });
   }

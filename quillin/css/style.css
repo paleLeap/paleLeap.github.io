@@ -1577,11 +1577,11 @@ a, button, label, select, input, textarea, summary {
 
 .reach__input:focus { outline: none; border-bottom-color: var(--orange); }
 
+/* There was a line of red text under each field: "That needs to be a 10 digit
+   number", and so on. The owners had it removed, so the rule under the field is
+   the whole of the signal now. The checking itself is unchanged and "Send my
+   request" still will not enable until a channel is properly filled in. */
 .reach__input--bad { border-bottom-color: #ef6b62; }
-
-.reach__error { margin: .5rem 0 0; font-size: 1rem; color: #ef6b62; text-align: center; }
-
-.reach__error[hidden] { display: none; }
 
 /* ---------- photos ---------- */
 

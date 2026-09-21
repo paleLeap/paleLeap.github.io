@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="5ac52f00fe">
+<meta name="build" content="1828d3924b">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=6bdc5be8">
+<link rel="stylesheet" href="css/style.css?v=0e80ae41">
 </head>
 <body>
 
@@ -368,11 +368,14 @@
        of being the small print at the bottom of a receipt. -->
   <section class="step" id="step-reach" hidden aria-labelledby="reach-label">
     <p class="step__label" id="reach-label">How would you like to receive your quote?</p>
-    <p class="step__hint">Pick any that suit you. We only use this to send your
-      quote back.</p>
 
     <fieldset class="choices" id="send-where">
-      <legend class="visually-hidden">How would you like to receive your quote?</legend>
+      <!-- Not a repeat of the heading above it. Every other page here words its
+           legend differently from its visible label for the same reason; this
+           one matched verbatim, and with the explanatory line removed the two
+           now sit next to each other, so a screen reader announced the same
+           question twice in a row. -->
+      <legend class="visually-hidden">Ways to reach you</legend>
     </fieldset>
 
     <p class="confirm__do">
@@ -702,6 +705,6 @@
 <script src="js/landing.js?v=adea0fe6"></script>
 <script src="js/vin.js?v=546382b1"></script>
 <script src="js/glass.js?v=7b7553fa"></script>
-<script src="js/app.js?v=5778b697"></script>
+<script src="js/app.js?v=ae2d28ed"></script>
 </body>
 </html>
