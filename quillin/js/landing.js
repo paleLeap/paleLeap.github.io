@@ -264,25 +264,27 @@
      layout. Both have to be answered. */
   function toTop() { window.scrollTo(0, 0); }
 
-  /* ---- the common questions ---------------------------------------------
+  /* ---- disclosure lists ---------------------------------------------------
 
-     Native <details> snaps open, which is the one thing everything else on
-     this site does not do. So the toggle is taken over and the answer's height
-     animated, the same way the quote flow slides its disclosures, margins
-     included: a panel that collapses its height while keeping its margin
-     leaves a gap and then loses it in one frame, and that jump is exactly what
-     a stutter looks like.
+     Used twice on the Services page: the services themselves, and the common
+     questions under them. One behaviour, shared, because two accordions on one
+     page that opened differently would be a bug you could see.
+
+     Native <details> snaps open, which is the one thing nothing else on this
+     site does. So the toggle is taken over and the body's height animated, the
+     same way the quote flow slides its disclosures.
 
      The markup is still real <details>, so with this script broken or not yet
-     run every question still opens. */
-  Array.prototype.forEach.call(document.querySelectorAll('.faq__item'),
+     run every one of them still opens, and keyboard and screen reader
+     behaviour comes free. */
+  Array.prototype.forEach.call(document.querySelectorAll('.expand'),
     function (item) {
       var summary = item.querySelector('summary');
-      var body = item.querySelector('.faq__a');
+      var body = item.querySelector('.expand__body');
       if (!summary || !body) return;
 
       function slide(open) {
-        if (item._faq) { item._faq.cancel(); item._faq = null; }
+        if (item._anim) { item._anim.cancel(); item._anim = null; }
         if (REDUCED.matches) { item.open = open; return; }
 
         if (open) item.open = true;         // measurable only once it is open
@@ -291,11 +293,25 @@
           ? [{ height: '0px', opacity: 0 }, { height: h + 'px', opacity: 1 }]
           : [{ height: h + 'px', opacity: 1 }, { height: '0px', opacity: 0 }];
 
-        item._faq = body.animate(frames, { duration: open ? 260 : 200, easing: EASE });
-        item._faq.onfinish = function () {
-          item._faq = null;
+        var anim = body.animate(frames, { duration: open ? 260 : 200, easing: EASE });
+        item._anim = anim;
+
+        /* Safe to run twice, and it has to be: the good path is onfinish, and
+           the timer behind it is the guarantee.
+
+           A Web Animations callback is driven by the document timeline, which
+           does not advance in a tab the browser has stopped painting. This
+           project has already been bitten by exactly that, twice, once on a
+           navigation lock released inside rAF and once on the quote flow's own
+           slide. Here it would leave a service stuck open after a phone slept
+           mid-close. */
+        function done() {
+          if (item._anim !== anim) return;  // superseded by a later toggle
+          item._anim = null;
           if (!open) item.open = false;     // closed only after it has shrunk
-        };
+        }
+        anim.onfinish = done;
+        setTimeout(done, (open ? 260 : 200) + 120);
       }
 
       summary.addEventListener('click', function (e) {

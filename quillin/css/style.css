@@ -757,20 +757,109 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 .panel[hidden] { display: none; }
 
+/* ---------- the services, as a disclosure list ----------
+
+   Owner instruction: pressing a service name opens its description underneath.
+
+   Same control as the Common Questions below it, and deliberately so, but set
+   as the page's primary content rather than as reference: bigger, brighter,
+   and with more air. A question somebody may never ask can be quiet. The list
+   of what this business actually does cannot. */
+
+.svclist {
+  margin: 0 0 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.svc { border-top: 1px solid var(--line); }
+
+.svc summary {
+  list-style: none;                 /* the default triangle, gone */
+  cursor: pointer;
+  position: relative;
+  padding: 1.125rem 2.5rem 1.125rem 0;
+  /* Comfortably past the 44px floor: this is the main thing to press on the
+     page, so there is no reason for it to be tight. */
+  min-height: 3.5rem;
+  font-size: 1.1875rem;
+  font-weight: 500;
+  color: var(--ink-dim);
+  transition: color .2s var(--ease);
+}
+
+.svc summary::-webkit-details-marker { display: none; }
+
+.svc summary:hover,
+.svc[open] summary { color: var(--ink); }
+
+/* A plus that becomes a minus. Two rules rather than a glyph, so it lines up
+   with the type at any size and never inherits a font's own metrics. Same
+   reasoning as the Back arrow, which stopped being a character for this. */
+.svc summary::before,
+.svc summary::after {
+  content: "";
+  position: absolute;
+  right: .25rem;
+  top: 50%;
+  width: .8125rem;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--muted);
+  transition: transform .28s var(--ease), background .2s var(--ease);
+}
+
+.svc summary::after { transform: rotate(90deg); }
+
+.svc summary:hover::before,
+.svc summary:hover::after { background: var(--ink-dim); }
+
+.svc[open] summary::before,
+.svc[open] summary::after { background: var(--orange); }
+
+/* The upright stroke lies down on the horizontal one: plus becomes minus. */
+.svc[open] summary::after { transform: rotate(0deg); }
+
+.svc__body { overflow: hidden; }
+
+.svc__body p {
+  margin: 0;
+  padding: 0 1.5rem 1.375rem 0;
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--ink-dim);
+  max-width: 58ch;
+}
+
+@media (max-width: 40rem) {
+  .svc summary { font-size: 1.0625rem; padding-right: 2.25rem; }
+  .svc__body p { font-size: 1rem; padding-right: 0; }
+}
+
+/* The Common Questions row. Same control as a service, because the owners
+   asked for it as a category in the same list, but marked as not-a-service:
+   what this business DOES is the reason the page exists, and a row about the
+   page itself should not compete with those for attention. */
+.svc--questions summary { font-weight: 400; color: var(--muted); }
+
+.svc--questions summary:hover,
+.svc--questions[open] summary { color: var(--ink-dim); }
+
+/* Its body holds a whole disclosure list of its own, so it gets a little more
+   room beneath it than a paragraph would. */
+.svc--questions .svc__body { padding-bottom: .5rem; }
+
 /* ---------- common questions ----------
    A disclosure list, on the same axis as everything else on the page. Closed
    by default and quiet when closed: it is reference, not reading. */
 
-.faq__title {
-  margin: 3rem 0 0 calc(var(--title-fs) * .587);
-  font-size: .75rem;
-  font-weight: 500;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-}
+/* .faq__title is gone with the heading it styled: the questions are a row in
+   the services list now, so the row's own summary is the title.
 
-.faq { margin-left: calc(var(--title-fs) * .587); }
+   .faq no longer needs the reading-axis indent either. It is inside a
+   disclosure body that is already indented by the row it belongs to, and
+   indenting again would step it away from the copy in every other row. */
+.faq { margin: 0 0 .375rem; }
 
 /* The job a run of questions belongs to. Small caps and faint: it groups the
    questions under it without competing with them for attention. */
