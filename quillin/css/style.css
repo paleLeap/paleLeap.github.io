@@ -1074,11 +1074,12 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
    Smaller than the plus on a service, and on the LEFT rather than the right.
    A service is a full width row and its mark belongs at the far edge; this is
    a word, and the mark belongs against it. */
-.disc {
-  margin-top: .875rem;
-  border-top: 1px solid var(--rule);
-  padding-top: .5rem;
-}
+/* No rule above it. It had one, on the reasoning that small print wants
+   separating from the promise above it. Wrong: the long orange rules on these
+   pages separate one POINT from the next, and putting one here made the
+   disclaimer look like a sixth item on the Guarantee list rather than the last
+   line of the warranty it belongs to. Space does the separating instead. */
+.disc { margin-top: .625rem; }
 
 .disc summary {
   list-style: none;
