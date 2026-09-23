@@ -996,7 +996,62 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 .plain--split li b { margin-bottom: 0; }
 
-.plain--split li span { display: block; max-width: 46ch; }
+.plain--split li span,
+.plain--split li .split__body { display: block; max-width: 46ch; }
+
+/* ---------- the warranty block ----------
+
+   The right hand column of a split row, when what belongs there is more than a
+   sentence. The Lifetime Warranty is the only thing on this site that carries
+   a list of what is covered AND a clause saying what is not, and squeezing
+   that into one line would have meant either losing the detail or writing a
+   paragraph nobody reads to the end of. */
+
+.split__body p { margin: 0 0 .75rem; }
+
+.split__body p:last-child { margin-bottom: 0; }
+
+/* Its own list rules, because .plain li above would otherwise style these:
+   hairline-separated rows with 18px of padding, which is right for a page
+   section and absurd for four short bullets inside one. */
+.covers {
+  list-style: none;
+  margin: 0 0 .875rem;
+  padding: 0;
+}
+
+.covers li {
+  position: relative;
+  padding: .1875rem 0 .1875rem 1.125rem;
+  border: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1.55;
+  color: var(--ink-dim);
+}
+
+/* A mark rather than a bullet glyph, for the same reason the plus and the back
+   arrow are drawn: it lines up with the type at any size instead of inheriting
+   a font's own idea of where a dot sits. */
+.covers li::before {
+  content: "";
+  position: absolute;
+  left: .0625rem;
+  top: .8125em;
+  width: .375rem;
+  height: 1px;
+  background: var(--orange);
+}
+
+/* What is NOT covered. Quieter than the promise above it, because it is the
+   small print and should read as such, but not hidden: a warranty whose limits
+   are hard to find is worse than one that states them plainly. */
+.excl {
+  font-size: .875rem;
+  color: var(--faint);
+  border-top: 1px solid var(--line);
+  padding-top: .75rem;
+}
 
 @media (max-width: 46rem) {
   .plain--split li { grid-template-columns: 1fr; gap: .375rem 0; }
