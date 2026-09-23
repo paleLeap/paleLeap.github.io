@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="9e1b390176">
+<meta name="build" content="ca6c164301">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=a7851eb7">
+<link rel="stylesheet" href="css/style.css?v=38aefeea">
 </head>
 <body>
 
@@ -632,9 +632,20 @@
           </ul>
           <p>This warranty applies specifically to the workmanship and the
             installation performed by Quillin Auto Glass.</p>
-          <p class="excl">Damage caused by accidents, impact, vehicle body
-            damage, rust, pre-existing conditions, or other circumstances
-            unrelated to the installation is not covered.</p>
+          <!-- Behind a small plus, owner instruction. The exclusions are the
+               one part of this page that is not a promise, and a customer
+               reading a warranty should reach the good news without wading
+               through the limits of it first. Still a real <details>, so it
+               opens with the script broken, and it shares the accordion the
+               Services page uses rather than a second one. -->
+          <details class="disc expand">
+            <summary>Disclaimer.</summary>
+            <div class="disc__body expand__body">
+              <p>Damage caused by accidents, impact, vehicle body damage, rust,
+                pre-existing conditions, or other circumstances unrelated to the
+                installation is not covered.</p>
+            </div>
+          </details>
         </div>
       </li>
       <li>

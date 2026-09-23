@@ -1063,11 +1063,77 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 /* What is NOT covered. Quieter than the promise above it, because it is the
    small print and should read as such, but not hidden: a warranty whose limits
    are hard to find is worse than one that states them plainly. */
-.excl {
-  font-size: 1rem;
-  color: var(--muted);
+/* ---------- the disclaimer ----------
+
+   The exclusions, behind a small plus. Owner instruction, and it is the right
+   shape for them: everything else on this page is a promise, and somebody
+   reading a warranty should reach the good news without wading through the
+   limits of it first. Closed, it is one quiet word; open, it says exactly what
+   is not covered, which is the part that matters when it matters.
+
+   Smaller than the plus on a service, and on the LEFT rather than the right.
+   A service is a full width row and its mark belongs at the far edge; this is
+   a word, and the mark belongs against it. */
+.disc {
+  margin-top: .875rem;
   border-top: 1px solid var(--rule);
-  padding-top: .875rem;
+  padding-top: .5rem;
+}
+
+.disc summary {
+  list-style: none;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+  /* 44px, like every other target on this site. It came out at 41 with a
+     2.25rem floor: small type plus small padding is exactly how a control ends
+     up just under, and just under is the same as failing. */
+  padding: .625rem 0 .625rem 1.125rem;
+  min-height: 2.75rem;
+  font-size: .9375rem;
+  font-weight: 400;
+  color: var(--muted);
+  transition: color .2s var(--ease);
+}
+
+.disc summary::-webkit-details-marker { display: none; }
+
+.disc summary:hover,
+.disc[open] summary { color: var(--ink-dim); }
+
+/* Drawn, not a glyph, for the same reason as every other mark on this site:
+   it lines up with the type at any size rather than inheriting a font's own
+   idea of where a stroke sits. */
+.disc summary::before,
+.disc summary::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: .5rem;
+  height: 1px;
+  background: var(--muted);
+  transition: transform .28s var(--ease), background .2s var(--ease);
+}
+
+.disc summary::after { transform: rotate(90deg); }
+
+.disc summary:hover::before,
+.disc summary:hover::after { background: var(--ink-dim); }
+
+.disc[open] summary::before,
+.disc[open] summary::after { background: var(--orange); }
+
+.disc[open] summary::after { transform: rotate(0deg); }
+
+.disc__body { overflow: hidden; }
+
+.disc__body p {
+  margin: 0;
+  padding: 0 0 .625rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--muted);
 }
 
 @media (max-width: 46rem) {
