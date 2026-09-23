@@ -999,6 +999,20 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
   line-height: 1.3;
   color: var(--ink);
   margin-bottom: .375rem;
+  /* Nudged in, owner instruction: the P of Phone should line up with the 1 of
+     (214), not with the bracket in front of it.
+
+     .3em of a 21px label is 6.3px, and the opening bracket at the 17px the
+     value is set in advances 6.2. Measured rather than guessed, which is the
+     only way to hit something this small.
+
+     It is really optical alignment, the same idea as hanging punctuation: a
+     bracket is mostly air, so a number that starts with one reads as indented
+     when it is flush. The rows without a bracket take the same nudge, so the
+     labels stay in a line with each other down the page, which matters more
+     than each one being flush with its own value. In em, so it holds wherever
+     these lists are set at a different size. */
+  margin-left: .3em;
 }
 
 /* Name in its own column, explanation beside it. A stack of bold-then-paragraph
