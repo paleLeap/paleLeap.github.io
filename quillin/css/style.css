@@ -53,6 +53,15 @@
   --muted:   #9aa3ac;
   --faint:   #79828b;
   --line:    rgba(255, 255, 255, .09);
+  /* The long rules that separate sections on the reading pages. Brand orange,
+     owner instruction: the same colour as the plus and minus on a disclosure.
+     One token, so dialling it back is one value rather than six rules.
+
+     Deliberately NOT used in the quote flow. The choice rows, the review table
+     and the answered list are a working instrument and their hairlines are
+     structure; these are a page being read, and a warm rule down it is the
+     cheapest warmth on the site. */
+  --rule:    #f07d2a;
   --line-2:  rgba(255, 255, 255, .16);
 
   --pick-off: #e8615e;
@@ -284,7 +293,10 @@ body:not(.on-quote) .greeting { display: none; }
 
 #guarantee .panel__sub { color: var(--ink-dim); }
 
-#guarantee .plain li b { color: var(--ink); font-weight: 400; }
+/* This page lifted its names a notch when everything around them was weight
+   300. They are weight 500 across the board now, so the override has nothing
+   left to do but hold them BACK, which is the opposite of what it was for. */
+#guarantee .plain li b { color: var(--ink); }
 
 .panel__title {
   margin: 0 0 .75rem;
@@ -768,10 +780,10 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 .svclist {
   margin: 0 0 1rem;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--rule);
 }
 
-.svc { border-top: 1px solid var(--line); }
+.svc { border-top: 1px solid var(--rule); }
 
 .svc > summary {
   list-style: none;                 /* the default triangle, gone */
@@ -893,7 +905,7 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
   color: var(--faint);
 }
 
-.faq__item { border-top: 1px solid var(--line); }
+.faq__item { border-top: 1px solid var(--rule); }
 
 .faq__item summary {
   list-style: none;                 /* the default triangle, gone */
@@ -967,21 +979,26 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 /* The supporting sections sit one notch below the job in hand: the same type,
    a touch dimmer, so the quote always reads as the brighter thing. */
+/* Set bigger and brighter, owner instruction, and overdue: these pages were
+   missed by the type pass that went through the quote flow this session, so
+   they were still carrying the 15px weight-300 settings that started the whole
+   "too small, too faded" round of feedback. */
 .plain li {
-  padding: 1.125rem 0;
-  border-top: 1px solid var(--line);
-  font-size: .9375rem;
-  font-weight: 300;
-  line-height: 1.6;
-  color: var(--muted);
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--rule);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--ink-dim);
 }
 
 .plain li b {
   display: block;
-  font-size: 1rem;
-  font-weight: 300;
+  font-size: 1.3125rem;
+  font-weight: 500;
+  line-height: 1.3;
   color: var(--ink);
-  margin-bottom: .3125rem;
+  margin-bottom: .375rem;
 }
 
 /* Name in its own column, explanation beside it. A stack of bold-then-paragraph
@@ -989,7 +1006,7 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
    become scannable down the left instead of buried in prose. */
 .plain--split li {
   display: grid;
-  grid-template-columns: 10.5rem 1fr;
+  grid-template-columns: 13rem 1fr;
   gap: 0 2rem;
   align-items: baseline;
 }
@@ -1022,7 +1039,7 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 .covers li {
   position: relative;
-  padding: .1875rem 0 .1875rem 1.125rem;
+  padding: .25rem 0 .25rem 1.25rem;
   border: 0;
   font-size: inherit;
   font-weight: inherit;
@@ -1047,10 +1064,10 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
    small print and should read as such, but not hidden: a warranty whose limits
    are hard to find is worse than one that states them plainly. */
 .excl {
-  font-size: .875rem;
-  color: var(--faint);
-  border-top: 1px solid var(--line);
-  padding-top: .75rem;
+  font-size: 1rem;
+  color: var(--muted);
+  border-top: 1px solid var(--rule);
+  padding-top: .875rem;
 }
 
 @media (max-width: 46rem) {
