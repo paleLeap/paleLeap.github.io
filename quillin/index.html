@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="bfdb78eccf">
-<meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=435aff35">
+<meta name="build" content="3af97ff617">
+<meta name="description" content="Mobile auto glass repair and replacement across North Texas, based in Wylie. Family operated, Black Owned and Woman Owned, lifetime warranty on installation. Start with your VIN and tell us what broke.">
+<link rel="stylesheet" href="css/style.css?v=1b1cebce">
 </head>
 <body>
 
@@ -41,6 +41,18 @@
        aria-label="Quillin Auto Glass, open the menu">
       <img src="assets/img/logo.png?v=9612b179" alt="" width="300" height="243">
     </a>
+
+    <!-- The word, so the logo does not have to be guessed at.
+
+         Owner instruction, and the strongest note in their whole set: "Pages
+         are hidden until hovering over the small logo. I am afraid we may lose
+         some customers looking for more information prior to jumping directly
+         into requesting a quote." A control nobody knows is a control is the
+         same as no control.
+
+         It shows while the strip is shut and gets out of the way when it
+         opens, because once the five words are there they say it better. -->
+    <p class="brandcue" aria-hidden="true">Menu</p>
 
     <nav class="brandnav" id="brandnav" aria-label="Sections">
       <a href="#quote"     style="--i:0">quote</a>
@@ -89,9 +101,17 @@
        "too much going on" before a single question had been answered. One
        thing to press is the fix. -->
   <div class="greeting">
-    <p class="standfirst">Servicing Dallas Metroplex auto glass needs since
-      <span data-placeholder="founded">20xx</span>. Family owned and operated.
-      Let&rsquo;s get you back on the road.</p>
+    <!-- A sentence to a line, owner instruction. Three <p> rather than line
+         breaks inside one, so each is a paragraph in the markup as well as to
+         the eye, and the spacing between them is a margin that can be tuned
+         rather than a <br> that cannot.
+
+         The founding year is 2024, from them, so data-placeholder goes with
+         it: that attribute exists to make an unknown greppable and loud, and
+         leaving it on a known value would cost it its meaning. -->
+    <p class="standfirst">Servicing North Texas auto glass needs since 2024.</p>
+    <p class="standfirst">Family owned and operated.</p>
+    <p class="standfirst">Let&rsquo;s get you back on the road.</p>
 
     <!-- The heading IS the button. A filled control rather than a headline that
          happens to be clickable: the people this was rebuilt for should never

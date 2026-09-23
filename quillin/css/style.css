@@ -132,8 +132,48 @@ body {
   /* The floor matters as much as the ceiling here: a vw-only value came out
      BELOW the old fixed 56px on a narrow window, so "bigger" quietly became
      smaller on laptops. */
-  height: clamp(4.8rem, 9vw, 6.6rem);
+  /* Bigger, owner instruction. It is the handle for the whole menu, and their
+     worry is that nobody finds it: "Pages are hidden until hovering over the
+     small logo." A bigger target is half the answer; the word beside it is the
+     other half. */
+  height: clamp(5.5rem, 10.5vw, 7.75rem);
   display: block;
+}
+
+/* "Menu", beside the mark, while the strip is shut.
+
+   The same padding and size as a .brandnav link, so it stands exactly where
+   the first word will and the swap reads as one thing becoming another rather
+   than as two things in two places.
+
+   aria-hidden, because the nav beside it is already labelled "Sections" and
+   the logo already says it opens the menu. This is for eyes only. */
+.brandcue {
+  margin: 0;
+  flex: none;
+  padding: .4375rem .75rem;
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--muted);
+  overflow: hidden;
+  max-width: 8rem;
+  transition: opacity .2s var(--ease), max-width .3s var(--ease),
+              padding .3s var(--ease), color .2s var(--ease);
+}
+
+.brand:hover .brandcue { color: var(--orange); }
+
+/* Out of the way the moment the words arrive: they say it better. */
+.brand:hover .brandcue,
+.brand:focus-within .brandcue,
+.brand.is-open .brandcue {
+  opacity: 0;
+  max-width: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .brandnav {
@@ -410,8 +450,14 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
    17-22px at weight 200 in --muted, which is exactly the combination the
    owners' testers described as faded: a hairline weight is what makes small
    light text on black look washed out, more than the colour does. */
+/* One sentence to a paragraph now, so the spacing between them is the gap
+   between two <p> rather than a <br> inside one. The one directly above the
+   heading takes the big gap; the others sit close, as one block of three
+   lines. :has, so nothing depends on counting them. */
+.standfirst:has(+ h1) { margin-bottom: 2rem; }
+
 .standfirst {
-  margin: 0 auto 2rem;
+  margin: 0 auto .5rem;
   max-width: 52ch;
   font-size: clamp(1.25rem, 2.8vw, 1.625rem);
   line-height: 1.5;
@@ -2346,7 +2392,19 @@ a, button, label, select, input, textarea, summary {
   /* Bigger, on the owner's own feedback. The mark is the only thing on a phone
      header telling you whose business this is, and it was being shrunk to make
      room for icons that have since been dropped. */
-  .brand__logo img { height: 4.25rem; }
+  /* Bigger on a phone too, owner instruction. Still well short of the desktop
+     size: the header shares this row with the phone number, and a mark that
+     crowds it would trade one piece of findability for another. Measured at
+     320: 5.25rem pushed "Questions? Call us!" 19px off the screen. */
+  .brand__logo img { height: 4.875rem; }
+
+  /* No "Menu" here. It answers a problem that only exists on a pointer device,
+     where the pages hide until the logo is hovered. A phone has the section
+     bar along the bottom of every screen, which is the owners' favourite part
+     of the mobile version, and tapping the mark opens the words as well. All
+     the cue would do up here is take width off a row that has none to give:
+     it and the larger mark together ran the header 19px past a 320 screen. */
+  .brandcue { display: none; }
 
   .top__tel { font-size: .875rem; }
 
@@ -2394,6 +2452,15 @@ a, button, label, select, input, textarea, summary {
      On a phone a persistent bottom bar is the expected place for this, so it
      just lives there. The logo toggle stays for desktop, where hovering the
      mark is a reasonable thing to discover. */
+  /* Owner instruction: "let's get a bit more of our business colors around
+     that for emphasis on all the details we provide." So the bar wears the
+     same orange rule the reading pages use, and the section you are on is
+     orange rather than a shade of grey.
+
+     What it does NOT get back is a filled pill behind the current word. That
+     was here once and came out again, because at the bottom of a phone screen
+     it read as a lit button and pulled the eye down away from the work in
+     hand. Colour on the word does the same job without the weight. */
   .dock {
     opacity: 1;
     transform: none;
@@ -2401,7 +2468,7 @@ a, button, label, select, input, textarea, summary {
     justify-content: flex-start;
     overflow-x: auto;
     scrollbar-width: none;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--rule);
     background: var(--bg);
   }
 
@@ -2424,6 +2491,9 @@ a, button, label, select, input, textarea, summary {
     padding: .875rem .5rem;
     font-size: .6875rem;
     letter-spacing: .07em;
+    /* Up off --faint. This bar is the only way to the other pages on a phone,
+       and the owners' whole point is that people should find them. */
+    color: var(--muted);
   }
 
   /* Tapping a word should read as the word answering you, not as a box
@@ -2442,9 +2512,9 @@ a, button, label, select, input, textarea, summary {
      not enough to read as a lit control demanding attention, which is what
      the filled pill did. */
   .dock a.is-on {
-    color: var(--ink-dim);
+    color: var(--orange);
     background: none;
-    text-shadow: 0 0 8px rgba(237, 240, 242, .16);
+    text-shadow: 0 0 10px rgba(240, 125, 42, .28);
   }
 
   .dock a.is-on:active { color: var(--ink); text-shadow: 0 0 10px rgba(237, 240, 242, .45); }
