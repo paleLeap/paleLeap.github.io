@@ -2434,14 +2434,25 @@ a, button, label, select, input, textarea, summary {
      one option among several; edge to edge it reads as the thing to press. */
   .starter { display: block; width: 100%; padding: 1.25rem 1rem; }
 
-  /* Matches the starter's width so the two stack as a pair rather than as a
-     button with something smaller loose underneath it. Still obviously the
-     lesser of the two: no fill, lighter weight, smaller type. */
-  .greeting__alt .greeting__contact { display: flex; width: 100%; padding: .875rem 1rem; font-size: 1rem; }
+  /* Sized to their own text, not to the starter.
 
-  /* Full width too, so the opening screen is three controls in one column
-     rather than two and a smaller one floating under them. */
-  .greeting .pagehelp__btn { display: flex; width: 100%; padding: .875rem 1rem; font-size: 1rem; }
+     They were full width, on the reasoning that three controls in one column
+     read as one set. The owners want them drawn in, and they are right: three
+     boxes of identical width say the three things inside them carry equal
+     weight, which is exactly backwards. "Get your quote." is the reason the
+     page exists and keeps the full width; these two are the ways out of it and
+     now take only the room their words need.
+
+     min-height rather than padding alone, so drawing them in cannot quietly
+     drop them under the 44px floor. */
+  .greeting__alt .greeting__contact,
+  .greeting .pagehelp__btn {
+    display: inline-flex;
+    width: auto;
+    min-height: 2.875rem;
+    padding: .75rem 1.25rem;
+    font-size: 1rem;
+  }
 
   /* 16px was the phone size for the line that now carries the whole opening
      screen. It holds a narrow measure, it just does not shrink to fit. */
