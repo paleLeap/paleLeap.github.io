@@ -1137,6 +1137,31 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
   color: var(--muted);
 }
 
+/* ---------- where to find your VIN, on the help page ----------
+
+   The same three places the quote flow offers, for somebody reading this page
+   who has not started a quote and cannot reach that one. */
+
+.wherelist__title {
+  font-weight: 500;
+  color: var(--ink-dim);
+  padding-bottom: .25rem !important;
+}
+
+.wherelist {
+  margin: 0;
+  padding: 0 0 .625rem 1.25rem;
+  color: var(--muted);
+}
+
+.wherelist li {
+  margin-bottom: .3125rem;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.wherelist li:last-child { margin-bottom: 0; }
+
 @media (max-width: 46rem) {
   .plain--split li { grid-template-columns: 1fr; gap: .375rem 0; }
   .plain--split li b { margin-bottom: .125rem; }
@@ -2135,6 +2160,22 @@ a, button, label, select, input, textarea, summary {
     padding: .6875rem .25rem;
     margin: -.6875rem -.25rem;
     display: inline-block;
+  }
+
+  /* Same problem, same fix, one difference: NO inline-block here. The links in
+     these lists sit inside running sentences and some of them are long enough
+     to wrap, and inline-block would force such a link onto a single line and
+     push it out of the column. Vertical padding on an inline element grows the
+     hit box without touching the line box, which is the whole trick, and the
+     wrap still happens.
+
+     Worth the care because the one this was written for dials a phone. */
+  .plain a {
+    /* .75rem, not .6875rem. The smaller value landed the box on 43.99px, which
+       rounds to 44 in a readout and is under it in fact. A target that is only
+       just big enough is the same as one that is not. */
+    padding: .75rem .125rem;
+    margin: 0 -.125rem;
   }
 
   /* The strip is a tap toggle here, so it must not also open on a stray hover

@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="614b02ee93">
+<meta name="build" content="8b6141b8f5">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=aa139f78">
+<link rel="stylesheet" href="css/style.css?v=d8f89ec5">
 </head>
 <body>
 
@@ -751,9 +751,13 @@
     <ul class="plain plain--split plain--tight">
       <li>
         <b>Do I have to use this?</b>
-        <span>Not at all. You are welcome to give a call or send us a text to
-          talk to a real person. This is here for your convenience and to save
-          you some time.</span>
+        <!-- The offer is the link. The corner of every page already dials on a
+             tap; this is the same number, in the sentence that makes the
+             offer, so reading it and acting on it are the same gesture. -->
+        <span>Not at all. You are welcome to <a href="tel:+12145867650"
+          aria-label="Give us a call or send us a text at (214) 586-7650">give a
+          call or send us a text</a> to talk to a real person. This is here for
+          your convenience and to save you some time.</span>
       </li>
       <li>
         <b>Why do you want my VIN?</b>
@@ -785,8 +789,38 @@
       </li>
       <li>
         <b>What if I cannot find my VIN?</b>
-        <span>Simply tell us your Year, Make, &amp; Model from a list
-          instead!</span>
+        <div class="split__body">
+          <p>Simply tell us your Year, Make, &amp; Model from a list
+            instead!</p>
+          <!-- The same three places the quote flow offers behind "Need help
+               finding your VIN?", worded the same and reachable here too:
+               somebody reading this page has not started the flow yet and
+               cannot get at that one.
+
+               DUPLICATED ON PURPOSE, and the two must be kept in step. The
+               alternative was cloning one into the other at runtime, which
+               would have cost these disclosures the thing they are built for:
+               working with the script broken. If you edit one list, edit the
+               other. The flow's copy is #vin-help.
+
+               What is NOT repeated here is that panel's "Can't find it? Pick
+               your vehicle from a list instead." button. It switches the quote
+               down its other branch, and there is no quote running on this
+               page for it to switch. -->
+          <details class="disc expand">
+            <summary>Need help finding your VIN?</summary>
+            <div class="disc__body expand__body">
+              <p class="wherelist__title">Where to find your VIN</p>
+              <ol class="wherelist">
+                <li>Your insurance card or vehicle registration.</li>
+                <li>The sticker in the driver&rsquo;s door jamb, visible with
+                  the door open.</li>
+                <li>The corner of the dash on the driver&rsquo;s side, read
+                  through the windshield.</li>
+              </ol>
+            </div>
+          </details>
+        </div>
       </li>
     </ul>
 
