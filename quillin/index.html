@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="7817a7989b">
+<meta name="build" content="bfdb78eccf">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=33fecc4a">
+<link rel="stylesheet" href="css/style.css?v=435aff35">
 </head>
 <body>
 
@@ -842,11 +842,25 @@
 
   <section class="panel" id="contact" hidden>
     <h1 class="panel__title">Contact</h1>
+    <!-- The owners' own wording throughout. Their brief for all of it: "Our
+         brand is very down-to-earth. Meaning, most of the written script
+         should feel like a conversation." -->
     <ul class="plain">
-      <li><b>Phone</b><a href="tel:+12145867650">(214) 586-7650</a>, calls and texts.</li>
+      <li><b>Phone</b><a href="tel:+12145867650">(214) 586-7650</a>. Give us a
+        call or shoot us a text.</li>
       <li><b>Email</b><a href="mailto:QuillinAutoGlass@gmail.com">QuillinAutoGlass@gmail.com</a></li>
-      <li><b>Hours</b>Monday to Friday 8am to 6pm. Saturday 8am to noon. Sunday by appointment.</li>
-      <li><b>Where</b>Based in Wylie, Texas. We come to you.</li>
+      <!-- Separated by a tilde rather than a full stop, their instruction. The
+           separators are set dim on purpose: three opening hours on one line
+           only scan as three things if the marks between them stay out of the
+           way of the words. Marked aria-hidden so a screen reader reads the
+           hours and not "tilde". -->
+      <li><b>Hours</b><span class="hrs">Monday to Friday: 8am to 6pm<span
+        class="sep" aria-hidden="true">~</span></span><span class="hrs">Saturday:
+        8am to Noon<span class="sep" aria-hidden="true">~</span></span><span
+        class="hrs">Sunday: By Appointment</span></li>
+      <!-- "We Come To You" is capitalised deliberately, theirs, for emphasis. -->
+      <li><b>Where</b>Based in Wylie, Texas. We specialize in providing mobile
+        service. That means We Come To You!</li>
       <li><b>Payment</b>All major cards, cash, Zelle.</li>
     </ul>
 

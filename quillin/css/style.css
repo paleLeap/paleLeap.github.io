@@ -1185,6 +1185,32 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 .plain a:hover { color: var(--orange); border-color: var(--orange); }
 
+/* ---------- the opening hours ----------
+
+   Tilde separated, their instruction, on one line where there is room for one
+   line. The separators are dim so three sets of hours read as three things
+   rather than as one string with punctuation in it, and aria-hidden so a
+   screen reader says the hours and not "tilde".
+
+   Each range is its own nowrap unit and carries the mark that follows it. Set
+   as plain text it broke wherever it ran out of room, which at 320 left a line
+   reading "~ Saturday: 8am to Noon ~", a separator dangling at both ends of
+   the thing it was meant to separate. */
+.hrs { white-space: nowrap; }
+
+.sep {
+  color: var(--faint);
+  padding: 0 .3125rem;
+}
+
+/* Too narrow for one line: the ranges stack, one per line, and the separators
+   go. A mark between two things sitting side by side is a separator; the same
+   mark at the end of a line is a loose end. The stack does the separating. */
+@media (max-width: 34rem) {
+  .hrs { display: block; }
+  .sep { display: none; }
+}
+
 .aside { margin: 1.25rem 0 0; font-size: 1rem; font-weight: 400; color: var(--muted); }
 
 
