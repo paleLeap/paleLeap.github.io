@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="81c7feeeda">
+<meta name="build" content="8963bd7188">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=903aaceb">
+<link rel="stylesheet" href="css/style.css?v=036c0be2">
 </head>
 <body>
 
@@ -436,66 +436,6 @@
          Still real <details>, so every service opens with the script broken or
          not yet run, and keyboard and screen reader behaviour comes free. -->
     <div class="svclist">
-      <!-- Owner instruction: Common Questions gets its own category at the top
-           of this list, above Windshield Chip Repair. So it is a row like any
-           other rather than a section of its own further down the page.
-
-           A disclosure inside a disclosure. It works because the outer body is
-           animated with the Web Animations API and no fill, so once the
-           animation is done its height reverts to auto: opening a question
-           inside then grows the outer container naturally instead of being
-           clipped by a height left behind from the animation. -->
-      <details class="svc svc--questions expand">
-        <summary>Common Questions</summary>
-        <div class="svc__body expand__body">
-        <div class="faq">
-          <p class="faq__group">Rock chip repair</p>
-
-          <details class="faq__item expand">
-            <summary>Will the rock chip disappear?</summary>
-            <div class="faq__a expand__body"><p>Our goal is to save your windshield and stop the
-              damage spreading. It does look better afterwards, but it will not
-              disappear completely. The resin we use dries clear, though not
-              crystal clear like glass.</p></div>
-          </details>
-
-          <p class="faq__group">Windshield replacement</p>
-
-          <details class="faq__item expand">
-            <summary>How long until I can drive?</summary>
-            <div class="faq__a expand__body"><p>Thirty minutes to an hour and a half, depending
-              on what you need. We can use a quick-set urethane if you are in a
-              hurry, just ask.</p></div>
-          </details>
-
-          <details class="faq__item expand">
-            <summary>When can I remove the tape?</summary>
-            <div class="faq__a expand__body"><p>After 24 hours.</p></div>
-          </details>
-
-          <details class="faq__item expand">
-            <summary>How long until I can wash my vehicle?</summary>
-            <div class="faq__a expand__body"><p>Five days.</p></div>
-          </details>
-
-          <details class="faq__item expand">
-            <summary>What if it rains before the five days?</summary>
-            <div class="faq__a expand__body"><p>Rain is fine. It is the pressure of a car wash
-              we want to keep away from it, not water.</p></div>
-          </details>
-
-          <p class="faq__group">Door glass</p>
-
-          <details class="faq__item expand">
-            <summary>What about the glass inside the door and the vehicle?</summary>
-            <div class="faq__a expand__body"><p>Your door glass quote includes clearing the
-              fragments out of the door and the visible glass inside the
-              vehicle.</p></div>
-          </details>
-        </div>
-        </div>
-      </details>
-
       <details class="svc expand">
         <summary>Windshield Chip Repair</summary>
         <div class="svc__body expand__body">
@@ -572,6 +512,78 @@
           Not sure what part you need? Send us a photo, and we will take it
           from there!
           </p>
+    
+
+    </div>
+      </details>
+      <!-- Last row of the list. It was first, briefly; the owners moved it to
+           the bottom, which is the right place: somebody arriving at a services
+           page wants to know what is offered before they want the small print
+           about it.
+
+           A disclosure inside a disclosure. It works because the outer body is
+           animated with the Web Animations API and no fill, so once the
+           animation is done its height reverts to auto: opening a question
+           inside then grows the outer container naturally instead of being
+           clipped by a height left behind from the animation. -->
+      <details class="svc svc--questions expand">
+        <summary>Common Questions</summary>
+        <div class="svc__body expand__body">
+        <div class="faq">
+
+          <div class="faqgroup">
+            <p class="faq__group">Rock chip repair</p>
+
+
+            <details class="faq__item expand">
+              <summary>Will the rock chip disappear?</summary>
+              <div class="faq__a expand__body"><p>Our goal is to save your windshield and stop the
+                damage spreading. It does look better afterwards, but it will not
+                disappear completely. The resin we use dries clear, though not
+                crystal clear like glass.</p></div>
+            </details>
+          </div>
+
+          <div class="faqgroup">
+            <p class="faq__group">Windshield replacement</p>
+
+
+            <details class="faq__item expand">
+              <summary>How long until I can drive?</summary>
+              <div class="faq__a expand__body"><p>Thirty minutes to an hour and a half, depending
+                on what you need. We can use a quick-set urethane if you are in a
+                hurry, just ask.</p></div>
+            </details>
+
+            <details class="faq__item expand">
+              <summary>When can I remove the tape?</summary>
+              <div class="faq__a expand__body"><p>After 24 hours.</p></div>
+            </details>
+
+            <details class="faq__item expand">
+              <summary>How long until I can wash my vehicle?</summary>
+              <div class="faq__a expand__body"><p>Five days.</p></div>
+            </details>
+
+            <details class="faq__item expand">
+              <summary>What if it rains before the five days?</summary>
+              <div class="faq__a expand__body"><p>Rain is fine. It is the pressure of a car wash
+                we want to keep away from it, not water.</p></div>
+            </details>
+          </div>
+
+          <div class="faqgroup">
+            <p class="faq__group">Door glass</p>
+
+
+            <details class="faq__item expand">
+              <summary>What about the glass inside the door and the vehicle?</summary>
+              <div class="faq__a expand__body"><p>Your door glass quote includes clearing the
+                fragments out of the door and the visible glass inside the
+                vehicle.</p></div>
+            </details>
+          </div>
+          </div>
         </div>
       </details>
     </div>

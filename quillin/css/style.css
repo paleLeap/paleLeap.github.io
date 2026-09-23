@@ -773,7 +773,7 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 .svc { border-top: 1px solid var(--line); }
 
-.svc summary {
+.svc > summary {
   list-style: none;                 /* the default triangle, gone */
   cursor: pointer;
   position: relative;
@@ -787,16 +787,22 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
   transition: color .2s var(--ease);
 }
 
-.svc summary::-webkit-details-marker { display: none; }
+.svc > summary::-webkit-details-marker { display: none; }
 
-.svc summary:hover,
-.svc[open] summary { color: var(--ink); }
+.svc > summary:hover,
+.svc[open] > summary { color: var(--ink); }
 
 /* A plus that becomes a minus. Two rules rather than a glyph, so it lines up
    with the type at any size and never inherits a font's own metrics. Same
-   reasoning as the Back arrow, which stopped being a character for this. */
-.svc summary::before,
-.svc summary::after {
+   reasoning as the Back arrow, which stopped being a character for this.
+
+   `> summary`, not `summary`, and every rule in this block is the same.
+   Written as a descendant selector these reached the questions nested inside
+   the Common Questions row, and `.svc[open] summary::after` then turned EVERY
+   one of their pluses into a minus the moment that row was opened: six closed
+   questions all claiming to be open. A child combinator is the whole fix. */
+.svc > summary::before,
+.svc > summary::after {
   content: "";
   position: absolute;
   right: .25rem;
@@ -808,16 +814,16 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
   transition: transform .28s var(--ease), background .2s var(--ease);
 }
 
-.svc summary::after { transform: rotate(90deg); }
+.svc > summary::after { transform: rotate(90deg); }
 
-.svc summary:hover::before,
-.svc summary:hover::after { background: var(--ink-dim); }
+.svc > summary:hover::before,
+.svc > summary:hover::after { background: var(--ink-dim); }
 
-.svc[open] summary::before,
-.svc[open] summary::after { background: var(--orange); }
+.svc[open] > summary::before,
+.svc[open] > summary::after { background: var(--orange); }
 
 /* The upright stroke lies down on the horizontal one: plus becomes minus. */
-.svc[open] summary::after { transform: rotate(0deg); }
+.svc[open] > summary::after { transform: rotate(0deg); }
 
 .svc__body { overflow: hidden; }
 
@@ -832,7 +838,7 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 }
 
 @media (max-width: 40rem) {
-  .svc summary { font-size: 1.0625rem; padding-right: 2.25rem; }
+  .svc > summary { font-size: 1.0625rem; padding-right: 2.25rem; }
   .svc__body p { font-size: 1rem; padding-right: 0; }
 }
 
@@ -840,10 +846,10 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
    asked for it as a category in the same list, but marked as not-a-service:
    what this business DOES is the reason the page exists, and a row about the
    page itself should not compete with those for attention. */
-.svc--questions summary { font-weight: 400; color: var(--muted); }
+.svc--questions > summary { font-weight: 400; color: var(--muted); }
 
-.svc--questions summary:hover,
-.svc--questions[open] summary { color: var(--ink-dim); }
+.svc--questions > summary:hover,
+.svc--questions[open] > summary { color: var(--ink-dim); }
 
 /* Its body holds a whole disclosure list of its own, so it gets a little more
    room beneath it than a paragraph would. */
@@ -861,10 +867,25 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
    indenting again would step it away from the copy in every other row. */
 .faq { margin: 0 0 .375rem; }
 
+/* A category and the questions under it are one unit. Owner instruction:
+   "ROCK CHIP REPAIR" and "Will the rock chip disappear?" should be together.
+
+   They were a flat run of headings and items, which reads as one long list
+   with labels dropped into it rather than as three groups. Space BETWEEN the
+   groups and none within, plus a rule down the left of each, so the heading
+   visibly owns what follows it. */
+.faqgroup {
+  margin: 1.5rem 0 0;
+  padding-left: .875rem;
+  border-left: 1px solid var(--line);
+}
+
+.faqgroup:first-child { margin-top: .25rem; }
+
 /* The job a run of questions belongs to. Small caps and faint: it groups the
    questions under it without competing with them for attention. */
 .faq__group {
-  margin: 1.75rem 0 .25rem;
+  margin: 0 0 .125rem;
   font-size: .625rem;
   font-weight: 500;
   letter-spacing: .18em;
