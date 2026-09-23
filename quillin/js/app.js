@@ -365,7 +365,7 @@
       hide(el.sendNote);
       reach = {};
       el.send.disabled = true;
-      el.send.textContent = 'Send my request';
+      el.send.textContent = 'Send My Request';
       Array.prototype.forEach.call(
         el.sendWhere.querySelectorAll('input'),
         function (i) { if (i.type === 'checkbox') i.checked = false; else i.value = ''; }

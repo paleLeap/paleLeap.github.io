@@ -22,7 +22,7 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="48c521e725">
+<meta name="build" content="614b02ee93">
 <meta name="description" content="Mobile auto glass repair and replacement in Wylie, Texas. Family operated, lifetime warranty on installation. Start with your VIN and tell us what broke.">
 <link rel="stylesheet" href="css/style.css?v=aa139f78">
 </head>
@@ -399,7 +399,7 @@
     </fieldset>
 
     <p class="confirm__do">
-      <button type="button" class="btn" id="send-request" disabled>Send my request</button>
+      <button type="button" class="btn" id="send-request" disabled>Send My Request</button>
     </p>
     <p class="note" id="send-note" role="status" aria-live="polite" hidden></p>
     <nav class="pagenav" aria-label="Step">
@@ -676,7 +676,10 @@
 
   <section class="panel" id="about" hidden>
     <h1 class="panel__title">About us</h1>
-    <p class="panel__sub">Black owned and family operated.</p>
+    <!-- Their wording, their business. It also closes a gap: the Guarantee
+         rewrite took "Black owned and family operated" out of Real People, so
+         between that change and this one the site said it nowhere. -->
+    <p class="panel__sub">Black Owned and Woman Owned.</p>
 
     <!-- Their own words, lightly punctuated. The photographs are their own
          work, placed so the page has a rhythm rather than a gallery bolted on
@@ -748,43 +751,53 @@
     <ul class="plain plain--split plain--tight">
       <li>
         <b>Do I have to use this?</b>
-        <span>No. Call or text <a href="tel:+12145867650">(214) 586-7650</a> and
-          talk to a person. This only saves you the call.</span>
+        <span>Not at all. You are welcome to give a call or send us a text to
+          talk to a real person. This is here for your convenience and to save
+          you some time.</span>
       </li>
       <li>
         <b>Why do you want my VIN?</b>
-        <span>It tells us the exact glass your vehicle was built with. It
-          describes the vehicle, not you, and we use it for nothing else.</span>
+        <span>There are variations of features and specs for most Year, Make and
+          Models. The VIN provides us with your exact match.</span>
       </li>
       <li>
         <b>Does anything send before I say so?</b>
-        <span>No. Nothing leaves your device until you press send, and you see
-          all of it first.</span>
+        <!-- This quotes the button by name, so the button has to carry that
+             name. It said "Send my request" until this copy arrived; both are
+             "Send My Request" now. A page that quotes a control the customer
+             cannot then find is worse than no page at all. -->
+        <span>No. Nothing leaves your device until you press the &ldquo;Send My
+          Request&rdquo; button at the end of your quote process.</span>
       </li>
       <li>
         <b>Is that car on screen mine?</b>
-        <span>No, it is the same shape as yours so you have something to point
-          at. The list of windows beside it is yours.</span>
+        <!-- The old answer ended "The list of windows beside it is yours." That
+             is gone on their instruction: it reads as a comprehensive list
+             rather than one specific to the customer's vehicle, so claiming it
+             is theirs sets an expectation the list does not meet. -->
+        <span>No. It is a similar diagram to help you tell us where the damage
+          is on your vehicle. Something to point at.</span>
       </li>
       <li>
         <b>Do I have to send photos?</b>
-        <span>No, but one clear picture of the break tells us more than anything
-          else you can give us.</span>
+        <span>No. Pictures give us a clearer idea of the damage but are not
+          necessary in most cases.</span>
       </li>
       <li>
         <b>What if I cannot find my VIN?</b>
-        <span>Pick your year, make and model from a list instead.</span>
+        <span>Simply tell us your Year, Make, &amp; Model from a list
+          instead!</span>
       </li>
     </ul>
 
-    <h2 class="panel__h2">The whole thing, start to finish</h2>
+    <h2 class="panel__h2">The Whole Thing, Start to Finish</h2>
 
     <ol class="steps">
       <li>Tell us the vehicle, by VIN or from a list.</li>
       <li>Tap whichever glass is broken, or just describe it.</li>
       <li>Add a photo if you can.</li>
-      <li>Say how soon you need it.</li>
-      <li>Check it over and tell us how to reach you.</li>
+      <li>Tell us how soon you&rsquo;re looking to schedule.</li>
+      <li>Specify the best way to reach you and send it all our way!</li>
     </ol>
 
     <p class="goback">
@@ -831,6 +844,6 @@
 <script src="js/landing.js?v=90b186fa"></script>
 <script src="js/vin.js?v=546382b1"></script>
 <script src="js/glass.js?v=7b7553fa"></script>
-<script src="js/app.js?v=9bb1cf6d"></script>
+<script src="js/app.js?v=bd7c4b66"></script>
 </body>
 </html>
