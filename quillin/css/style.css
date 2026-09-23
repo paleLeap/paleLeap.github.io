@@ -214,7 +214,19 @@ body {
 .brand:focus-within .brandnav a,
 .brand.is-open .brandnav a { opacity: 1; transform: none; }
 
-.brandnav a:hover { color: var(--ink-dim); }
+/* ---------- pressed and pointed at, in the brand colour ----------
+
+   Owner instruction: the menu words, "Don't need a quote?", "How this works"
+   and the phone number in the corner should all glow orange rather than white
+   when hovered or pressed.
+
+   It is the better rule and it was already half here. Links inside the reading
+   pages have gone orange on hover since they were written; the chrome around
+   them was brightening to white instead, so the same gesture meant two
+   different things depending on which part of the page it landed on. Orange
+   everywhere: the site has one accent, and touching something is exactly when
+   it should show. */
+.brandnav a:hover { color: var(--orange); }
 
 .brandnav a.is-on { color: var(--ink); background: rgba(255, 255, 255, .06); border-radius: 2px; }
 
@@ -268,7 +280,8 @@ body {
   transition: color .25s var(--ease);
 }
 
-.top__tel:hover { color: var(--ink); }
+.top__tel:hover,
+.top__tel:active { color: var(--orange); }
 
 /* ---------- the page ---------- */
 
@@ -535,7 +548,7 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 }
 
 .greeting__alt .greeting__contact:hover {
-  color: var(--ink);
+  color: var(--orange);
   background: rgba(255, 255, 255, .04);
   box-shadow: inset 0 0 0 1px var(--line-2);
 }
@@ -809,7 +822,8 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
   background: var(--line-2);
 }
 
-.dock a:hover { color: var(--ink-dim); }
+.dock a:hover,
+.dock a:active { color: var(--orange); }
 
 .dock a.is-on { color: var(--ink); background: rgba(255, 255, 255, .06); }
 
@@ -1351,7 +1365,7 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
               box-shadow .2s var(--ease), background .2s var(--ease);
 }
 
-.pagehelp__btn:hover { color: var(--ink); text-decoration-color: var(--orange); }
+.pagehelp__btn:hover { color: var(--orange); text-decoration-color: var(--orange); }
 
 .pagehelp__btn:active { color: var(--orange); text-decoration-color: var(--orange); }
 
@@ -1369,7 +1383,7 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 }
 
 .greeting .pagehelp__btn:hover {
-  color: var(--ink);
+  color: var(--orange);
   background: rgba(255, 255, 255, .04);
   box-shadow: inset 0 0 0 1px var(--line-2);
 }
@@ -1562,7 +1576,7 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
   stroke-linejoin: round;
 }
 
-.pageback:hover { color: var(--ink); }
+.pageback:hover { color: var(--orange); }
 
 .pageback:active { color: var(--orange); }
 
@@ -1786,7 +1800,7 @@ a, button, label, select, input, textarea, summary {
   transition: color .2s var(--ease), text-decoration-color .2s var(--ease);
 }
 
-.plainlink:hover { color: var(--ink); text-decoration-color: var(--orange); }
+.plainlink:hover { color: var(--orange); text-decoration-color: var(--orange); }
 
 /* A quiet link that opens something stays lit while that thing is open, so a
    second click reads as putting it away rather than as one that did nothing. */
@@ -2502,9 +2516,11 @@ a, button, label, select, input, textarea, summary {
      tap target, not the width of the text, so it always looks oversized.
      Off, and replaced by the text brightening and picking up a halo for as
      long as the finger is down. */
+  /* The halo was white, so a press on a phone flashed the one colour this is
+     meant to stop flashing. */
   .dock a:active {
-    color: var(--ink);
-    text-shadow: 0 0 10px rgba(237, 240, 242, .45);
+    color: var(--orange);
+    text-shadow: 0 0 10px rgba(240, 125, 42, .45);
   }
 
   /* Where you are now is the same gesture held far lower: a dim lift and the
@@ -2517,7 +2533,7 @@ a, button, label, select, input, textarea, summary {
     text-shadow: 0 0 10px rgba(240, 125, 42, .28);
   }
 
-  .dock a.is-on:active { color: var(--ink); text-shadow: 0 0 10px rgba(237, 240, 242, .45); }
+  .dock a.is-on:active { color: var(--orange); text-shadow: 0 0 10px rgba(240, 125, 42, .45); }
 
   /* Every item gets a divider, so about no longer needs its own. The rule is
      drawn on the item rather than added as an element, and sits on the shared
