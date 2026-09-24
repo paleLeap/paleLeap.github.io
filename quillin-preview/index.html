@@ -1,0 +1,1262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quillin Auto Glass | Windshield and Auto Glass Repair, Wylie TX</title>
+<!-- Not for search engines yet. This is a proof of concept sitting beside the
+     client's real live site, and two Quillin Auto Glass results would do them
+     no favours. Remove this line when it goes live for real. -->
+<meta name="robots" content="noindex, nofollow">
+<!-- The document itself cannot be cache busted: bump.sh stamps the css and js
+     it points AT, but nothing can stamp this file's own URL.
+
+     A <meta http-equiv="Cache-Control"> was here and it did nothing. Browsers
+     ignore that tag for caching decisions; only the real HTTP header counts,
+     and the host sends `cache-control: max-age=600`. So a phone can keep
+     serving a ten minute old copy of this page, which is exactly what "it
+     isn't updating" looks like.
+
+     The header is not ours to change on this host, so the page checks for
+     itself: `build` below is stamped by bump.sh, version.txt beside it holds
+     the same value, and js/landing.js fetches that file with cache: no-store
+     on load. If they disagree the page is stale and it reloads itself once
+     against a fresh URL. -->
+<!-- Where "Send My Request" posts. The relay is worker/quote-relay.js; empty
+     means not wired, and the page says so rather than pretending to send.
+     Local testing: node tools/relay-dev.mjs and http://localhost:8787/quote. -->
+<meta name="quote-relay" content="">
+<meta name="build" content="3e02be95ac">
+<meta name="description" content="Mobile auto glass repair and replacement across North Texas, based in Wylie. Family operated, Black Owned and Woman Owned, lifetime warranty on installation. Start with your VIN and tell us what broke.">
+<link rel="stylesheet" href="css/style.css?v=c95c0494">
+</head>
+<body>
+
+<div class="backdrop" aria-hidden="true"></div>
+
+<header class="top">
+  <!-- The logo is the handle. Hovering it grows the mark to the right into the
+       four sections; the logo itself is also the way back to the quote. -->
+  <div class="brand">
+    <!-- The menu handle, on every device. It was a link home on a pointer
+         device and a menu toggle on touch, which meant the biggest thing on the
+         page behaved differently depending on what you were holding. -->
+    <a class="brand__logo" href="#quote" aria-expanded="false" aria-controls="brandnav"
+       aria-label="Quillin Auto Glass, open the menu">
+      <img src="assets/img/logo.png?v=9612b179" alt="" width="300" height="243">
+      <!-- The wordmark, as the owners drew their header: the name set in type,
+           not the car mark. Shown on the landing only; the quote flow and the
+           other pages keep the logo. -->
+      <span class="brand__word" aria-hidden="true">Quillin<small>Auto Glass</small></span>
+    </a>
+
+    <!-- The word, so the logo does not have to be guessed at.
+
+         Owner instruction, and the strongest note in their whole set: "Pages
+         are hidden until hovering over the small logo. I am afraid we may lose
+         some customers looking for more information prior to jumping directly
+         into requesting a quote." A control nobody knows is a control is the
+         same as no control.
+
+         It shows while the strip is shut and gets out of the way when it
+         opens, because once the five words are there they say it better. -->
+    <p class="brandcue" aria-hidden="true">Menu</p>
+
+    <!-- OPEN ON A DESKTOP, on the owners' own strongest note: "Pages are
+         hidden until hovering over the small logo. I am afraid we may lose some
+         customers looking for more information prior to jumping directly into
+         requesting a quote."
+
+         The hover-to-reveal is gone above 40rem; the words are simply there.
+         On a phone the logo still opens them, because there is no hover and
+         because the owners said the phone header is the part they like.
+
+         Reviews goes OUT to their Google listing rather than to a panel. There
+         is no review content on this site and none will be written here. It is
+         marked data-placeholder until the URL arrives, the same way the social
+         links were, so it cannot ship looking real. -->
+    <nav class="brandnav" id="brandnav" aria-label="Sections">
+      <!-- The way home, owner report: "There's no way to get back to the main
+           page, the quote page, from anywhere." On a phone it is the first
+           word in the menu; on a desktop the logo does it and this is hidden,
+           because the drawn header has five words and the logo beside them. -->
+      <a href="#quote" class="nav--home" data-home style="--i:0">home</a>
+      <a href="#services"  style="--i:0">services</a>
+      <a href="#about"     style="--i:1">about</a>
+      <a href="#faq"       style="--i:2">faq</a>
+      <a href="#" data-placeholder rel="noopener" style="--i:3">reviews</a>
+      <a href="#contact"   style="--i:4">contact</a>
+    </nav>
+  </div>
+  <div class="top__right">
+    <!-- Handles still unknown; these are placeholders until the client supplies
+         them, and they are marked so nobody ships them by accident. -->
+    <nav class="social" aria-label="Social">
+      <a href="https://www.instagram.com/quillinautoglass/" target="_blank"
+         rel="noopener" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="3" y="3" width="18" height="18" rx="5"/>
+          <circle cx="12" cy="12" r="4.2"/>
+          <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/>
+        </svg>
+      </a>
+      <a href="https://www.facebook.com/p/Quillin-Auto-Glass-61566913943922/"
+         target="_blank" rel="noopener" aria-label="Facebook">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="3" y="3" width="18" height="18" rx="5"/>
+          <path d="M15.2 8.2h-1.6c-.9 0-1.4.5-1.4 1.3v1.6h2.9l-.4 2.9h-2.5V21"/>
+        </svg>
+      </a>
+      <!-- Email, owner instruction: Facebook, Instagram, email and the phone
+           box, top right. The address is the one on the Contact page. -->
+      <a href="mailto:QuillinAutoGlass@gmail.com" aria-label="Email QuillinAutoGlass@gmail.com">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="3" y="5.5" width="18" height="13" rx="2.5"/>
+          <path d="M4 7.5l8 5.5 8-5.5"/>
+        </svg>
+      </a>
+    </nav>
+    <!-- Reads as an invitation rather than a string of digits. The href is
+         still the number, so a tap dials; the label just stops the corner
+         being a lump of figures nobody was asked to read. -->
+    <!-- A button, as drawn, with the handset. It was a quiet text link; in the
+         mockup it is the one framed thing in the header and that is right, it
+         is the only action up there. The href is still the number, so a tap
+         dials. -->
+    <a class="top__tel" href="tel:+12145867650"
+       aria-label="Call us at (214) 586-7650">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M6.6 3.5h3l1.5 3.8-2 1.4a12 12 0 0 0 6.2 6.2l1.4-2 3.8 1.5v3a1.8 1.8 0 0 1-2 1.8A16.5 16.5 0 0 1 4.8 5.5a1.8 1.8 0 0 1 1.8-2z"/>
+      </svg>
+      <span>Call us</span>
+    </a>
+  </div>
+</header>
+
+<main class="flow">
+
+  <!-- The page opens closed. Who Quillin are, one control, and a quiet way to
+       read how the thing works. Nothing else is on screen until "Get your quote."
+       is pressed, at which point the VIN step appears below and the heading
+       goes back to being a heading.
+
+       Owner feedback, from people who do not use a phone or a PC often: the
+       first screen had a headline, an input, a hint with a link in it, two
+       disclosure buttons and a bordered button, all at once, and it read as
+       "too much going on" before a single question had been answered. One
+       thing to press is the fix. -->
+  <!-- ===== THE LANDING, to the owners' mockup ==============================
+
+       A light sheet under a band of photographs, which is what the sketch is:
+       a header rule, an image, then the page. It is only the LANDING that goes
+       light. The quote flow behind the button stays the dark instrument it has
+       always been, and every contrast measurement taken against that near-black
+       still holds, because none of it is on screen at the same time as this.
+       body.is-started is the switch; app.js sets it. -->
+  <div class="landing">
+
+    <!-- The band, where the sketch draws a truck with an arrow at it.
+
+         Owner instruction, 2026-09-23: "smooth panning images of ONLY the
+         employees working, humans in the picture". So this band has its OWN
+         photographs now, opaque, rather than being a window onto the site's
+         backdrop: every frame has one of them doing the job in it, and the
+         skyline is kept for the sheet below, as it is on the other pages.
+         backdrop.js fills .hero__reel; the set and why each photograph is in it
+         is tools/crew.py.
+
+         No arrow in the button, on the owners' earlier instruction, though the
+         sketch still draws one. -->
+    <div class="hero">
+      <div class="hero__reel" aria-hidden="true"></div>
+      <div class="hero__inner">
+      <button type="button" class="cta" id="start-quote">
+        <svg class="cta__doc" viewBox="0 0 24 28" aria-hidden="true" focusable="false">
+          <rect x="1" y="1" width="22" height="26" rx="2"/>
+          <path d="M6 8h12M6 13h12M6 18h7"/>
+        </svg>
+        <span class="cta__lines">
+          <!-- "Get your Quote", owner instruction: the "here" came off. -->
+          <span class="cta__lead">Get your</span>
+          <span class="cta__big">Quote</span>
+          <span class="cta__sub">Fast. Easy. No obligation.</span>
+        </span>
+      </button>
+      </div>
+    </div>
+
+    <!-- The sheet. -->
+    <div class="sheet">
+      <div class="sheet__cols">
+
+        <div class="welcome">
+          <p class="welcome__kicker">Welcome to</p>
+          <p class="welcome__name">Quillin<span>Auto Glass</span></p>
+          <p class="welcome__tag">Your Neighborhood Glass Company</p>
+          <div class="welcome__prose">
+            <p>We&rsquo;re a mobile auto glass replacement and repair company
+              based in Wylie, Texas, proudly serving our neighbors and
+              surrounding communities.</p>
+            <p>As a family owned business, we believe in honest work, clear
+              communication, and always doing the next right thing.</p>
+          </div>
+        </div>
+
+        <ul class="feats">
+          <li>
+            <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <path d="M16 3l11 4v9c0 7-4.7 11.6-11 13-6.3-1.4-11-6-11-13V7z"/>
+              <path d="M11 16.5l3.4 3.4L21.5 13"/>
+            </svg>
+            <b>Reliable service</b>
+            <span>Honest work.<br>Never cutting corners.</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <path d="M9 9h11v12H9zM20 13h4.5l3 4v4H20z"/>
+              <circle cx="12.5" cy="23" r="2.2"/><circle cx="23.5" cy="23" r="2.2"/>
+              <path d="M1.5 12h5M2.5 16h4M3.5 20h3"/>
+            </svg>
+            <b>Mobile service</b>
+            <span>We come to you.<br>Home or work.</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <circle cx="16" cy="12" r="4"/><circle cx="7.5" cy="14" r="3.2"/>
+              <circle cx="24.5" cy="14" r="3.2"/>
+              <path d="M9 25c0-4 3.2-6.5 7-6.5s7 2.5 7 6.5M1.5 24c0-3 2.2-5 5-5M30.5 24c0-3-2.2-5-5-5"/>
+            </svg>
+            <b>Family operated</b>
+            <span>Black owned.<br>Community supported.</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <path d="M16 3c-5 0-9 4-9 9 0 6.7 9 17 9 17s9-10.3 9-17c0-5-4-9-9-9z"/>
+              <circle cx="16" cy="12" r="3.4"/>
+            </svg>
+            <b>Serving our neighbors</b>
+            <span>Wylie &middot; Sachse &middot; Murphy<br>Plano &middot; Rowlett &middot; and more</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Four tiles, bordered, as drawn, and drawn as the sketch draws them:
+           the piece of glass itself, with the damage marked on it. NO ARROWS:
+           owner instruction from the round before, and it stands even though
+           the sketch still has them, because four arrows pointing at one
+           destination said nothing the link did not already say. -->
+      <nav class="tiles" aria-label="Services">
+        <a href="#services" data-panel-link>
+          <svg viewBox="0 0 64 40" aria-hidden="true" focusable="false">
+            <path d="M7 33c-1.2 0-2-1-1.6-2.1L12 10c.8-2.2 2.4-3 4.6-3.2C21.8 6.3 27 6 32 6s10.2.3 15.4.8c2.2.2 3.8 1 4.6 3.2l6.6 20.9c.4 1.1-.4 2.1-1.6 2.1z"/>
+            <path d="M17 26l7-14M27 28l6-12" class="tiles__glint"/>
+            <path d="M44 13v8M40 17h8M41.2 14.2l5.6 5.6M46.8 14.2l-5.6 5.6M44 21l-2 5" class="tiles__mark"/>
+          </svg>
+          <b>Windshield<br>replacement</b>
+        </a>
+        <a href="#services" data-panel-link>
+          <svg viewBox="0 0 64 40" aria-hidden="true" focusable="false">
+            <path d="M5 33L12.5 8.5C13 7.4 14 7 15.2 7h33.6c1.2 0 2.2.4 2.7 1.5L59 33z"/>
+            <path d="M16 29l8-17" class="tiles__glint"/>
+            <circle cx="41" cy="17" r="1.6" class="tiles__mark"/>
+            <path d="M41 11v4M41 19v4M35 17h4M43 17h4M37 13l2.6 2.6M45 13l-2.6 2.6M37 21l2.6-2.6M45 21l-2.6-2.6" class="tiles__mark"/>
+          </svg>
+          <b>Rock chip<br>repair</b>
+        </a>
+        <a href="#services" data-panel-link>
+          <svg viewBox="0 0 64 40" aria-hidden="true" focusable="false">
+            <path d="M14 36V20L26 6h22v30z"/>
+            <path d="M19 19L28 9h16v10z" class="tiles__pane"/>
+            <path d="M33 11l-5 7" class="tiles__glint"/>
+            <path d="M40 24h5" class="tiles__mark"/>
+          </svg>
+          <b>Door glass<br>replacement</b>
+        </a>
+        <a href="#services" data-panel-link>
+          <svg viewBox="0 0 64 40" aria-hidden="true" focusable="false">
+            <path d="M8 31c-1.3 0-2.1-1-1.7-2.2L10.5 12C11.2 9.6 13 8 16 8h32c3 0 4.8 1.6 5.5 4l4.2 16.8c.4 1.2-.4 2.2-1.7 2.2z"/>
+            <path d="M14 27l3-13c.3-1.4 1.2-2 2.6-2h24.8c1.4 0 2.3.6 2.6 2l3 13z" class="tiles__pane"/>
+            <path d="M22 24l5-9M29 25l4-7" class="tiles__glint"/>
+          </svg>
+          <b>Back glass<br>replacement</b>
+        </a>
+      </nav>
+
+      <!-- Ruled either side, as drawn. -->
+      <p class="motto"><span>Do the next right thing</span></p>
+
+      <!-- A footer line. The sketch stops at the motto; a business page that
+           simply ends looks unfinished, and this is the one place a
+           reader who has scrolled all the way down gets the number without
+           scrolling back up. -->
+      <footer class="landfoot">
+        <span>Quillin Auto Glass</span>
+        <span>Mobile auto glass across North Texas</span>
+        <a href="tel:+12145867650">(214) 586-7650</a>
+      </footer>
+
+    </div>
+  </div>
+
+  <section class="panel" id="quote">
+
+  <!-- step 1: vin
+
+       A fork, not a form. The step opens as a question and two answers and
+       nothing else: whichever one is pressed, only that branch's controls are
+       revealed, and the other branch never appears at all.
+
+       Third owner correction on this step, and the sharpest: "it keeps
+       displaying TOO much information". Every previous version put the field,
+       the explanation, the way out and the disclosure on screen together and
+       asked the customer to work out which of them applied to their situation.
+       Asking first, and showing one thing after, is the difference between a
+       question and a form.
+
+       The explanatory line that used to sit under the field is gone with it.
+       "Why do you want my VIN?" is already answered, in more detail and in
+       better words, in the How this works panel, which is now pinned to the
+       bottom of every screen in the quote. -->
+  <section class="step" id="step-vin" aria-labelledby="vin-label">
+    <label class="step__label" id="vin-label" for="vin">Do you know your VIN?</label>
+
+    <!-- The whole of the step at rest. Two answers to one question, the same
+         size as each other because neither is a footnote to the other, and
+         told apart by fill rather than by size: one of them leads to a better
+         quote, both of them lead to a quote. -->
+    <div class="vinfork" id="vin-fork">
+      <button type="button" class="btn" id="yes-vin">I know my VIN</button>
+      <button type="button" class="btn btn--alt" id="no-vin"
+              aria-expanded="false" aria-controls="manual">I don&rsquo;t know my VIN</button>
+    </div>
+
+    <div class="field" id="vin-field" hidden>
+      <input id="vin" name="vin" type="text" inputmode="latin" autocomplete="off"
+             spellcheck="false" maxlength="17" placeholder="e.g. 1HGCM82633A004352"
+             aria-describedby="vin-note">
+    </div>
+
+    <p class="note" id="vin-note" role="status" aria-live="polite" hidden></p>
+
+    <!-- Only on the branch where somebody has said they know it and is now
+         looking for it. Hidden on the fork, because at that point it is
+         answering a question nobody has asked yet. -->
+    <p class="helpask" hidden>
+      <button type="button" class="plainlink" id="vin-help-btn"
+              aria-expanded="false" aria-controls="vin-help">Need help finding your VIN?</button>
+    </p>
+
+    <div class="helppanel" id="vin-help" hidden>
+      <p>Where to find your VIN</p>
+      <ol>
+        <li>Your insurance card or vehicle registration.</li>
+        <li>The sticker in the driver&rsquo;s door jamb, visible with the door open.</li>
+        <li>The corner of the dash on the driver&rsquo;s side, read through the windshield.</li>
+      </ol>
+      <!-- The way across to the other branch, for the person who said they knew
+           it and then could not find it. It lives in here rather than on the
+           step, because at rest it would be a third control on a screen that
+           exists to have two. -->
+      <p class="helppanel__out">
+        <button type="button" class="plainlink" id="give-up-vin">Can&rsquo;t find it? Pick your vehicle from a list instead.</button>
+      </p>
+    </div>
+
+    <!-- Belongs to "I don't know my VIN", so it sits above the dropdowns that
+         button reveals and answers it in words before showing another form. -->
+    <p class="note" id="manual-note" role="status" aria-live="polite" hidden></p>
+
+    <div class="manual" id="manual" hidden>
+      <label class="visually-hidden" for="m-year">Year</label>
+      <select id="m-year"><option value="">Year</option></select>
+      <label class="visually-hidden" for="m-make">Make</label>
+      <select id="m-make" disabled><option value="">Make</option></select>
+      <label class="visually-hidden" for="m-model">Model</label>
+      <select id="m-model" disabled><option value="">Model</option></select>
+    </div>
+
+    <!-- This page carries the customer on by itself: decoding a VIN, or picking
+         the last dropdown, moves them. So there was no footer here at all, and
+         that was a dead end. Coming BACK to this page means the vehicle is
+         already settled, nothing is going to fire again, and there was nothing
+         on screen to press. syncNav only reveals this once there is a vehicle
+         to go forward with, so the opening fork is still just two buttons. -->
+    <nav class="pagenav" id="vin-nav" aria-label="Step" hidden>
+      <span></span>
+      <button type="button" class="btn" data-next disabled>Continue</button>
+    </nav>
+  </section>
+
+  <!-- There was a "One more thing" step here, between the vehicle and the
+       damage. It asked whether the car has a camera behind the rearview mirror,
+       because a windshield with one has to be recalibrated to it.
+
+       Removed entirely on owner instruction, in two steps: first it stopped
+       being asked when a VIN was given, then it stopped being asked at all.
+       Their reasoning did not change between the two, it just went further:
+       "As long as they are providing the VIN, we can see all this information.
+       Too much information can confuse the clients. If we need additional
+       information, that will become our responsibility to contact the clients."
+
+       The information still reaches the SHOP. The VIN's own driver-assist
+       reading is in the outgoing record and in the work list built for them,
+       and it has always been filtered out of what the customer sees, because
+       it can flag falsely. On the no-VIN route there is now no driver-assist
+       signal at all, and the record says so in as many words rather than
+       leaving a null to be misread as "no camera".
+
+       See app.js, vehicleSettled(), for what this step carried besides its
+       question, which was resetBelow(2) and had to survive it. -->
+
+  <!-- There was a "Did we get that right?" page here, between the vehicle and
+       the damage. It showed what the VIN had decoded to, or what had been
+       chosen from the dropdowns, and asked the customer to press "Yes, that's
+       my vehicle" before going on.
+
+       Removed on owner feedback: people found it annoying to confirm a vehicle
+       they had only just chosen, which on the year/make/model route is exactly
+       what it was asking. A confirmation step that confirms the thing you did
+       one screen ago is a speed bump, not a check.
+
+       The information it carried has not gone. The damage page now names the
+       vehicle above the model, the review page lists it in full, and Back from
+       either returns to the VIN. What went is the click. -->
+
+  <!-- step 4: glass selection (3d picker lands here) -->
+  <section class="step" id="step-glass" hidden aria-labelledby="glass-label">
+    <p class="step__label" id="glass-label">So&hellip; where&rsquo;s the damage?</p>
+    <!-- What the VIN decoded to, or what was picked from the dropdowns. This is
+         the only place the customer sees it between entering it and the review,
+         now that the confirmation page has gone, so it is a statement rather
+         than a question: here is the vehicle we are quoting, and Back is
+         underneath if it is wrong. -->
+    <p class="onvehicle" id="on-vehicle" hidden></p>
+    <!-- Shown instead of the picker when the VIN decodes to something we do not
+         do glass on. The message box below stays, so it is a redirection rather
+         than a dead end. -->
+    <p class="step__hint" id="decline-note" hidden></p>
+    <div class="picker" id="picker">
+      <div class="picker__stage" id="picker-stage" aria-hidden="true"></div>
+      <div class="picker__side">
+        <p class="picker__note" id="picker-note"></p>
+        <fieldset class="choices" id="picker-list">
+          <legend class="visually-hidden">Which glass is damaged?</legend>
+        </fieldset>
+      </div>
+    </div>
+
+    <p style="margin:.875rem 0 0">
+      <button type="button" class="plainlink" id="just-tell">Or just tell us!</button>
+    </p>
+
+    <div class="tellus" id="tellus" hidden>
+      <label class="visually-hidden" for="tellus-text">Describe the damage</label>
+      <!-- rows=2 is only the starting height. app.js grows it to fit what has
+           been typed, and the CSS turns off the drag handle: a box the customer
+           is invited to resize is a box they can make the wrong size, and it
+           was the one control on the site that still looked like a browser
+           default rather than part of this page. -->
+      <textarea id="tellus-text" rows="2"
+                placeholder="e.g. rock chip in the windshield, passenger side"></textarea>
+      <p class="note" id="tellus-note" role="status" aria-live="polite" hidden></p>
+    </div>
+
+    <!-- This page cannot advance on its own. Picking a pane is an act of
+         pointing, not an act of finishing, and a second window may still be
+         broken; the customer says when they are done. -->
+    <nav class="pagenav" aria-label="Step">
+      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
+      <button type="button" class="btn" data-next disabled>Continue</button>
+    </nav>
+  </section>
+
+  <!-- step 4b: chip or crack. The WINDSHIELD only.
+
+       This used to hang off the bottom of the picker page, under the model and
+       the list of eleven windows. That page was the one place in the flow that
+       still could not be seen without scrolling on a phone, and this was most
+       of the reason why: a second question, with its own three answers and its
+       own running list of what had already been settled, below a question that
+       was already the tallest on the site.
+
+       It is also just a different question. A chip and a replacement are the
+       same workflow and very different jobs, and it is the single most common
+       thing the shop has to ring back about, so it deserves being asked on its
+       own rather than underneath something else.
+
+       It used to walk every pane the customer picked, one at a time, with the
+       settled ones collapsed to a line above the question. The owners stopped
+       that: door glass moves up and down, so a repair there will not last and
+       they would not recommend one, which makes chip or crack a question only
+       the windshield can usefully answer. The page does not appear at all now
+       unless the windshield is among the glass picked.
+
+       The machinery for the walk is still underneath, at length one. See
+       chipPanels() in app.js for the single line that would bring it back. -->
+  <section class="step" id="step-chip" hidden aria-labelledby="chip-label">
+    <ul class="answered plain" id="chip-done" hidden></ul>
+
+    <div class="subq" id="chipq" hidden>
+      <p class="step__label" id="chip-label">Chip or crack?</p>
+      <fieldset class="choices" id="chip-choices">
+        <legend class="visually-hidden" id="chip-legend">Is the damage a chip or a crack?</legend>
+      </fieldset>
+    </div>
+
+    <nav class="pagenav" aria-label="Step">
+      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
+      <button type="button" class="btn" data-next disabled>Continue</button>
+    </nav>
+  </section>
+
+  <!-- There was a "What kind of damage will we be repairing?" dropdown here,
+       between the glass and the photographs. The owners called it irrelevant
+       and it is gone: the shop already learns the job from the panes picked,
+       the chip-or-crack answer on the windshield, the photographs and the free
+       text box, and a ten item dropdown of causes was one more thing to read
+       past.
+       See LOG.md. -->
+
+  <!-- step 4c: photographs -->
+  <section class="step" id="step-photos" hidden aria-labelledby="photos-label">
+    <!-- The owners' wording, verbatim, and the same sentence the "How this
+         works" answer uses. The reason goes in the label and the permission to
+         skip goes in the hint: the step still has to tell somebody with no
+         photograph that Continue is an answer, not a failure. -->
+    <p class="step__label" id="photos-label">Pictures give us a clearer idea of the damage.</p>
+    <p class="step__hint">No picture? No problem! Carry on.</p>
+
+    <p style="margin:0">
+      <button type="button" class="btn btn--alt" id="add-photos">Upload images</button>
+    </p>
+    <input type="file" id="photo-input" accept="image/*" multiple hidden>
+    <ul class="shots" id="shots" hidden></ul>
+    <p class="note" id="photo-note" role="status" aria-live="polite" hidden></p>
+
+    <!-- "No images" used to be a button of its own beside "Upload images",
+         which made two ways forward out of one question. Continue is the way
+         forward; pressing it with nothing attached IS the answer "no", and the
+         request still records that it was declined rather than skipped. -->
+    <nav class="pagenav" aria-label="Step">
+      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
+      <button type="button" class="btn" data-next>Continue</button>
+    </nav>
+  </section>
+
+  <!-- step 5: timing -->
+  <section class="step" id="step-when" hidden aria-labelledby="when-label">
+    <p class="step__label" id="when-label">When do you need this fixed?</p>
+    <fieldset class="choices" id="when-choices">
+      <legend class="visually-hidden">How soon do you need this fixed?</legend>
+    </fieldset>
+
+    <!-- "That it?" was here, meaning "is that the whole job". In a flow that
+         shows one question at a time it has nothing left to ask: the job was
+         settled two pages ago and this page has a single answer, so choosing
+         one is finishing. Continue is the way on for somebody who came BACK and
+         finds their answer already given. -->
+    <nav class="pagenav" aria-label="Step">
+      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
+      <button type="button" class="btn" data-next disabled>Continue</button>
+    </nav>
+  </section>
+
+  <!-- step 6: the confirmation page.
+
+       The last place a wrong answer can be caught before it reaches somebody
+       standing in a driveway with the wrong windshield. It asks one question
+       about the whole request and does nothing else: how to reach you is its
+       own page, after this one is agreed. -->
+  <section class="step" id="step-review" hidden aria-labelledby="review-label">
+    <p class="step__label" id="review-label">Does this look right?</p>
+
+    <dl class="summary" id="summary"></dl>
+
+    <p class="confirm__do">
+      <button type="button" class="btn" id="review-yes">Yes. One More Step to Go!</button>
+    </p>
+    <nav class="pagenav" aria-label="Step">
+      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
+    </nav>
+  </section>
+
+  <!-- step 7: how to reach you.
+
+       Split off the review, where it used to sit underneath the summary. It is
+       a different question from "is this correct", it is the one thing the shop
+       cannot work without, and on its own page it gets asked properly instead
+       of being the small print at the bottom of a receipt. -->
+  <section class="step" id="step-reach" hidden aria-labelledby="reach-label">
+    <p class="step__label" id="reach-label">How would you like to receive your quote?</p>
+
+    <fieldset class="choices" id="send-where">
+      <!-- Not a repeat of the heading above it. Every other page here words its
+           legend differently from its visible label for the same reason; this
+           one matched verbatim, and with the explanatory line removed the two
+           now sit next to each other, so a screen reader announced the same
+           question twice in a row. -->
+      <legend class="visually-hidden">Ways to reach you</legend>
+    </fieldset>
+
+    <!-- Name and where the vehicle is. Owner instruction, and the client was
+         "very clear she wants a section for name because it helps a lot".
+         Both OPTIONAL, and say so inside the box, in their words: neither can
+         stop a request being sent. Location is a search: typing offers cities
+         and addresses, and the first suggestion is always "Use my exact
+         location", which asks the phone. -->
+    <div class="aboutyou">
+      <input class="reach__input aboutyou__field" id="cust-name" type="text"
+             autocomplete="name" autocapitalize="words" maxlength="80"
+             placeholder="Name (Optional, but helps)" aria-label="Name, optional">
+      <div class="loc">
+        <input class="reach__input aboutyou__field" id="cust-loc" type="text"
+               autocomplete="off" maxlength="160" role="combobox"
+               aria-autocomplete="list" aria-expanded="false" aria-controls="loc-list"
+               placeholder="Location (Optional, but helps)" aria-label="Location, optional">
+        <ul class="loc__list" id="loc-list" role="listbox" aria-label="Locations" hidden></ul>
+      </div>
+      <p class="loc__note" id="loc-note" role="status" aria-live="polite" hidden></p>
+
+      <!-- Owner instruction: a "Have insurance?" box that does nothing but
+           tell the owners. It changes no price, question or page here; it is
+           a line in their email so they know before they call. -->
+      <label class="choice insure" for="cust-insured">
+        <input type="checkbox" id="cust-insured">
+        <span>Have insurance?</span>
+      </label>
+    </div>
+
+    <!-- A field no person sees and every form-filling bot completes. The relay
+         drops anything that arrives with it filled in. -->
+    <div class="hp" aria-hidden="true">
+      <label for="hp-company">Company</label>
+      <input type="text" id="hp-company" name="company" tabindex="-1" autocomplete="off">
+    </div>
+
+    <p class="confirm__do">
+      <button type="button" class="btn" id="send-request" disabled>Send My Request</button>
+    </p>
+    <p class="note" id="send-note" role="status" aria-live="polite" hidden></p>
+    <nav class="pagenav" aria-label="Step">
+      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
+    </nav>
+  </section>
+
+  <!-- Sent. The one page in the flow with no Back: the request has left, and
+       going back to the form that sent it invites sending it twice. Two ways
+       on instead, and the phone number for anybody who cannot wait. -->
+  <section class="step" id="step-sent" hidden aria-labelledby="sent-label">
+    <div class="sent__mark" aria-hidden="true">
+      <svg viewBox="0 0 48 48" focusable="false"><circle cx="24" cy="24" r="21"/><path d="M14.5 24.5l6.5 6.5 13-14"/></svg>
+    </div>
+    <p class="step__label" id="sent-label" tabindex="-1">Thank you! We&rsquo;ve got it.</p>
+    <p class="sent__body" id="sent-body">Your request is on its way to us.</p>
+    <p class="sent__call">Need us sooner? <a href="tel:+12145867650">(214) 586-7650</a></p>
+    <p class="confirm__do sent__do">
+      <button type="button" class="btn" id="sent-home">Back to the home page</button>
+    </p>
+  </section>
+
+  </section>
+
+  <section class="panel" id="services" hidden>
+    <h1 class="panel__title">Services</h1>
+    <p class="panel__sub">All Cars, Trucks, and Commercial Vehicles</p>
+    <!-- Every description here is the owners' own, sent verbatim and set as
+         written. Their order too, which is theirs rather than the old
+         frequency-first one.
+
+         ADAS Recalibration is the exception and is NOT in the list they sent.
+         Kept rather than silently deleted: it is a real service, the quote
+         flow detects it from the VIN and reports it, and losing it here would
+         make the site contradict the tool on the same page. It keeps its
+         original position directly under Windshield Replacement, because that
+         is what causes it. Flagged in GOAL.md; remove it the moment they say
+         it was deliberate. -->
+    <!-- A disclosure list, not a wall of text. Owner instruction: pressing
+         "Windshield Chip Repair" should open its description underneath.
+
+         It is the SAME control as the Common Questions further down this page,
+         which is deliberate. Two accordions on one page that opened differently
+         would be a bug you could see. The behaviour lives on `.expand` now,
+         shared by both, and each carries its own class for looks: these are the
+         page's primary content and are set larger and brighter than a question
+         somebody may never ask.
+
+         Still real <details>, so every service opens with the script broken or
+         not yet run, and keyboard and screen reader behaviour comes free. -->
+    <div class="svclist">
+      <details class="svc expand">
+        <summary>Windshield Chip Repair</summary>
+        <div class="svc__body expand__body">
+          <p>
+          Our Rock Chip Repair process helps seal and strengthen your
+          windshield, preventing a small chip from becoming a bigger problem.
+          While the impact point may remain slightly visible, we are proud to
+          help our neighbors safely preserve their windshield whenever
+          possible and keep them on the road.
+          </p>
+        </div>
+      </details>
+      <details class="svc expand">
+        <summary>Windshield Replacement</summary>
+        <div class="svc__body expand__body">
+          <p>
+          Need a new windshield? Here at Quillin Auto Glass, we bring the
+          replacement right to you. Taking care of your vehicle with the same
+          attention we would give our own.
+          </p>
+        </div>
+      </details>
+      <details class="svc expand">
+        <summary>ADAS Recalibration</summary>
+        <div class="svc__body expand__body">
+          <p>
+          Newer vehicles watch the road through a camera behind the mirror for
+          lane keeping and automatic braking. Change the glass it looks
+          through and it has to be re-aimed, or it reads the road wrong.
+          </p>
+        </div>
+      </details>
+      <details class="svc expand">
+        <summary>Door Glass Replacement</summary>
+        <div class="svc__body expand__body">
+          <p>
+          A broken door window can leave your vehicle exposed and quickly
+          become a stressful inconvenience. We come directly to you, carefully
+          clean up the broken glass, install your new window, and make sure
+          everything is working properly so you can get back to your day.
+          </p>
+        </div>
+      </details>
+      <details class="svc expand">
+        <summary>Power Window Repair/Replacement</summary>
+        <div class="svc__body expand__body">
+          <p>
+          Having trouble with a window that will not roll up or down? We can
+          help! Our certified team will diagnose the issue to determine
+          whether it needs a switch, motor, regulator, or something else. From
+          there, we will recommend the right repair to get your window working
+          properly again.
+          </p>
+        </div>
+      </details>
+      <details class="svc expand">
+        <summary>Back Glass Replacement</summary>
+        <div class="svc__body expand__body">
+          <p>
+          Let&rsquo;s get your vehicle secure, protected, and back to normal
+          without rearranging your day. We come directly to you, thoroughly
+          clean out the broken glass, and carefully install your new back
+          glass using professional-grade materials and proper installation
+          techniques.
+          </p>
+        </div>
+      </details>
+      <details class="svc expand">
+        <summary>Specialty Glass Replacement</summary>
+        <div class="svc__body expand__body">
+          <p>
+          Our team is equipped to repair even the most unique parts: vent
+          glass, quarter glass, mirrors, moldings, and everything in between.
+          Not sure what part you need? Send us a photo, and we will take it
+          from there!
+          </p>
+    
+
+    </div>
+      </details>
+    </div>
+
+    <p class="goback">
+      <button type="button" class="plainlink goback__btn">Go back.</button>
+    </p>
+
+  </section>
+
+  <!-- The questions are their own page now. Owner instruction, from the
+       mockup's nav, and it answers something they had already said in another
+       context: "People will go looking for the payment methods offered and may
+       not look in a 'Contact Us' area." The same is true of the questions. They
+       were the last row of the Services list, which is a reasonable place to
+       file them and a poor place to find them.
+
+       The content is untouched: same six questions, same grouping, same
+       .expand behaviour. Only its home changed. -->
+  <section class="panel" id="faq" hidden>
+    <h1 class="panel__title">Common Questions</h1>
+    <p class="panel__sub">The ones we get asked most.</p>
+
+<div class="faq">
+
+          <div class="faqgroup">
+            <p class="faq__group">Rock chip repair</p>
+
+
+            <details class="faq__item expand">
+              <summary>Will the rock chip disappear?</summary>
+              <div class="faq__a expand__body"><p>Our goal is to save your windshield and stop the
+                damage spreading. It does look better afterwards, but it will not
+                disappear completely. The resin we use dries clear, though not
+                crystal clear like glass.</p></div>
+            </details>
+          </div>
+
+          <div class="faqgroup">
+            <p class="faq__group">Windshield replacement</p>
+
+
+            <details class="faq__item expand">
+              <summary>How long until I can drive?</summary>
+              <div class="faq__a expand__body"><p>Thirty minutes to an hour and a half, depending
+                on what you need. We can use a quick-set urethane if you are in a
+                hurry, just ask.</p></div>
+            </details>
+
+            <details class="faq__item expand">
+              <summary>When can I remove the tape?</summary>
+              <div class="faq__a expand__body"><p>After 24 hours.</p></div>
+            </details>
+
+            <details class="faq__item expand">
+              <summary>How long until I can wash my vehicle?</summary>
+              <div class="faq__a expand__body"><p>Five days.</p></div>
+            </details>
+
+            <details class="faq__item expand">
+              <summary>What if it rains before the five days?</summary>
+              <div class="faq__a expand__body"><p>Rain is fine. It is the pressure of a car wash
+                we want to keep away from it, not water.</p></div>
+            </details>
+          </div>
+
+          <div class="faqgroup">
+            <p class="faq__group">Door glass</p>
+
+
+            <details class="faq__item expand">
+              <summary>What about the glass inside the door and the vehicle?</summary>
+              <div class="faq__a expand__body"><p>Your door glass quote includes clearing the
+                fragments out of the door and the visible glass inside the
+                vehicle.</p></div>
+            </details>
+          </div>
+          </div>
+
+    <p class="goback">
+      <button type="button" class="plainlink goback__btn">Go back.</button>
+    </p>
+
+  </section>
+
+  <section class="panel" id="guarantee" hidden>
+    <h1 class="panel__title">Quillin Guarantee</h1>
+    <p class="panel__sub panel__sub--quote">&ldquo;We treat every ride like it&rsquo;s
+      our own, and every neighbor like family.&rdquo;</p>
+
+    <!-- All five points are the owners' own words, sent verbatim.
+
+         The Lifetime Warranty is the first thing on this site that does not
+         fit the one-line-each shape the rest of these pages use: it carries a
+         list of what is covered and a clause saying what is not. So it gets a
+         block in the right hand column rather than a sentence, and the
+         exclusions are marked as what they are.
+
+         "Real People" no longer mentions Black owned and family operated. That
+         is theirs too: the ownership line moved to the About page, where they
+         asked for it to read "Black Owned and Woman Owned".
+
+         "Fast Turnaround" restores "In and out before you finish your coffee",
+         which was cut from this page earlier in the project for doing the most
+         selling and the least explaining. They want it back. It is their line
+         and their business. -->
+    <ul class="plain plain--split">
+      <li>
+        <b>Lifetime Warranty</b>
+        <div class="split__body">
+          <p>Quillin Auto Glass provides a lifetime warranty on the
+            installation of your auto glass for as long as you own the vehicle.
+            This warranty covers installation-related issues including:</p>
+          <ul class="covers">
+            <li>Wind Noise</li>
+            <li>Water or Air Leaks</li>
+            <li>Free Consultation/Inspection of any concern related to our
+              workmanship</li>
+            <li>Repair or Correction at no additional cost, when determined to
+              be necessary and covered under this warranty</li>
+          </ul>
+          <p>This warranty applies specifically to the workmanship and the
+            installation performed by Quillin Auto Glass.</p>
+          <!-- Behind a small plus, owner instruction. The exclusions are the
+               one part of this page that is not a promise, and a customer
+               reading a warranty should reach the good news without wading
+               through the limits of it first. Still a real <details>, so it
+               opens with the script broken, and it shares the accordion the
+               Services page uses rather than a second one. -->
+          <details class="disc expand">
+            <summary>Disclaimer.</summary>
+            <div class="disc__body expand__body">
+              <p>Damage caused by accidents, impact, vehicle body damage, rust,
+                pre-existing conditions, or other circumstances unrelated to the
+                installation is not covered.</p>
+            </div>
+          </details>
+        </div>
+      </li>
+      <li>
+        <b>We Come To You</b>
+        <span>Mobile service across North Texas. We bring the shop to you.</span>
+      </li>
+      <li>
+        <b>No Stress Pricing</b>
+        <span>We tell you the price before we start. Transparency is key. No
+          surprises, no games, no changing the number halfway through.</span>
+      </li>
+      <li>
+        <b>Real People</b>
+        <span>No robots. No shortcuts. Just experienced people who take pride in
+          doing the job right.</span>
+      </li>
+      <li>
+        <b>Fast Turnaround</b>
+        <span>In and out before you finish your coffee.</span>
+      </li>
+    </ul>
+
+    <p class="goback">
+      <button type="button" class="plainlink goback__btn">Go back.</button>
+    </p>
+
+  </section>
+
+  <section class="panel" id="about" hidden>
+    <h1 class="panel__title">About us</h1>
+    <!-- Their wording, their business. It also closes a gap: the Guarantee
+         rewrite took "Black owned and family operated" out of Real People, so
+         between that change and this one the site said it nowhere. -->
+    <p class="panel__sub">Black Owned and Woman Owned.</p>
+
+    <!-- TWO SECTIONS, EXCLUSIVE, NOT LINKS. Owner instruction: the page opens
+         on "About us" and "Our work" sits beside it, and only one is open at a
+         time. They are tabs, so they are marked up as tabs: role="tablist" with
+         two role="tab" buttons owning two role="tabpanel" bodies, arrow keys
+         between them, and a roving tabindex. A pair of divs that merely look
+         like tabs would leave a screen reader with no idea the second one is
+         there at all.
+
+         Deliberately NOT the .expand accordion used on Services. That one lets
+         several rows stand open together, which is right for a list of services
+         and wrong here: the whole of this instruction is that one excludes the
+         other. -->
+    <div class="tabs" role="tablist" aria-label="About Quillin Auto Glass">
+      <button type="button" class="tabs__tab is-on" id="tab-story" role="tab"
+              aria-selected="true" aria-controls="pane-story" tabindex="0">About us</button>
+      <button type="button" class="tabs__tab" id="tab-work" role="tab"
+              aria-selected="false" aria-controls="pane-work" tabindex="-1">Our work</button>
+    </div>
+
+    <!-- REBUILT, 2026-09-23, flagged by the owners as very important. Their
+         standing complaint about this page, verbatim: "For a black owned
+         company, there sure aren't any black people." It was six photographs
+         of WORK on a page about who they are. So it now opens on the two of
+         them, from the photograph on their own current website, and every
+         other picture on it has one of them in it doing the job.
+
+         Every sentence is still theirs. The three words in the values band
+         are lifted from their own last line, not written here. -->
+    <div class="tabs__pane" id="pane-story" role="tabpanel" aria-labelledby="tab-story">
+
+      <div class="meet">
+        <figure class="meet__photo">
+          <!-- The photograph from their own current website. No names and no
+               description, on the user's instruction. -->
+          <img src="assets/img/about/owners.jpg?v=65d0e42b" width="1120" height="1400"
+               decoding="async" alt="">
+        </figure>
+        <div class="meet__text">
+          <p class="meet__kicker">BLANK BLANK BLANK BLANK</p>
+          <h2 class="meet__name">BLANK BLANK BLANK BLANK</h2>
+          <p class="meet__lead">At Quillin Auto Glass, we believe in more than
+            just fixing glass. We believe in providing service with a smile.
+            Whether you are in need of a windshield replacement or a quick chip
+            repair, our team is here to make the process easy, fast and
+            friendly.</p>
+          <p class="meet__do">
+            <a class="btn meet__btn" href="#quote" data-start-quote>Get your Quote</a>
+            <a class="meet__call" href="tel:+12145867650">or call (214) 586-7650</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="prose story">
+        <p>As a family owned business, we treat each customer like they are one of
+          our own. Your satisfaction is our top priority, and we are dedicated to
+          ensuring your experience is smooth, stress free and enjoyable.</p>
+
+        <p>With over ten years of experience in the industry and a childlike
+          passion for building up broken things and solving puzzles, Quillin Auto
+          has been a dream well in the making. Reaching the community and caring
+          for neighbors using the gifts on hand, we have taken our core values
+          and beliefs and poured them into this company.</p>
+      </div>
+
+      <div class="values">
+        <p class="values__words">
+          <span>Integrity</span><span>Honesty</span><span>Transparency</span>
+        </p>
+        <p class="values__line">We aim to serve the community that we grew up in
+          with integrity, honesty and transparency.</p>
+      </div>
+
+      <div class="closer">
+        <p class="closer__sign">Let&rsquo;s get you back on the road.</p>
+        <a class="btn" href="#quote" data-start-quote>Get your Quote</a>
+      </div>
+    </div>
+
+    <div class="tabs__pane" id="pane-work" role="tabpanel" aria-labelledby="tab-work" hidden>
+      <div class="prose">
+        <!-- BLANK: the owners write this. Nothing on this page is worded by
+             us unless it came from their own website. -->
+        <p>BLANK BLANK BLANK BLANK</p>
+
+        <figure class="album album--ba">
+          <span class="ba">
+            <img src="assets/img/about/ba-chip-before.jpg?v=da711909" width="1200" height="900"
+                 loading="lazy" decoding="async"
+                 alt="A star shaped rock chip in a windshield, with a quarter held beside it for scale">
+            <b class="ba__tag">Before</b>
+          </span>
+          <span class="ba">
+            <img src="assets/img/about/ba-chip-after.jpg?v=07d92ab7" width="1200" height="900"
+                 loading="lazy" decoding="async"
+                 alt="The same chip after repair, filled with resin and barely visible">
+            <b class="ba__tag">After</b>
+          </span>
+          <figcaption>BLANK BLANK BLANK BLANK</figcaption>
+        </figure>
+
+        <p>BLANK BLANK BLANK BLANK</p>
+      </div>
+
+      <!-- The gallery. Tap any one to see it large (js/landing.js). Their own
+           photographs, from their Facebook and their site. Captions BLANK until
+           the owners say what each one is. -->
+      <ul class="gallery" aria-label="Our work">
+        <li><button type="button" class="gallery__item" data-full="assets/img/about/work-racecar.jpg">
+          <img src="assets/img/about/work-racecar.jpg?v=3deac987" width="1400" height="1050" loading="lazy" decoding="async" alt="">
+          <span>BLANK BLANK BLANK BLANK</span></button></li>
+        <li><button type="button" class="gallery__item" data-full="assets/img/about/work-ram.jpg">
+          <img src="assets/img/about/work-ram.jpg?v=ddfacf33" width="1269" height="664" loading="lazy" decoding="async" alt="">
+          <span>BLANK BLANK BLANK BLANK</span></button></li>
+        <li><button type="button" class="gallery__item" data-full="assets/img/about/work-doorglass.jpg">
+          <img src="assets/img/about/work-doorglass.jpg?v=dd214e34" width="1400" height="1050" loading="lazy" decoding="async" alt="">
+          <span>BLANK BLANK BLANK BLANK</span></button></li>
+        <li><button type="button" class="gallery__item" data-full="assets/img/about/work-driveway.jpg">
+          <img src="assets/img/about/work-driveway.jpg?v=69c8b68f" width="1088" height="827" loading="lazy" decoding="async" alt="">
+          <span>BLANK BLANK BLANK BLANK</span></button></li>
+        <li><button type="button" class="gallery__item" data-full="assets/img/about/tesla.jpg">
+          <img src="assets/img/about/tesla.jpg?v=7bc63d9c" width="560" height="420" loading="lazy" decoding="async" alt="">
+          <span>BLANK BLANK BLANK BLANK</span></button></li>
+        <li><button type="button" class="gallery__item" data-full="assets/img/about/work-fleet.jpg">
+          <img src="assets/img/about/work-fleet.jpg?v=0e8aa9e8" width="1400" height="1050" loading="lazy" decoding="async" alt="">
+          <span>BLANK BLANK BLANK BLANK</span></button></li>
+        <li><button type="button" class="gallery__item" data-full="assets/img/about/work-sprinter.jpg">
+          <img src="assets/img/about/work-sprinter.jpg?v=22e072ad" width="1400" height="1050" loading="lazy" decoding="async" alt="">
+          <span>BLANK BLANK BLANK BLANK</span></button></li>
+        <li><button type="button" class="gallery__item" data-full="assets/img/about/transit.jpg">
+          <img src="assets/img/about/transit.jpg?v=68cbce52" width="560" height="420" loading="lazy" decoding="async" alt="">
+          <span>BLANK BLANK BLANK BLANK</span></button></li>
+        <li><button type="button" class="gallery__item" data-full="assets/img/about/fleet.jpg">
+          <img src="assets/img/about/fleet.jpg?v=86807d2a" width="420" height="420" loading="lazy" decoding="async" alt="">
+          <span>BLANK BLANK BLANK BLANK</span></button></li>
+        <li><button type="button" class="gallery__item" data-full="assets/img/about/sunroof.jpg">
+          <img src="assets/img/about/sunroof.jpg?v=714fe519" width="420" height="420" loading="lazy" decoding="async" alt="">
+          <span>BLANK BLANK BLANK BLANK</span></button></li>
+      </ul>
+
+      <div class="closer">
+        <p class="closer__sign">Let&rsquo;s get you back on the road.</p>
+        <a class="btn" href="#quote" data-start-quote>Get your Quote</a>
+      </div>
+    </div>
+
+    <!-- The large view for the gallery. A real <dialog>: Escape closes it and
+         focus is held inside it for free. -->
+    <dialog class="lightbox" id="lightbox" aria-label="Photo">
+      <button type="button" class="lightbox__close" aria-label="Close">&times;</button>
+      <img class="lightbox__img" alt="">
+      <p class="lightbox__cap"></p>
+      <button type="button" class="lightbox__nav lightbox__nav--prev" aria-label="Previous photo">&lsaquo;</button>
+      <button type="button" class="lightbox__nav lightbox__nav--next" aria-label="Next photo">&rsaquo;</button>
+    </dialog>
+
+    <p class="goback">
+      <button type="button" class="plainlink goback__btn">Go back.</button>
+    </p>
+
+  </section>
+
+  <section class="panel" id="help" hidden>
+    <h1 class="panel__title">How this works</h1>
+    <p class="panel__sub">In plain terms.</p>
+
+    <!-- Doubts first, steps second. Someone who opened this page is hesitating,
+         and the things that actually make a person leave are "do I have to do
+         this", "why do you want my VIN" and "is that my car". Answering those
+         before explaining the process is the difference between reassurance and
+         a manual. -->
+    <ul class="plain plain--split plain--tight">
+      <li>
+        <b>Do I have to use this?</b>
+        <!-- The offer is the link. The corner of every page already dials on a
+             tap; this is the same number, in the sentence that makes the
+             offer, so reading it and acting on it are the same gesture. -->
+        <span>Not at all. You are welcome to <a href="tel:+12145867650"
+          aria-label="Give us a call or send us a text at (214) 586-7650">give a
+          call or send us a text</a> to talk to a real person. This is here for
+          your convenience and to save you some time.</span>
+      </li>
+      <li>
+        <b>Why do you want my VIN?</b>
+        <span>There are variations of features and specs for most Year, Make and
+          Models. The VIN provides us with your exact match.</span>
+      </li>
+      <li>
+        <b>Does anything send before I say so?</b>
+        <!-- This quotes the button by name, so the button has to carry that
+             name. It said "Send my request" until this copy arrived; both are
+             "Send My Request" now. A page that quotes a control the customer
+             cannot then find is worse than no page at all. -->
+        <span>No. Nothing leaves your device until you press the &ldquo;Send My
+          Request&rdquo; button at the end of your quote process.</span>
+      </li>
+      <li>
+        <b>Is that car on screen mine?</b>
+        <!-- The old answer ended "The list of windows beside it is yours." That
+             is gone on their instruction: it reads as a comprehensive list
+             rather than one specific to the customer's vehicle, so claiming it
+             is theirs sets an expectation the list does not meet. -->
+        <span>No. It is a similar diagram to help you tell us where the damage
+          is on your vehicle. Something to point at.</span>
+      </li>
+      <li>
+        <b>Do I have to send photos?</b>
+        <span>No. Pictures give us a clearer idea of the damage but are not
+          necessary in most cases.</span>
+      </li>
+      <li>
+        <b>What if I cannot find my VIN?</b>
+        <div class="split__body">
+          <p>Simply tell us your Year, Make, &amp; Model from a list
+            instead!</p>
+          <!-- The same three places the quote flow offers behind "Need help
+               finding your VIN?", worded the same and reachable here too:
+               somebody reading this page has not started the flow yet and
+               cannot get at that one.
+
+               DUPLICATED ON PURPOSE, and the two must be kept in step. The
+               alternative was cloning one into the other at runtime, which
+               would have cost these disclosures the thing they are built for:
+               working with the script broken. If you edit one list, edit the
+               other. The flow's copy is #vin-help.
+
+               What is NOT repeated here is that panel's "Can't find it? Pick
+               your vehicle from a list instead." button. It switches the quote
+               down its other branch, and there is no quote running on this
+               page for it to switch. -->
+          <details class="disc expand">
+            <summary>Need help finding your VIN?</summary>
+            <div class="disc__body expand__body">
+              <p class="wherelist__title">Where to find your VIN</p>
+              <ol class="wherelist">
+                <li>Your insurance card or vehicle registration.</li>
+                <li>The sticker in the driver&rsquo;s door jamb, visible with
+                  the door open.</li>
+                <li>The corner of the dash on the driver&rsquo;s side, read
+                  through the windshield.</li>
+              </ol>
+            </div>
+          </details>
+        </div>
+      </li>
+    </ul>
+
+    <h2 class="panel__h2">The Whole Thing, Start to Finish</h2>
+
+    <ol class="steps">
+      <li>Tell us the vehicle, by VIN or from a list.</li>
+      <li>Tap whichever glass is broken, or just describe it.</li>
+      <li>Add a photo if you can.</li>
+      <li>Tell us how soon you&rsquo;re looking to schedule.</li>
+      <li>Specify the best way to reach you and send it all our way!</li>
+    </ol>
+
+    <p class="goback">
+      <button type="button" class="plainlink goback__btn">Go back.</button>
+    </p>
+
+  </section>
+
+  <section class="panel" id="contact" hidden>
+    <h1 class="panel__title">Contact</h1>
+    <!-- The owners' own wording throughout. Their brief for all of it: "Our
+         brand is very down-to-earth. Meaning, most of the written script
+         should feel like a conversation." -->
+    <ul class="plain">
+      <li><b>Phone</b><a href="tel:+12145867650">(214) 586-7650</a>. Give us a
+        call or shoot us a text.</li>
+      <li><b>Email</b><a href="mailto:QuillinAutoGlass@gmail.com">QuillinAutoGlass@gmail.com</a></li>
+      <!-- Separated by a tilde rather than a full stop, their instruction. The
+           separators are set dim on purpose: three opening hours on one line
+           only scan as three things if the marks between them stay out of the
+           way of the words. Marked aria-hidden so a screen reader reads the
+           hours and not "tilde". -->
+      <li><b>Hours</b><span class="hrs">Monday to Friday: 8am to 6pm<span
+        class="sep" aria-hidden="true">~</span></span><span class="hrs">Saturday:
+        8am to Noon<span class="sep" aria-hidden="true">~</span></span><span
+        class="hrs">Sunday: By Appointment</span></li>
+      <!-- "We Come To You" is capitalised deliberately, theirs, for emphasis. -->
+      <li><b>Where</b>Based in Wylie, Texas. We specialize in providing mobile
+        service. That means We Come To You!</li>
+      <li><b>Payment</b>All major cards, cash, Zelle.</li>
+    </ul>
+
+    <p class="goback">
+      <button type="button" class="plainlink goback__btn">Go back.</button>
+    </p>
+
+  </section>
+
+</main>
+
+<!-- Bottom right corner, in the logo's orange, very faint. -->
+<a class="aboutcorner" href="#about">About us.</a>
+
+<!-- "How this works" was a fixed strip pinned along the bottom edge here. It
+     rides with the flow now instead: app.js moves one control to the foot of
+     whichever page is showing, so it follows the customer through rather than
+     sitting on the glass in front of them. See placeHelp in app.js. -->
+
+<!-- The bottom bar. Same five words as the header now, and on a pointer device
+     it appears only at the foot of the pages that are NOT the home page: see
+     checkDock in landing.js. On a phone it stays put, because there is no hover
+     up there and the owners singled this bar out as the part of the mobile
+     version they like. -->
+<!-- Quote first, all the way to the left: owner instruction. It is the job
+     the site exists for, so it leads the bar rather than trailing it. -->
+<nav class="dock" aria-label="Sections">
+  <a href="#quote" class="nav--lead">quote</a>
+  <a href="#services">services</a>
+  <a href="#about">about</a>
+  <a href="#faq">faq</a>
+  <a href="#contact">contact</a>
+</nav>
+
+<script src="js/backdrop.js?v=500ac6d4"></script>
+<script src="js/landing.js?v=2b7661f5"></script>
+<script src="js/vin.js?v=546382b1"></script>
+<script src="js/glass.js?v=7b7553fa"></script>
+<script src="js/app.js?v=6c7fceb4"></script>
+</body>
+</html>
