@@ -1257,7 +1257,9 @@ body.on-quote:not(.is-started) .backdrop__layer--work.is-on { opacity: 0; }
 .hero {
   position: relative;
   overflow: hidden;
-  min-height: clamp(20rem, 48vh, 30rem);
+  /* A little taller than it was, now the photographs are shown whole: at
+     30rem a 4:3 photograph came out 640px wide on a laptop. */
+  min-height: clamp(20rem, 54vh, 34rem);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1279,11 +1281,17 @@ body.on-quote:not(.is-started) .backdrop__layer--work.is-on { opacity: 0; }
 .hero__shot {
   position: absolute;
   inset: 0;
-  background-size: cover;
-  background-position: var(--fx, 50%) 30%;
+  /* The photograph WHOLE (contain), over the same photograph blurred to fill
+     the band (cover). Owner instruction: "zoomed out if needed, showing them
+     working". Cropped to the band's 3:1, every one of these lost somebody's
+     head or knees. Sat right of centre on a wide screen, so the people are
+     clear of the button on the left. */
+  background-size: contain, cover;
+  background-repeat: no-repeat, no-repeat;
+  background-position: 80% 50%, center;
   opacity: 0;
   transition: opacity 2.4s linear;
-  transform: scale(1.1);
+  transform: scale(1.04);
   will-change: opacity, transform;
 }
 
@@ -1295,14 +1303,16 @@ body.on-quote:not(.is-started) .backdrop__layer--work.is-on { opacity: 0; }
 
 .hero__shot.is-panning.is-rev { animation-name: crewpanback; }
 
+/* A gentler pan than when the photographs were cropped to fill: shown whole,
+   a 3.5% slide at 1.1x walked their edges past the surround. */
 @keyframes crewpan {
-  from { transform: scale(1.1) translateX(-3.5%); }
-  to   { transform: scale(1.1) translateX( 3.5%); }
+  from { transform: scale(1.04) translateX(-1.5%); }
+  to   { transform: scale(1.04) translateX( 1.5%); }
 }
 
 @keyframes crewpanback {
-  from { transform: scale(1.1) translateX( 3.5%); }
-  to   { transform: scale(1.1) translateX(-3.5%); }
+  from { transform: scale(1.04) translateX( 1.5%); }
+  to   { transform: scale(1.04) translateX(-1.5%); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1676,6 +1686,10 @@ body.on-quote:not(.is-started) .backdrop__layer--work.is-on { opacity: 0; }
 
 @media (max-width: 30rem) {
   .hero { min-height: 17rem; padding: 1.5rem 0; }
+  /* On a phone the button spans the band, so the photograph takes the top
+     and the button sits at the foot: the person is above it, not behind it. */
+  .hero { min-height: 26rem; justify-content: flex-end; }
+  .hero__shot { background-position: 50% 0, center; }
   .cta { padding: 1.125rem 1.25rem; gap: 1rem; }
   .tiles a { padding: 1.25rem .625rem; }
   .tiles svg { max-width: 4.5rem; }
@@ -3380,6 +3394,29 @@ a, button, label, select, input, textarea, summary {
 
 .manual select:disabled { color: var(--faint); cursor: default; }
 
+/* The typed fallbacks look like the dropdowns they stand in for: words on a
+   rule, the rule turning orange while you type. 16px+ so iOS does not zoom. */
+.manual__text {
+  font: inherit;
+  font-size: 1.125rem;
+  padding: .9375rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: var(--ink);
+  transition: border-color .25s var(--ease);
+}
+
+.manual__text::placeholder { color: var(--faint); }
+
+.manual__text:focus { outline: none; border-bottom-color: var(--orange); }
+
+.manual__text[hidden], .manual__go[hidden] { display: none; }
+
+.manual__go { justify-self: start; margin-top: .75rem; }
+
+.manual__go:disabled { opacity: .45; cursor: default; }
+
 .manual select option { background: var(--raise); color: var(--ink); }
 
 /* ---------- choices ----------
@@ -3711,6 +3748,53 @@ a, button, label, select, input, textarea, summary {
    the whole of the signal now. The checking itself is unchanged and "Send my
    request" still will not enable until a channel is properly filled in. */
 .reach__input--bad { border-bottom-color: #ef6b62; }
+
+/* ---------- "Not your shape?" ---------- */
+.shape__ask { margin: .25rem 0 .5rem; }
+
+.shape {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .375rem;
+  margin: 0 0 .875rem;
+}
+
+.shape[hidden] { display: none; }
+
+.shape__btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .25rem;
+  min-height: 4rem;
+  padding: .5rem .25rem;
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .03);
+  color: var(--ink-dim);
+  font: inherit;
+  font-size: .8125rem;
+  cursor: pointer;
+  transition: border-color .2s var(--ease), background .2s var(--ease), color .2s var(--ease);
+}
+
+.shape__btn svg {
+  width: 2.75rem;
+  height: 1.375rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.shape__btn:hover { border-color: var(--orange); color: var(--ink); }
+
+.shape__btn[aria-pressed="true"] {
+  border-color: var(--orange);
+  background: rgba(240, 125, 42, .14);
+  color: var(--ink);
+}
 
 /* ---------- sending, and sent ---------- */
 

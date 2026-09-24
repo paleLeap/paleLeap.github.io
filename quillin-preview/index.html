@@ -26,9 +26,9 @@
      means not wired, and the page says so rather than pretending to send.
      Local testing: node tools/relay-dev.mjs and http://localhost:8787/quote. -->
 <meta name="quote-relay" content="">
-<meta name="build" content="3e02be95ac">
+<meta name="build" content="8b28c0fe75">
 <meta name="description" content="Mobile auto glass repair and replacement across North Texas, based in Wylie. Family operated, Black Owned and Woman Owned, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=c95c0494">
+<link rel="stylesheet" href="css/style.css?v=7f765131">
 </head>
 <body>
 
@@ -371,8 +371,21 @@
       <select id="m-year"><option value="">Year</option></select>
       <label class="visually-hidden" for="m-make">Make</label>
       <select id="m-make" disabled><option value="">Make</option></select>
+      <!-- Typed, when the list does not have it. The make and model lists come
+           from NHTSA, and NHTSA has gaps: it has no Scion at all, for any year,
+           so a 2012 Scion hit "No models found" and a disabled box with no way
+           forward. Found by a real tester. The model step can never dead-end
+           now: a built-in list covers the known gaps, every list ends with
+           "isn't listed", and an empty or failed lookup opens these directly. -->
+      <label class="visually-hidden" for="m-make-text">Make</label>
+      <input id="m-make-text" class="manual__text" type="text" hidden
+             placeholder="Type the make" autocomplete="off" autocapitalize="words" maxlength="40">
       <label class="visually-hidden" for="m-model">Model</label>
       <select id="m-model" disabled><option value="">Model</option></select>
+      <label class="visually-hidden" for="m-model-text">Model</label>
+      <input id="m-model-text" class="manual__text" type="text" hidden
+             placeholder="Type the model" autocomplete="off" autocapitalize="words" maxlength="40">
+      <button type="button" class="btn manual__go" id="m-go" hidden disabled>Continue</button>
     </div>
 
     <!-- This page carries the customer on by itself: decoding a VIN, or picking
@@ -439,6 +452,14 @@
       <div class="picker__stage" id="picker-stage" aria-hidden="true"></div>
       <div class="picker__side">
         <p class="picker__note" id="picker-note"></p>
+        <!-- The shape is worked out from the VIN, or from the model name when
+             there is no VIN, and some models come in several (a Civic is a
+             sedan, a coupe or a hatchback). The glass list IS the shape, so a
+             wrong shape is the wrong glass. One tap puts it right; nothing is
+             typed. The row is built by app.js from Glass's archetypes. -->
+        <p class="shape__ask"><button type="button" class="plainlink" id="shape-ask"
+           aria-expanded="false" aria-controls="shape-row">Not your shape?</button></p>
+        <div class="shape" id="shape-row" role="group" aria-label="Pick the shape of your vehicle" hidden></div>
         <fieldset class="choices" id="picker-list">
           <legend class="visually-hidden">Which glass is damaged?</legend>
         </fieldset>
@@ -1253,10 +1274,10 @@
   <a href="#contact">contact</a>
 </nav>
 
-<script src="js/backdrop.js?v=500ac6d4"></script>
+<script src="js/backdrop.js?v=732d242c"></script>
 <script src="js/landing.js?v=2b7661f5"></script>
-<script src="js/vin.js?v=546382b1"></script>
+<script src="js/vin.js?v=71775f88"></script>
 <script src="js/glass.js?v=7b7553fa"></script>
-<script src="js/app.js?v=6c7fceb4"></script>
+<script src="js/app.js?v=fe8dd753"></script>
 </body>
 </html>

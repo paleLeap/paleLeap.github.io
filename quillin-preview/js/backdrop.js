@@ -95,7 +95,7 @@
      reason the vehicle models carry one: these are fetched by a path built
      here, so nothing in index.html points at them and nothing would bust them
      if one were ever replaced. */
-  var SHOTS_V = '?v=9cd2974e';
+  var SHOTS_V = '?v=4ad2de13';
 
   var host = document.querySelector('.backdrop');
   if (!host) return;
@@ -276,14 +276,17 @@
      on), and alternates direction so two in a row do not slide the same way.
 
      fx is where the person stands, from tools/crew.py; keep the two in step. */
-  var CREW = [
-    { src: 'assets/img/crew/crew-01.jpg', fx: '85%' },
-    { src: 'assets/img/crew/crew-02.jpg', fx: '50%' },
-    { src: 'assets/img/crew/crew-03.jpg', fx: '35%' },
-    { src: 'assets/img/crew/crew-04.jpg', fx: '83%' },
-    { src: 'assets/img/crew/crew-05.jpg', fx: '66%' },
-    { src: 'assets/img/crew/crew-06.jpg', fx: '55%' }
-  ];
+  /* Every photograph with a person doing the job (tools/crew.py says which
+     and why), each shown WHOLE over a blurred copy of itself. Shuffled into
+     a fresh order every visit, owner instruction: "random". */
+  var CREW = [1, 2, 3, 4, 5, 6, 7, 8].map(function (n) {
+    var id = 'assets/img/crew/crew-' + (n < 10 ? '0' : '') + n;
+    return { src: id + '.jpg', fill: id + '-fill.jpg' };
+  });
+  for (var k = CREW.length - 1; k > 0; k--) {           // Fisher-Yates
+    var r = Math.floor(Math.random() * (k + 1));
+    var tmp = CREW[k]; CREW[k] = CREW[r]; CREW[r] = tmp;
+  }
   var CREW_CYCLE_MS = 8000;
   var CREW_FADE_MS = 2400;     // .hero__shot's transition in the stylesheet
 
@@ -303,8 +306,9 @@
     var flip = false;
 
     function load(layer, shot) {
-      layer.style.backgroundImage = 'url("' + shot.src + SHOTS_V + '")';
-      layer.style.setProperty('--fx', shot.fx);
+      /* Two layers in one: the photograph whole, over its blurred surround. */
+      layer.style.backgroundImage = 'url("' + shot.src + SHOTS_V + '"), url("' +
+        shot.fill + SHOTS_V + '")';
       layer.classList.remove('is-panning');
       void layer.offsetWidth;                  // restart the pan from its start
       layer.classList.toggle('is-rev', flip);
@@ -323,6 +327,7 @@
         shots[on].classList.remove('is-on');
         on = 1 - on;
         warm(CREW[(i + 1) % CREW.length].src);
+        warm(CREW[(i + 1) % CREW.length].fill);
       };
       img.src = CREW[i].src + SHOTS_V;
     }
@@ -332,6 +337,7 @@
       load(shots[0], CREW[0]);
       shots[0].classList.add('is-on');
       warm(CREW[1].src);
+      warm(CREW[1].fill);
       if (reduced.matches) return;
       setInterval(next, CREW_CYCLE_MS);
     };

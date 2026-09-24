@@ -23,6 +23,9 @@
     mYear:     $('m-year'),
     mMake:     $('m-make'),
     mModel:    $('m-model'),
+    mMakeText: $('m-make-text'),
+    mModelText:$('m-model-text'),
+    mGo:       $('m-go'),
     glass:     $('step-glass'),
     onVehicle: $('on-vehicle'),
     vinNav:    $('vin-nav'),
@@ -37,6 +40,8 @@
     picker:    $('picker'),
     pickerStage: $('picker-stage'),
     pickerNote:  $('picker-note'),
+    shapeAsk:    $('shape-ask'),
+    shapeRow:    $('shape-row'),
     pickerList:  $('picker-list'),
     justTell:  $('just-tell'),
     tellus:    $('tellus'),
@@ -78,13 +83,46 @@
     sentHome:  $('sent-home')
   };
 
+  /* Makes NHTSA's model lookup has nothing for, filled in by hand from each
+     make's US line-up. Checked against vPIC on 2026-09-23: GetModelsForMake
+     returns 0 for Scion at every year. Used only when vPIC comes back empty,
+     so the moment vPIC gains a make, its answer wins. body is the archetype,
+     so the 3D picker shows the right shape. */
+  var FALLBACK_MODELS = {
+    Scion: [
+      { name: 'FR-S', from: 2013, to: 2016, body: 'coupe' },
+      { name: 'iA',   from: 2016, to: 2016, body: 'sedan' },
+      { name: 'iM',   from: 2016, to: 2016, body: 'hatch' },
+      { name: 'iQ',   from: 2012, to: 2015, body: 'hatch' },
+      { name: 'tC',   from: 2005, to: 2016, body: 'coupe' },
+      { name: 'xA',   from: 2004, to: 2006, body: 'hatch' },
+      { name: 'xB',   from: 2004, to: 2006, body: 'hatch' },
+      { name: 'xB',   from: 2008, to: 2015, body: 'hatch' },   // no 2007 model year
+      { name: 'xD',   from: 2008, to: 2014, body: 'hatch' }
+    ]
+  };
+  var fallbackBody = Object.create(null);
+
+  function fallbackModels(make, year) {
+    var y = parseInt(year, 10);
+    return (FALLBACK_MODELS[make] || []).filter(function (m) {
+      return y >= m.from && y <= m.to;
+    });
+  }
+
+  var OTHER = '__other';
+
   var MAKES = [
-    'Acura','Alfa Romeo','Audi','BMW','Buick','Cadillac','Chevrolet','Chrysler',
-    'Dodge','Fiat','Ford','Freightliner','Genesis','GMC','Honda','Hyundai',
-    'Infiniti','Jaguar','Jeep','Kenworth','Kia','Land Rover','Lexus','Lincoln',
-    'Mack','Maserati','Mazda','Mercedes-Benz','Mercury','Mini','Mitsubishi',
-    'Nissan','Peterbilt','Pontiac','Porsche','Ram','Rivian','Saturn','Scion',
-    'Subaru','Tesla','Toyota','Volkswagen','Volvo'
+    'Acura', 'Alfa Romeo', 'Aston Martin', 'Audi', 'Bentley', 'BMW', 'Buick',
+    'Cadillac', 'Chevrolet', 'Chrysler', 'Dodge', 'Ferrari', 'Fiat', 'Ford',
+    'Freightliner', 'Genesis', 'Geo', 'GMC', 'Hino', 'Honda', 'Hummer',
+    'Hyundai', 'Infiniti', 'International', 'Isuzu', 'Jaguar', 'Jeep',
+    'Kenworth', 'Kia', 'Lamborghini', 'Land Rover', 'Lexus', 'Lincoln',
+    'Lotus', 'Lucid', 'Mack', 'Maserati', 'Mazda', 'McLaren', 'Mercedes-Benz',
+    'Mercury', 'Mini', 'Mitsubishi', 'Nissan', 'Oldsmobile', 'Peterbilt',
+    'Plymouth', 'Polestar', 'Pontiac', 'Porsche', 'Ram', 'Rivian',
+    'Rolls-Royce', 'Saab', 'Saturn', 'Scion', 'Smart', 'Subaru', 'Suzuki',
+    'Tesla', 'Toyota', 'Volkswagen', 'Volvo', 'Western Star'
   ];
 
   var vehicle = null;      // the decoded vehicle
@@ -612,6 +650,7 @@
     el.mMake.disabled = true;
     clearModels('Model');
     el.mModel.disabled = true;
+    typedShut();
     vehicle = null;
     resetBelow(2);
     syncNav();
@@ -624,8 +663,74 @@
     for (var y = now; y >= 1981; y--) {          // vPIC coverage starts at 1981
       el.mYear.add(new Option(y, y));
     }
-    MAKES.forEach(function (m) { el.mMake.add(new Option(m, m)); });
   }
+
+  /* The makes for the chosen YEAR only, from the shipped index: a make that
+     sold nothing that year is never offered, so the model list that follows
+     always has something in it. It used to offer all 64 makes for every
+     year, and "2018 Geo" (Geo ended in 1997) went straight to an empty list
+     and a "Type the model" box. If the index cannot be had, the full list. */
+  function fillMakes(year) {
+    var keep = el.mMake.value;
+    el.mMake.innerHTML = '';
+    el.mMake.add(new Option('Loading\u2026', ''));
+    el.mMake.disabled = true;
+    return VIN.makesFor(year).then(function (list) {
+      if (el.mYear.value !== year) return false;         // year changed again meanwhile
+      var makes = (list && list.length) ? list : MAKES;
+      el.mMake.innerHTML = '';
+      el.mMake.add(new Option('Make', ''));
+      makes.forEach(function (m) { el.mMake.add(new Option(m, m)); });
+      el.mMake.add(new Option('My make isn\u2019t listed', OTHER));
+      el.mMake.disabled = false;
+      var still = makes.indexOf(keep) !== -1 || keep === OTHER;
+      el.mMake.value = still ? keep : '';
+      return still && !!keep;
+    });
+  }
+
+  /* ---- typing it in, when the lists do not have it ---- */
+
+  function typedOpen(makeToo) {
+    el.mMakeText.hidden = !makeToo;
+    el.mModel.hidden = !!makeToo || el.mModel.hidden;
+    el.mModelText.hidden = false;
+    el.mGo.hidden = false;
+    syncTyped();
+  }
+
+  function typedShut() {
+    el.mMakeText.hidden = true;
+    el.mModelText.hidden = true;
+    el.mGo.hidden = true;
+    el.mMakeText.value = '';
+    el.mModelText.value = '';
+    el.mModel.hidden = false;
+  }
+
+  function typedMake() {
+    return el.mMake.value === OTHER ? el.mMakeText.value.trim() : el.mMake.value;
+  }
+
+  function syncTyped() {
+    el.mGo.disabled = !(typedMake().length >= 2 && el.mModelText.value.trim().length >= 1);
+  }
+
+  el.mMakeText.addEventListener('input', syncTyped);
+  el.mModelText.addEventListener('input', syncTyped);
+
+  function goTyped() {
+    if (el.mGo.disabled) return;
+    var model = el.mModelText.value.trim();
+    settleManual(typedMake(), model, [], null, true);
+  }
+
+  el.mGo.addEventListener('click', goTyped);
+  [el.mMakeText, el.mModelText].forEach(function (f) {
+    f.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); goTyped(); }
+    });
+  });
 
   /* One of the two answers now, not a disclosure. It used to toggle, because it
      sat on a screen that also held the field and could be pressed by mistake;
@@ -638,56 +743,110 @@
   });
 
   el.mYear.addEventListener('change', function () {
-    el.mMake.disabled = !el.mYear.value;
     clearModels('Model');
     resetBelow(2);
+    var typedMakeOpen = el.mMake.value === OTHER;
+    if (!typedMakeOpen) typedShut();
+    if (!el.mYear.value) { el.mMake.value = ''; el.mMake.disabled = true; return; }
+    fillMakes(el.mYear.value).then(function (kept) {
+      /* The same make in the new year: its models for that year, straight
+         away, rather than making them choose the make again. */
+      if (kept && el.mMake.value !== OTHER) loadModels();
+    });
   });
 
   el.mMake.addEventListener('change', function () {
     resetBelow(2);
+    typedShut();
     if (!el.mMake.value) { clearModels('Model'); return; }
+    if (el.mMake.value === OTHER) {
+      clearModels('Model');
+      typedOpen(true);
+      el.mMakeText.focus();
+      return;
+    }
+    loadModels();
+  });
+
+  function loadModels() {
     clearModels('Loading…');
     el.mModel.disabled = true;
 
-    var token = el.mMake.value + el.mYear.value;
+    var make = el.mMake.value, year = el.mYear.value;
+    var token = make + year;
     lastLookup = token;
 
-    VIN.modelsFor(el.mMake.value, el.mYear.value).then(function (models) {
+    function fill(models) {
       if (lastLookup !== token) return;
-      if (!models.length) { clearModels('No models found'); return; }
+      /* vPIC's list, or ours for the makes it lacks. Never nothing: an empty
+         answer opens the typed box instead of a dead dropdown. */
+      if (!models.length) {
+        models = fallbackModels(make, year).map(function (m) {
+          fallbackBody[m.name] = m.body;
+          return { name: m.name, types: [] };
+        });
+      }
+      /* Should not happen now the make list follows the year. If it does
+         (our own file unreachable AND NHTSA down), the list still opens as a
+         normal choice, with "isn't listed" in it, rather than dropping the
+         customer into a text box they did not ask for. */
       clearModels('Model');
       modelTypes = Object.create(null);
       models.forEach(function (m) {
         modelTypes[m.name] = m.types;
+        if (m.body) fallbackBody[m.name] = m.body;
         el.mModel.add(new Option(m.name, m.name));
       });
+      el.mModel.add(new Option('My model isn\u2019t listed', OTHER));
       el.mModel.disabled = false;
-    }).catch(function () {
-      if (lastLookup === token) clearModels('Couldn’t load models');
-    });
-  });
+    }
+
+    /* A lookup that fails outright (NHTSA down, the phone offline) is treated
+       exactly like an empty one: the built-in list, then the typed box. It
+       used to say "Couldn't load models" and stop. */
+    VIN.modelsFor(make, year).then(fill).catch(function () { fill([]); });
+  }
 
   el.mModel.addEventListener('change', function () {
+    if (el.mModel.value === OTHER) {
+      resetBelow(2);
+      typedOpen(false);
+      el.mModelText.focus();
+      return;
+    }
+    typedShut();
     if (!el.mModel.value) { resetBelow(2); return; }
+    var name = el.mModel.value;
+    settleManual(el.mMake.value, name, modelTypes[name] || [], fallbackBody[name] || null, false);
+  });
+
+  /* One place a hand-entered vehicle is made, whichever way it was named. */
+  function settleManual(make, model, types, body, typed) {
     // No VIN means no ADAS data, so we have to ask rather than infer.
     undecline();
     vehicle = {
       year: el.mYear.value,
-      make: el.mMake.value,
-      model: el.mModel.value,
+      make: make,
+      model: model,
       trim: '', bodyClass: '', doors: '', cab: '', vin: '',
       /* What vPIC filed this model under: car, truck, mpv, or several. Not a
          body style, but enough to stop us asking a stupid question about one. */
-      vpicTypes: modelTypes[el.mModel.value] || [],
+      vpicTypes: types,
       /* Worked out, not asked. See bodyFor: the name settles the common
-         nameplates and the vPIC bucket covers the rest. */
-      bodyStyle: bodyFor(el.mModel.value, modelTypes[el.mModel.value] || []),
+         nameplates and the vPIC bucket covers the rest. A built-in list
+         entry carries its own. */
+      bodyStyle: body || bodyFor(model, types),
+      /* A shape from the checked list (tools/body), not a guess. */
+      bodyFromList: !!body,
       adas: { camera: [], mixed: [], elsewhere: [] },
-      label: el.mYear.value + ' ' + el.mMake.value + ' ' + el.mModel.value,
+      label: el.mYear.value + ' ' + make + ' ' + model,
+      /* Typed by the customer, not picked from a list: the owners should
+         know the name was not checked against anything. */
+      typedByCustomer: !!typed,
       usable: true
     };
     vehicleSettled(vehicle);
-  });
+  }
 
   function clearModels(label) {
     el.mModel.innerHTML = '';
@@ -893,11 +1052,89 @@
 
   /* The vehicle is a body archetype chosen from the VIN, not the customer's exact
      car, and the note says so. What has to be right is the panel set. */
+  /* ---------- "Not your shape?" ----------
+
+     The customer's answer to the one thing the picker depends on. Offered on
+     every vehicle, VIN or not: a VIN decodes the shape well but not always, and
+     a model name is a guess for anything that comes in several bodies. Picking
+     one sets vehicle.bodyStyle, which Glass.resolve already ranks above every
+     other source, and rebuilds the picker for it. Whatever they had already
+     written about the damage is kept. */
+  var SHAPES = [
+    ['sedan', 'Sedan', 'M4 17h40M8 17l5-6h14l6 6M6 17v3h36v-3'],
+    ['coupe', 'Coupe', 'M4 17h40M10 17l7-6h10l8 6M6 17v3h36v-3'],
+    ['hatch', 'Hatchback', 'M6 17h36M10 17l5-7h16l6 7M8 17v3h32v-3M31 10v7'],
+    ['convertible', 'Convertible', 'M4 17h40M14 17l3-4h4M6 17v3h36v-3M27 13h8'],
+    ['suv', 'SUV', 'M4 17h40M7 17l3-8h24l5 8M6 17v3h36v-3'],
+    ['pickup', 'Pickup', 'M3 17h42M5 17l3-7h14v7M22 12h20v5M5 17v3h38v-3'],
+    ['van', 'Van', 'M5 17h38M7 17V8h26l7 9M7 20h34v-3'],
+    ['heavy', 'Big truck', 'M3 17h42M5 17V8h12v9M17 10h26v7M5 20h38v-3']
+  ];
+
+  function buildShapes() {
+    if (el.shapeRow.children.length) return;
+    SHAPES.forEach(function (sh) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'shape__btn';
+      b.setAttribute('data-shape', sh[0]);
+      b.setAttribute('aria-pressed', 'false');
+      b.innerHTML = '<svg viewBox="0 0 48 24" aria-hidden="true" focusable="false"><path d="' +
+        sh[2] + '"/><circle cx="14" cy="20" r="2.4"/><circle cx="35" cy="20" r="2.4"/></svg>';
+      var t = document.createElement('span');
+      t.textContent = sh[1];
+      b.appendChild(t);
+      b.addEventListener('click', function () { chooseShape(sh[0]); });
+      el.shapeRow.appendChild(b);
+    });
+  }
+
+  function markShape(id) {
+    Array.prototype.forEach.call(el.shapeRow.children, function (b) {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-shape') === id));
+    });
+  }
+
+  el.shapeAsk.addEventListener('click', function () {
+    buildShapes();
+    markShape(archetype && archetype.id);
+    var open = el.shapeRow.hidden;
+    if (open) slideOpen(el.shapeRow); else slideShut(el.shapeRow);
+    el.shapeAsk.setAttribute('aria-expanded', String(open));
+  });
+
+  function chooseShape(id) {
+    if (!vehicle || (archetype && archetype.id === id)) return;
+    vehicle.bodyStyle = id;
+    vehicle.bodyChosenByCustomer = true;
+    /* New shape, new glass: only the picks and the 3D view go. NOT
+       resetBelow(4), which also hides this very page (el.glass is
+       step-glass) and empties what they wrote about the damage. */
+    panels = [];
+    windshield = null;
+    damageKind = {};
+    hide(el.chipQ);
+    el.chipDone.innerHTML = '';
+    el.chipDone.hidden = true;
+    teardownPicker();
+    openPicker();
+    markShape(id);
+    syncNav();
+  }
+
   function openPicker() {
     if (picker || el.pickerList.querySelector('input')) return;
     archetype = Glass.resolve(vehicle);
+    /* The shape row closes on a new vehicle; it stays open, marked, when the
+       customer is the one who just changed the shape. */
+    if (!vehicle.bodyChosenByCustomer) {
+      el.shapeRow.hidden = true;
+      el.shapeAsk.setAttribute('aria-expanded', 'false');
+    }
 
-    el.pickerNote.textContent = 'This is a ' + archetype.label +
+    /* "an SUV": said "es-you-vee", so it takes "an" like any vowel sound. */
+    var an = /^(suv|[aeiou])/i.test(archetype.label) ? 'an ' : 'a ';
+    el.pickerNote.textContent = 'This is ' + an + archetype.label +
       ' like yours, not your exact car. Tap the glass that needs work.';
 
     // Resolved relative to THIS file (js/), not the document base. The leading
@@ -1528,9 +1765,16 @@
         label: v.label, year: v.year, make: v.make, model: v.model,
         trim: v.trim, bodyClass: v.bodyClass, doors: v.doors, cab: v.cab,
         vin: v.vin || null,
-        identifiedBy: v.vin ? 'vin' : 'year/make/model chosen by customer'
+        identifiedBy: v.vin ? 'vin'
+          : v.typedByCustomer ? 'year from the list, make/model TYPED by customer'
+          : 'year/make/model chosen by customer'
       },
       archetype: archetype ? archetype.id : null,
+      /* Where the shape came from, because the glass list follows from it:
+         the owners should know whether it was read, guessed or told. */
+      bodySource: v.bodyChosenByCustomer ? 'chosen by customer'
+        : v.vin ? 'from the VIN'
+        : v.bodyFromList ? 'from our model list' : 'guessed from the model name',
       damage: {
         panels: panels.slice(),
         panelLabels: Glass.labelsFor(panels),

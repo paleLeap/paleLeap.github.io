@@ -248,7 +248,53 @@
      list a model came back in is vPIC telling us what kind of thing it is. An
      Elantra comes back under 'car' and never under 'truck', so there is no
      reason to ask a customer whether their Elantra is a pickup. */
+  /* ---- the model list, shipped with the site first ----
+
+     Built by tools/build-models.py from vPIC (and NHTSA's recall index where
+     vPIC has gaps, like Scion), one small file per make. Asking vPIC live
+     from the customer's phone is what failed: it has no Scion at all, and it
+     answers bursts with a 403. The live lookup below is now only what happens
+     if the shipped file is missing or has nothing for that year.
+
+     DATA_V is stamped by bump.sh from the folder's contents, because this
+     path is built here and nothing in index.html names it. */
+  var DATA_V = '?v=f1c4c319';
+  var TYPE_OF = { c: 'car', t: 'truck', m: 'mpv' };
+
+  function slug(make) {
+    return String(make).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  /* Which makes sold something in a given year, from the shipped index.
+     Fetched once; null when it cannot be had, and the caller falls back to
+     its full list. */
+  var makesIndex = null;
+  function makesFor(year) {
+    if (!makesIndex) {
+      makesIndex = fetch('assets/data/models/index.json' + DATA_V)
+        .then(function (r) { if (!r.ok) throw new Error('no index'); return r.json(); })
+        .catch(function () { makesIndex = null; return null; });
+    }
+    return makesIndex.then(function (idx) { return idx ? (idx[String(year)] || []) : null; });
+  }
+
   function modelsFor(make, year) {
+    return fetch('assets/data/models/' + slug(make) + '.json' + DATA_V)
+      .then(function (r) { if (!r.ok) throw new Error('no list'); return r.json(); })
+      .then(function (d) {
+        var rows = (d.years || {})[String(year)];
+        if (!rows || !rows.length) throw new Error('no year');
+        return rows.map(function (row) {
+          return { name: row[0], body: row[2] || null,
+                   types: String(row[1] || '').split('').map(function (c) {
+            return TYPE_OF[c];
+          }).filter(Boolean) };
+        });
+      })
+      .catch(function () { return modelsLive(make, year); });
+  }
+
+  function modelsLive(make, year) {
     var types = ['car', 'truck', 'mpv'];
     return Promise.all(types.map(function (t) {
       return json(API + '/GetModelsForMakeYear/make/' + encodeURIComponent(make) +
@@ -262,6 +308,10 @@
         s.rows.forEach(function (m) {
           var n = m.Model_Name;
           if (!n) return;
+          /* vPIC matches the make by SUBSTRING: "Geo" also answers for
+             Peugeot. Only this make's own rows. */
+          var mk = String(m.Make_Name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (mk && mk !== String(make).toLowerCase().replace(/[^a-z0-9]/g, '')) return;
           if (!seen[n]) seen[n] = { name: n, types: [] };
           if (seen[n].types.indexOf(s.type) === -1) seen[n].types.push(s.type);
         });
@@ -321,6 +371,7 @@
     inspect: inspect,
     decode: decode,
     modelsFor: modelsFor,
+    makesFor: makesFor,
     adasState: adasState,
     adasDetail: adasDetail,
     tooOldForAdas: tooOldForAdas,
