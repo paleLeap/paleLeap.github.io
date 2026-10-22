@@ -1,4 +1,4 @@
-/* Step flow: VIN -> specifics -> confirm -> glass.
+/* Step flow: VIN -> confirm -> glass.
    Each step reveals the next below it. Nothing above ever disappears, so the
    customer can always scroll up and change an earlier answer. */
 
@@ -23,9 +23,6 @@
     mYear:     $('m-year'),
     mMake:     $('m-make'),
     mModel:    $('m-model'),
-    specifics: $('step-specifics'),
-    specHint:  $('spec-hint'),
-    specChoices: $('spec-choices'),
     glass:     $('step-glass'),
     onVehicle: $('on-vehicle'),
     vinNav:    $('vin-nav'),
@@ -74,15 +71,16 @@
   ];
 
   var vehicle = null;      // the decoded vehicle
-  var answers = {};        // step 2 answers
   var panels = [];         // glass panels picked in the picker
   var picker = null;       // the live picker instance, if WebGL is available
   var archetype = null;    // resolved body style for this vehicle
   var windshield = null;   // 'chip' | 'crack' | 'unsure', when a windshield is picked
 
-  /* panel id -> 'chip' | 'crack' | 'unsure'. Asked once per piece of glass the
-     customer picked rather than only for the windshield: a shop needs to know
-     which of three broken windows is a chip before it can price any of them. */
+  /* panel id -> 'chip' | 'crack' | 'unsure'. Only ever holds the windshield
+     now; see chipPanels() for why, and for the one line to change if a second
+     pane ever earns the question back. It stays a MAP rather than a string
+     because the question, the answered rows and the outgoing record all read it
+     by pane id, and a map of one is cheaper than three call sites of surgery. */
   var damageKind = {};
 
   /* Sized the way the trade sizes it, and the way a customer can actually
@@ -229,14 +227,49 @@
      it is a jump, and it is what the stutter at the end of every close was.
 
      box-sizing is border-box throughout, so scrollHeight already accounts for
-     padding and only the margins need collecting separately. */
+     padding and only the margins need collecting separately.
+
+     BORDERS ARE NOT IN scrollHeight though, padding is. Every disclosure this
+     was first written for was an unbordered div, so the difference was zero and
+     nobody noticed. The reach fields have a 1px rule under them, which made the
+     animation land a pixel short of where releasing the height to auto then put
+     it: a one pixel jump at the end of every open. Small, but it is the same
+     class of thing as the margin note above, and it is the last frame of the
+     animation, which is the frame people actually look at. */
   function slideBox(node) {
     var cs = getComputedStyle(node);
-    return { h: node.scrollHeight, mt: cs.marginTop, mb: cs.marginBottom };
+    var borders = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+    return { h: node.scrollHeight + (borders || 0), mt: cs.marginTop, mb: cs.marginBottom };
+  }
+
+  /* Where an interrupted slide is right now, so the next one can start from it
+     rather than from a standing start.
+
+     Read BEFORE cancelling, because cancel() puts the element back to its
+     unanimated size and the current height is gone the moment it runs. */
+  function slideFrom(node) {
+    var cs = getComputedStyle(node);
+    return { h: cs.height, o: cs.opacity };
   }
 
   function slideOpen(node) {
-    if (!node || !node.hidden) return;
+    if (!node) return;
+
+    /* A close still in flight has NOT set hidden yet; it sets it in its own
+       callback when it lands. So "already open" and "halfway shut" looked
+       identical here, and the early return took the second one: ticking a
+       checkbox, unticking it, and ticking it again inside 240ms left the field
+       hidden while its box stayed checked, because the close that was still
+       running went on to hide an element the reopen thought it had handled.
+
+       An animation in flight is the tell. */
+    var busy = !!node._anim;
+    if (!node.hidden && !busy) return;
+
+    /* Read where it actually is before anything cancels it, so an interrupted
+       slide carries on from there instead of snapping to nothing first. */
+    var from = busy ? slideFrom(node) : { h: '0px', o: 0 };
+
     node.hidden = false;
     if (!MOTION_OK) return;
 
@@ -246,7 +279,7 @@
 
     node.style.overflow = 'hidden';
     var anim = node.animate(
-      [{ height: '0px', marginTop: '0px', marginBottom: '0px', opacity: 0 },
+      [{ height: from.h, marginTop: '0px', marginBottom: '0px', opacity: from.o },
        { height: box.h + 'px', marginTop: box.mt, marginBottom: box.mb, opacity: 1 }],
       { duration: 340, easing: EASE }
     );
@@ -284,12 +317,17 @@
     if (!node || node.hidden) return;
     if (!MOTION_OK) { node.hidden = true; return; }
 
+    /* Same as the open: if a slide is already running, start from where it has
+       got to. Shutting an element that is halfway open used to measure its FULL
+       height, jump it there, and shrink from that, which read as a flinch. */
+    var from = node._anim ? slideFrom(node) : null;
     if (node._anim) { node._anim.cancel(); node._anim = null; }
     var box = slideBox(node);
 
     node.style.overflow = 'hidden';
     var anim = node.animate(
-      [{ height: box.h + 'px', marginTop: box.mt, marginBottom: box.mb, opacity: 1 },
+      [{ height: from ? from.h : box.h + 'px', marginTop: box.mt, marginBottom: box.mb,
+         opacity: from ? from.o : 1 },
        { height: '0px', marginTop: '0px', marginBottom: '0px', opacity: 0 }],
       { duration: 240, easing: EASE }
     );
@@ -330,7 +368,6 @@
   }
 
   function resetBelow(step) {
-    if (step <= 2) { hide(el.specifics); clearChoices(el.specChoices); answers = {}; }
     if (step <= 3) hide(el.onVehicle);
     if (step <= 4) {
       hide(el.glass);
@@ -393,7 +430,12 @@
   function takeFork() {
     if (forkTaken) return;
     forkTaken = true;
-    hide(el.fork);
+    /* Slid, not snapped. This is the FIRST thing anybody does here, and the two
+       halves of it used to disagree: the buttons vanished in a frame while the
+       branch they chose grew in underneath. One gesture, so one animation. The
+       shut is 240 and the open 340, so the fork is gone before the branch has
+       fully arrived and the step never looks like it holds both. */
+    slideShut(el.fork);
   }
 
   /* Back to the question itself. Called by startOver, so every route that
@@ -420,20 +462,22 @@
 
   el.yesVin.addEventListener('click', function () {
     takeFork();
-    show(el.field);
-    show(el.helpask);
+    slideOpen(el.field);
+    slideOpen(el.helpask);
     syncNav();
     /* Not on a touch screen: a keyboard thrown up the instant the button is
        released covers the branch that was just revealed. Same reasoning as the
        start button. */
-    if (!COARSE) el.vin.focus();
+    /* preventScroll: focusing an element that is still growing is the browser's
+       cue to scroll it into view, against a height changing under it. */
+    if (!COARSE) el.vin.focus({ preventScroll: true });
   });
 
   /* The crossing from one branch to the other, offered inside the help panel
      for somebody who said they knew their VIN and then could not find it. */
   el.giveUpVin.addEventListener('click', function () {
-    hide(el.field);
-    hide(el.helpask);
+    slideShut(el.field);
+    slideShut(el.helpask);
     shutHelp();
     el.vin.value = '';
     el.field.classList.remove('field--ok');
@@ -495,7 +539,7 @@
             doubtful ? 'warn' : '');
       }
       vehicle = v;
-      askSpecifics(v);
+      vehicleSettled(v);
     }).catch(function () {
       if (lastLookup !== vin) return;
       say('We couldn’t reach the vehicle database. Enter your vehicle below instead.', 'err');
@@ -516,7 +560,7 @@
        failure; the next thing they see should not be another form. */
     if (announce) {
       el.manualNote.textContent = 'No problem! Let\u2019s continue.';
-      show(el.manualNote);
+      slideOpen(el.manualNote);
     }
     /* Populated BEFORE opening. scrollHeight is measured as the animation
        starts, so filling the dropdowns afterwards would animate to the height
@@ -530,7 +574,7 @@
   function shutManual() {
     if (el.manual.hidden) return;
     slideShut(el.manual);
-    hide(el.manualNote);
+    slideShut(el.manualNote);
     el.noVin.setAttribute('aria-expanded', 'false');
 
     /* Unlike the help panel, this one holds an ANSWER: which vehicle this is.
@@ -615,7 +659,7 @@
       label: el.mYear.value + ' ' + el.mMake.value + ' ' + el.mModel.value,
       usable: true
     };
-    askSpecifics(vehicle, true);
+    vehicleSettled(vehicle);
   });
 
   function clearModels(label) {
@@ -647,15 +691,34 @@
     el.glassLabel.textContent = 'So… where’s the damage?';
   }
 
-  /* ---------- step 2: specifics ---------- */
+  /* ---------- step 2: the vehicle is settled ---------- */
 
-  /* Only ask what the VIN could not settle. If it settled everything, this step
-     never appears and we go straight to confirm. */
-  function askSpecifics(v, noVin) {
+  /* There WAS a step here, "One more thing", and it is gone entirely on the
+     owners' instruction.
+
+     It asked whether the car has a camera behind the rearview mirror, because a
+     windshield with one has to be recalibrated to it. First it was asked
+     whenever the VIN came back ambiguous; then, on their instruction, only when
+     there was no VIN at all; now not at all. Their reasoning held the whole way
+     and simply went further than the first cut of it: "Too much information can
+     confuse the clients. If we need additional information, that will become
+     our responsibility to contact the clients."
+
+     So it is the shop's question to answer, not the customer's. What the VIN
+     says still reaches them untouched, in the request's `adas` block and in the
+     ADAS line workFor adds for them; the customer never sees either. On the
+     no-VIN route there is now no ADAS signal at all, which is the deliberate
+     cost of this and is stated plainly in the record that goes to them.
+
+     What the step carried BESIDES its question, and what therefore had to
+     survive it: resetBelow(2). It runs on every fresh lookup, because the
+     customer may correct a motorcycle VIN to a car, and a new vehicle must not
+     inherit the old one's glass. That is the whole of this function now.
+
+     `answers` went with the question. It only ever held this one. */
+  function vehicleSettled(v) {
     resetBelow(2);
-    var questions = questionsFor(v, noVin);
-    if (!questions.length) { askConfirm(v); return; }
-    renderQuestion(v, noVin, questions);
+    askConfirm(v);
   }
 
   /* vPIC's vehicle types are too coarse on their own: "truck" covers a pickup,
@@ -703,74 +766,6 @@
       if (BODY_DEFAULT[types[i]]) return BODY_DEFAULT[types[i]];
     }
     return 'sedan';
-  }
-
-  /* What still needs asking, in the order it should be asked. One list, read by
-     both the step that shows a question and the handler that answers one, so
-     the two can never disagree about whether anything is left. */
-  function questionsFor(v, noVin) {
-    var questions = [];
-    var state = VIN.adasState(v);
-
-    /* Asked whenever nothing that has seen the vehicle can say what shape it
-       is: every no-VIN entry, and any VIN whose body class vPIC does not carry.
-       It used to guess from the door count, which on the no-VIN path is also
-       unknown, so every manually entered pickup and van was drawn as a saloon
-       and the customer was asked to pick panes it does not have. */
-    if (!answers.adas && !VIN.tooOldForAdas(v) && (state === 'maybe' || noVin)) {
-      questions.push({
-        key: 'adas',
-        hint: 'Some ' + [v.year, v.make, v.model].filter(Boolean).join(' ') +
-              ' models have a camera behind the rearview mirror. If yours does, ' +
-              'a new windshield has to be recalibrated to it.',
-        options: [
-          { value: 'yes',  label: 'Yes, there’s a camera or sensor behind my mirror' },
-          { value: 'no',   label: 'No, nothing behind the mirror' },
-          { value: 'unsure', label: 'I’m not sure' }
-        ]
-      });
-    }
-
-    return questions;
-  }
-
-  function renderQuestion(v, noVin, questions) {
-    var q = questions[0];
-    el.specHint.textContent = q.hint;
-    clearChoices(el.specChoices);
-
-    q.options.forEach(function (opt) {
-      var id = 'spec-' + q.key + '-' + opt.value;
-      var label = document.createElement('label');
-      label.className = 'choice';
-      label.setAttribute('for', id);
-
-      var input = document.createElement('input');
-      input.type = 'radio';
-      input.name = q.key;
-      input.id = id;
-      input.value = opt.value;
-      input.addEventListener('change', function () {
-        answers[q.key] = opt.value;
-        /* The body style the customer gives is what the resolver, the picker
-           and the panel list all read from here on. */
-        if (q.key === 'bodyStyle') v.bodyStyle = opt.value;
-        /* Only one question is on screen at a time, so re-ask rather than
-           confirm: body style first, then anything still outstanding. */
-        if (questionsFor(v, noVin).length) { askSpecifics(v, noVin); return; }
-        askConfirm(v);
-      });
-
-      var span = document.createElement('span');
-      span.textContent = opt.label;
-
-      label.appendChild(input);
-      label.appendChild(span);
-      el.specChoices.appendChild(label);
-    });
-
-    specificsAsked = true;
-    goTo('step-specifics');
   }
 
   /* ---------- step 3: confirm ---------- */
@@ -850,9 +845,6 @@
      which on the forward pass is a control nobody ever needs to touch. */
   function pageAnswered(id) {
     if (id === 'step-vin') return !!vehicle;
-    if (id === 'step-specifics') {
-      return !!vehicle && !questionsFor(vehicle, !vehicle.vin).length;
-    }
     return true;
   }
 
@@ -862,7 +854,7 @@
      than imported per open so the five model files are only ever fetched once
      per visit however many times an earlier answer is edited. */
   var Vehicles = null;
-  import('./vehicles.js?v=b1e1486f').then(function (mod) { Vehicles = mod; },
+  import('./vehicles.js?v=6471ac10').then(function (mod) { Vehicles = mod; },
     function (err) { console.error('Vehicle models unavailable:', err); });
 
   function teardownPicker() {
@@ -979,16 +971,37 @@
     return '';
   }
 
-  /* Walks the chosen glass, asking about one piece at a time.
+  /* Which of the chosen panes get asked chip or crack. The WINDSHIELD, and
+     nothing else.
+
+     Owner instruction, reversing an earlier decision here to ask per pane.
+     Their reasoning is a trade fact worth recording: door glass moves up and
+     down, so even where a repair is possible it will not last, and they would
+     not recommend it. Asking somebody with a broken door window whether it is a
+     chip offers them a repair the shop will not do.
+
+     One function, read by the question, by the gate that says the page is
+     finished and by the router that decides the page exists at all, so those
+     three cannot drift apart. Still returns a LIST, and the question still
+     walks it: the walk costs nothing at length one, and the day a second pane
+     earns the question back, this is the only line that changes. */
+  function chipPanels() {
+    return panels.indexOf('windshield') !== -1 ? ['windshield'] : [];
+  }
+
+  /* Walks the glass that gets asked, one piece at a time.
 
      Each answer collapses to a line above the question and the question moves
      on to the next piece, so the customer is never looking at four identical
      sets of radio buttons and wondering which window they belong to. When the
      last one is answered the question goes away and the photo ask is next. */
   function syncChipQuestion() {
-    // Drop answers for glass that is no longer selected.
+    var ask = chipPanels();
+
+    /* Drop answers for glass that is no longer asked about: deselected, or a
+       door answered back when doors were still asked. */
     Object.keys(damageKind).forEach(function (id) {
-      if (panels.indexOf(id) === -1) delete damageKind[id];
+      if (ask.indexOf(id) === -1) delete damageKind[id];
     });
     windshield = damageKind.windshield || null;   // the rest of the app reads this
 
@@ -996,11 +1009,18 @@
 
        They used to be plain text. That was fine while this page always had a
        live question under them, but it is reachable by Back now, and arriving
-       that way means every pane is answered, the question is closed, and a
-       list of flat text is the only thing on screen: somebody who came back
-       specifically to change an answer had no way to do it. */
+       that way means the question is answered and closed and a list of flat
+       text is the only thing on screen: somebody who came back specifically to
+       change an answer had no way to do it.
+
+       Now that only the windshield is asked, this list is EMPTY on the way
+       forward, because answering the one question carries the customer on
+       before it could be drawn. Its whole remaining job is that dead end on the
+       way back. Kept rather than deleted for exactly that, and because it is
+       the list that would come back to life if a second pane ever earned the
+       question again. */
     el.chipDone.innerHTML = '';
-    var answered = panels.filter(function (id) { return damageKind[id]; });
+    var answered = ask.filter(function (id) { return damageKind[id]; });
     answered.forEach(function (id) {
       var li = document.createElement('li');
       var row = document.createElement('button');
@@ -1029,12 +1049,16 @@
       li.appendChild(row);
       el.chipDone.appendChild(li);
     });
-    el.chipDone.hidden = !answered.length;
+    /* Slid both ways. Pressing "Change" on a settled row used to snap the whole
+       list away while the question it re-opens slid in beneath it. Both helpers
+       return immediately if the element is already where it is being asked to
+       go, so calling this on every sync costs nothing. */
+    if (answered.length) slideOpen(el.chipDone); else slideShut(el.chipDone);
 
     // The next one to ask about, in the order the panels are listed.
     var next = null;
-    for (var i = 0; i < panels.length; i++) {
-      if (!damageKind[panels[i]]) { next = panels[i]; break; }
+    for (var i = 0; i < ask.length; i++) {
+      if (!damageKind[ask[i]]) { next = ask[i]; break; }
     }
 
     if (!next) { slideShut(el.chipQ); return; }
@@ -1060,7 +1084,7 @@
       input.value = opt.value;
       input.addEventListener('change', function () {
         damageKind[next] = opt.value;
-        syncChipQuestion();      // straight on to the next piece of glass
+        syncChipQuestion();      // settles this one and closes the question
         syncNav();
 
         /* Answering the last piece finishes this page, so it carries on rather
@@ -1093,7 +1117,9 @@
   /* The picker is an aid, never a gate. Plenty of people would rather type one
      sentence than rotate a car, and some will be on a device that cannot. */
   el.justTell.addEventListener('click', function () {
-    el.justTell.hidden = true;
+    /* The button and the panel are one gesture. The button used to disappear in
+       a frame while the box slid open below it. */
+    slideShut(el.justTell);
     slideOpen(el.tellus);
     /* Measured after the panel has a size. Inside slideOpen it is still zero
        height, so scrollHeight reads 0 and the box collapses to its padding. */
@@ -1228,8 +1254,8 @@
 
   function damageDone() {
     if (!damageGiven()) return false;
-    // Every pane picked has to have been asked chip or crack.
-    return panels.every(function (id) { return !!damageKind[id]; });
+    // Every pane that gets asked chip or crack has to have been answered.
+    return chipPanels().every(function (id) { return !!damageKind[id]; });
   }
 
   function photosDone() { return photos.length > 0 || noPhotos; }
@@ -1476,17 +1502,34 @@
         photosDeclined: noPhotos,
         // null unless the windshield was chosen
         windshield: windshield,
-        /* Chip, crack or not sure, for every piece of glass chosen. This is the
-           difference between a repair and a replacement, per pane. */
-        kinds: panels.map(function (id) {
+        /* Chip, crack or not sure, for the glass that gets asked. Windshield
+           only, on the owners' instruction, which is why this walks chipPanels
+           and not panels: a row per door reading kind: null would say the
+           customer was asked about the door and did not answer, and they were
+           never asked. The full list of broken glass is panels/panelLabels
+           above. This is the difference between a repair and a replacement. */
+        kinds: chipPanels().map(function (id) {
           return { panel: id, label: Glass.labelFor(id), kind: damageKind[id] || null };
         })
       },
       work: workFor(v),                        // ADAS included here
       adas: {
-        fromVin: state,                        // yes / maybe / no
-        customerSaid: answers.adas || null,    // yes / no / unsure, when asked
-        recalibrationLikely: state === 'yes' || answers.adas === 'yes',
+        /* null, not 'no', when there is no VIN. adasState reads the decoded
+           systems list, and a hand-entered vehicle has an EMPTY one, so it came
+           back 'no' for every manual entry: indistinguishable from a VIN that
+           genuinely reported no camera.
+
+           That was survivable while the customer was asked the question and
+           customerSaid sat next to it. With the question gone this is the only
+           driver-assist field on the no-VIN route, and "no" is the one answer
+           it must not give: it would send somebody out with a plain windshield
+           for a car that needs recalibrating. Absent and known-absent are
+           different things, and a record has to be able to say so. */
+        fromVin: v.vin ? state : null,         // yes / maybe / no, or null for no VIN
+        /* No customerSaid any more. The camera question was removed from the
+           flow entirely on the owners' instruction, so this rests on the VIN
+           alone, and on the no-VIN route on nothing at all. See the note. */
+        recalibrationLikely: state === 'yes',
         /* Broken out by where each sensor sits, so a flag can be judged rather
            than taken on trust. Anything under notGlassRelated was seen and
            deliberately not counted. */
@@ -1494,7 +1537,9 @@
         note: v.vin
           ? 'Model-level data from NHTSA vPIC. Only systems that look through ' +
             'the windshield were counted. Verify against the vehicle.'
-          : 'No VIN given, so this rests on the customer\'s answer alone.'
+          : 'No VIN given, and the camera question is no longer asked, so ' +
+            'there is NO driver assist information for this vehicle. Worth a ' +
+            'call before ordering glass.'
       },
       /* What the decoder made of the VIN itself. A corrected VIN or a year the
          registry did not supply is worth knowing before ordering a part. */
@@ -1553,9 +1598,30 @@
       if (c.type === 'tel') field.inputMode = 'tel';
       field.hidden = true;
 
+      /* Slid, not snapped. This was `field.hidden = !box.checked`, which is
+         display:none going on and off in a single frame: the one reveal in the
+         whole flow that still popped, on the last page the customer sees.
+         slideOpen and slideShut are what everything else here already uses.
+
+         focus with preventScroll. Focusing an element mid-slide is the browser's
+         cue to scroll it into view, and it does that against a height that is
+         still growing, so the page lurches under the very control the customer
+         just asked for. The keyboard still lands in the field; only the jump is
+         suppressed.
+
+         The value is cleared IMMEDIATELY on unticking rather than when the
+         animation lands, because check() runs straight after and decides
+         whether "Send My Request" is still allowed to be enabled. Emptying the
+         field on a 240ms delay would leave the button live for a quarter of a
+         second against a channel the customer has just withdrawn. */
       box.addEventListener('change', function () {
-        field.hidden = !box.checked;
-        if (box.checked) field.focus(); else field.value = '';
+        if (box.checked) {
+          slideOpen(field);
+          field.focus({ preventScroll: true });
+        } else {
+          field.value = '';
+          slideShut(field);
+        }
         check();
       });
       field.addEventListener('input', check);
@@ -1615,8 +1681,8 @@
   /* ------------------------------------------------------------------------
      PRESENTATION: only the live step stays open.
 
-     Borrowed from paleleap. Everything already answered folds down to a single
-     thin line carrying its answer, so the page only ever shows the question
+     Everything already answered folds down to a single thin line carrying
+     its answer, so the page only ever shows the question
      being asked plus a record of what came before. Clicking a folded line opens
      it again to change it.
 
@@ -1648,7 +1714,7 @@
      need; going back and changing an answer re-derives the rest rather than
      destroying it. */
 
-  var PAGES = ['step-vin', 'step-specifics', 'step-glass',
+  var PAGES = ['step-vin', 'step-glass',
                'step-chip', 'step-photos', 'step-when', 'step-review',
                'step-reach'];
 
@@ -1658,25 +1724,27 @@
      goTo can close it without caring where it was built. */
   var overUI = null;
 
-  /* The pages this particular request actually has. Specifics is the only one
-     that can drop out: it exists when there is something about the vehicle that
-     neither the VIN nor the model name could settle, and most of the time there
-     is not. */
+  /* The pages this particular request actually has. TWO of them can drop out:
+
+     Specifics exists when there is something about the vehicle that neither the
+     VIN nor the model name could settle, which since the owners' instruction
+     means a hand-entered vehicle and nothing else.
+
+     Chip or crack exists when the windshield is among the glass picked.
+
+     So the flow is eight pages at its longest and six at its shortest, and
+     nothing may assume a fixed length or a fixed neighbour. Back and Continue
+     both walk THIS list, which is the only reason they agree. */
   function pagesFor() {
     return PAGES.filter(function (id) {
-      if (id === 'step-specifics') return !el.specifics.hidden || specificsAsked;
-      /* No panes picked means nothing to ask chip or crack about: somebody who
-         only described the break in words, or only sent a photograph, skips
-         this page in both directions. */
-      if (id === 'step-chip') return panels.length > 0;
+      /* Chip or crack is a windshield question only, so the page exists only
+         when the windshield is among the glass picked. Somebody with a broken
+         door window, or who only described the break in words or sent a
+         photograph, skips it in both directions. */
+      if (id === 'step-chip') return chipPanels().length > 0;
       return true;
     });
   }
-
-  /* Set when a question has actually been rendered into the specifics page, so
-     Back from the confirm page returns to it rather than skipping over a
-     question the customer answered. */
-  var specificsAsked = false;
 
   /* Whatever a page needs in place before it is looked at.
 
@@ -1826,7 +1894,13 @@
 
     el.send.disabled = Object.keys(reach).length === 0;
 
-    placeReset(page === 'step-vin' && forkTaken ? node : null);
+    /* On EVERY page, not just the first. Owner instruction. It was held back
+       to the VIN step on the grounds that there is nothing to clear on an empty
+       first page, which is true of that page and of no other: the further in
+       somebody is, the more likely they are to want out. placeReset still
+       withholds it on the untaken fork, which is the case that reasoning
+       actually covered. */
+    placeReset(node);
     placeHelp(node);
   }
 
@@ -1834,11 +1908,11 @@
      pages that carry a Continue button need one; the rest either advance on the
      answer itself or carry their own worded button. */
   function pageDone(id) {
-    if (id === 'step-vin' || id === 'step-specifics') return pageAnswered(id);
+    if (id === 'step-vin') return pageAnswered(id);
     /* Something has to have been said about the damage, by any of the three
        routes: a pane tapped, a photograph, or a sentence. */
     if (id === 'step-glass') return damageGiven();
-    // every pane picked has to have been asked
+    // the windshield, if it was picked, has to have been asked chip or crack
     if (id === 'step-chip') return damageDone();
     if (id === 'step-photos') return true;     // "no photos" is a valid answer
     if (id === 'step-when') return !!urgency;
@@ -1876,7 +1950,7 @@
     /* The greeting has done its job. From here the page's own question is the
        heading, and the space it was taking is the difference between a question
        fitting on a phone screen and not. */
-    if (el.greeting && el.greeting.parentNode) el.greeting.parentNode.hidden = true;
+    if (el.greeting && el.greeting.parentNode) slideShut(el.greeting.parentNode);
 
     goTo('step-vin');
     /* Not on a touch screen. Focusing an input there throws a keyboard over the
@@ -1904,19 +1978,17 @@
 
   function startOver() {
     vehicle = null;
-    answers = {};
     lastLookup = '';
     lastRequest = null;
     el.vin.value = '';
     el.field.classList.remove('field--ok');
     undecline();
-    answers = {};
     /* slideShut, not hide. Starting over with the manual panel open used to
        snap three dropdowns out of existence in a frame while everything else
        on the page animated, which read as the page breaking rather than
        clearing. slideShut returns immediately if it is already closed. */
     slideShut(el.manual);
-    hide(el.manualNote);
+    slideShut(el.manualNote);
     el.noVin.setAttribute('aria-expanded', 'false');
     say('');
     resetBelow(2);            // cascades through damage, photos, timing, review
@@ -1925,7 +1997,6 @@
        as the only thing on the step and the VIN route unreachable. */
     resetFork();
     noPhotos = false;
-    specificsAsked = false;
     goTo('step-vin');
   }
 
@@ -1975,11 +2046,11 @@
 
     function close() {
       slideShut(confirmBox);
-      ask.hidden = false;
+      slideOpen(ask);
     }
 
     ask.addEventListener('click', function () {
-      ask.hidden = true;
+      slideShut(ask);
       slideOpen(confirmBox);
       no.focus();           // the safe option takes focus, not the destructive one
     });
@@ -2045,11 +2116,21 @@
     wrap.appendChild(sub);
     wrap.appendChild(row);
 
-    function close() { wrap.hidden = true; }
+    /* Opened and closed by the same helper as everything else. It used to fade
+       in from a CSS animation on the display flip and then close with no
+       animation at all, which is the asymmetry you cannot miss: it arrived
+       politely and then vanished. The CSS fadeIn goes with this, because
+       slideOpen animates opacity as well as height and keeping both ran two
+       fades at once on two curves. */
+    function close() { slideShut(wrap); }
     no.addEventListener('click', close);
     yes.addEventListener('click', function () { close(); startOver(); });
 
-    return { wrap: wrap, open: function () { wrap.hidden = false; no.focus(); }, close: close };
+    return {
+      wrap: wrap,
+      open: function () { slideOpen(wrap); no.focus({ preventScroll: true }); },
+      close: close
+    };
   })();
 
   document.addEventListener('quote:relaunch', function () {
@@ -2061,8 +2142,9 @@
     window.scrollTo({ top: 0, behavior: 'auto' });
   });
 
-  /* Shown once there is something worth losing. On an empty VIN step there is
-     nothing to clear, and offering to clear it is just noise. */
+  /* Shown on every page of the flow once there is something worth losing. On an
+     empty VIN step there is nothing to clear, and offering to clear it is just
+     noise; everywhere else there is. */
   function placeReset(live) {
     /* On the fork there is nothing to start over from: no branch has been taken
        and nothing has been answered. The moment one IS taken there is, and this

@@ -22,9 +22,9 @@
      the same value, and js/landing.js fetches that file with cache: no-store
      on load. If they disagree the page is stale and it reloads itself once
      against a fresh URL. -->
-<meta name="build" content="85d8b953ff">
+<meta name="build" content="7c5c2e6997">
 <meta name="description" content="Mobile auto glass repair and replacement across North Texas, based in Wylie. Family operated, Black Owned and Woman Owned, lifetime warranty on installation. Start with your VIN and tell us what broke.">
-<link rel="stylesheet" href="css/style.css?v=696415cf">
+<link rel="stylesheet" href="css/style.css?v=ebca969b">
 </head>
 <body>
 
@@ -58,7 +58,7 @@
       <a href="#quote"     style="--i:0">quote</a>
       <a href="#services"  style="--i:1">services</a>
       <a href="#guarantee" style="--i:2">guarantee</a>
-      <a href="#contact"   style="--i:3">contact</a>
+      <a href="#contact"   style="--i:3">contact &amp; info</a>
       <a href="#about" class="nav--apart" style="--i:4">about</a>
     </nav>
   </div>
@@ -83,8 +83,8 @@
     <!-- Reads as an invitation rather than a string of digits. The href is
          still the number, so a tap dials; the label just stops the corner
          being a lump of figures nobody was asked to read. -->
-    <a class="top__tel" href="tel:+12145867650"
-       aria-label="Questions? Call us at (214) 586-7650">Questions? Call us!</a>
+    <a class="top__tel" href="tel:+12145867650" aria-haspopup="dialog"
+       aria-label="Questions? Click here to reach out. Call or text us at (214) 586-7650">Questions? Click here to reach out!</a>
   </div>
 </header>
 
@@ -109,9 +109,14 @@
          The founding year is 2024, from them, so data-placeholder goes with
          it: that attribute exists to make an unknown greppable and loud, and
          leaving it on a known value would cost it its meaning. -->
-    <p class="standfirst">Servicing North Texas auto glass needs since 2024.</p>
-    <p class="standfirst">Family owned and operated.</p>
-    <p class="standfirst">Let&rsquo;s get you back on the road.</p>
+    <!-- Owner instruction, 2026-10-19, in person: these two lines and nothing
+         else, worded and capitalised exactly so. "auto glass needs" and "Let's
+         get you back on the road." came off at their word. -->
+    <p class="standfirst">Servicing North Texas since 2024</p>
+    <p class="standfirst">Family Owned and Operated</p>
+    <!-- Added the same evening, owner instruction, as written. It is their motto
+         from their own website. -->
+    <p class="standfirst">Do the next right thing.</p>
 
     <!-- The heading IS the button. A filled control rather than a headline that
          happens to be clickable: the people this was rebuilt for should never
@@ -203,8 +208,21 @@
     <p class="note" id="manual-note" role="status" aria-live="polite" hidden></p>
 
     <div class="manual" id="manual" hidden>
-      <label class="visually-hidden" for="m-year">Year</label>
-      <select id="m-year"><option value="">Year</option></select>
+      <!-- The year is TYPED or picked from a short list, owner instruction
+           2026-10-19, in person: tapping it shows the seven most recent years
+           starting with this one, and anyone can type their own. The select
+           below is still the answer app.js reads and resets; js/yearbox.js keeps
+           the two in step and is the only thing the customer touches. -->
+      <div class="yearbox">
+        <label class="visually-hidden" for="m-year-in">Year</label>
+        <input id="m-year-in" class="yearbox__input" type="text" inputmode="numeric"
+               placeholder="Year" autocomplete="off" spellcheck="false"
+               role="combobox" aria-expanded="false" aria-controls="m-year-list"
+               aria-autocomplete="list">
+        <svg class="yearbox__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <ul class="yearbox__list" id="m-year-list" role="listbox" aria-label="Years" hidden></ul>
+      </div>
+      <select id="m-year" class="visually-hidden" tabindex="-1" aria-hidden="true"><option value="">Year</option></select>
       <label class="visually-hidden" for="m-make">Make</label>
       <select id="m-make" disabled><option value="">Make</option></select>
       <label class="visually-hidden" for="m-model">Model</label>
@@ -223,20 +241,26 @@
     </nav>
   </section>
 
-  <!-- step 2: specifics -->
-  <section class="step" id="step-specifics" hidden aria-labelledby="spec-label">
-    <p class="step__label" id="spec-label">One more thing</p>
-    <p class="step__hint" id="spec-hint"></p>
-    <fieldset class="choices" id="spec-choices">
-      <legend class="visually-hidden">Vehicle specifics</legend>
-    </fieldset>
-    <!-- Answering carries you on, so Continue is only ever needed by somebody
-         who came back here and finds the question already answered. -->
-    <nav class="pagenav" aria-label="Step">
-      <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
-      <button type="button" class="btn" data-next disabled>Continue</button>
-    </nav>
-  </section>
+  <!-- There was a "One more thing" step here, between the vehicle and the
+       damage. It asked whether the car has a camera behind the rearview mirror,
+       because a windshield with one has to be recalibrated to it.
+
+       Removed entirely on owner instruction, in two steps: first it stopped
+       being asked when a VIN was given, then it stopped being asked at all.
+       Their reasoning did not change between the two, it just went further:
+       "As long as they are providing the VIN, we can see all this information.
+       Too much information can confuse the clients. If we need additional
+       information, that will become our responsibility to contact the clients."
+
+       The information still reaches the SHOP. The VIN's own driver-assist
+       reading is in the outgoing record and in the work list built for them,
+       and it has always been filtered out of what the customer sees, because
+       it can flag falsely. On the no-VIN route there is now no driver-assist
+       signal at all, and the record says so in as many words rather than
+       leaving a null to be misread as "no camera".
+
+       See app.js, vehicleSettled(), for what this step carried besides its
+       question, which was resetBelow(2) and had to survive it. -->
 
   <!-- There was a "Did we get that right?" page here, between the vehicle and
        the damage. It showed what the VIN had decoded to, or what had been
@@ -300,7 +324,7 @@
     </nav>
   </section>
 
-  <!-- step 4b: chip or crack, one piece of glass at a time.
+  <!-- step 4b: chip or crack. The WINDSHIELD only.
 
        This used to hang off the bottom of the picker page, under the model and
        the list of eleven windows. That page was the one place in the flow that
@@ -314,9 +338,15 @@
        thing the shop has to ring back about, so it deserves being asked on its
        own rather than underneath something else.
 
-       Answered pieces collapse to a line at the top and the question re-asks
-       itself for the next one, so somebody with three broken windows sees one
-       set of radio buttons three times instead of three sets at once. -->
+       It used to walk every pane the customer picked, one at a time, with the
+       settled ones collapsed to a line above the question. The owners stopped
+       that: door glass moves up and down, so a repair there will not last and
+       they would not recommend one, which makes chip or crack a question only
+       the windshield can usefully answer. The page does not appear at all now
+       unless the windshield is among the glass picked.
+
+       The machinery for the walk is still underneath, at length one. See
+       chipPanels() in app.js for the single line that would bring it back. -->
   <section class="step" id="step-chip" hidden aria-labelledby="chip-label">
     <ul class="answered plain" id="chip-done" hidden></ul>
 
@@ -336,15 +366,19 @@
   <!-- There was a "What kind of damage will we be repairing?" dropdown here,
        between the glass and the photographs. The owners called it irrelevant
        and it is gone: the shop already learns the job from the panes picked,
-       the chip-or-crack answer on each one, the photographs and the free text
-       box, and a ten item dropdown of causes was one more thing to read past.
+       the chip-or-crack answer on the windshield, the photographs and the free
+       text box, and a ten item dropdown of causes was one more thing to read
+       past.
        See LOG.md. -->
 
   <!-- step 4c: photographs -->
   <section class="step" id="step-photos" hidden aria-labelledby="photos-label">
-    <p class="step__label" id="photos-label">Photos help the most, have any?</p>
-    <p class="step__hint">One clear picture of the break tells us more than
-      anything else you can send. If you haven&rsquo;t got one, carry on.</p>
+    <!-- The owners' wording, verbatim, and the same sentence the "How this
+         works" answer uses. The reason goes in the label and the permission to
+         skip goes in the hint: the step still has to tell somebody with no
+         photograph that Continue is an answer, not a failure. -->
+    <p class="step__label" id="photos-label">Pictures give us a clearer idea of the damage.</p>
+    <p class="step__hint">No picture? No problem! Carry on.</p>
 
     <p style="margin:0">
       <button type="button" class="btn btn--alt" id="add-photos">Upload images</button>
@@ -393,7 +427,7 @@
     <dl class="summary" id="summary"></dl>
 
     <p class="confirm__do">
-      <button type="button" class="btn" id="review-yes">Yes, that&rsquo;s right</button>
+      <button type="button" class="btn" id="review-yes">Yes. One More Step to Go!</button>
     </p>
     <nav class="pagenav" aria-label="Step">
       <button type="button" class="pageback" data-back><svg class="pageback__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</button>
@@ -701,56 +735,110 @@
          between that change and this one the site said it nowhere. -->
     <p class="panel__sub">Black Owned and Woman Owned.</p>
 
-    <!-- Their own words, lightly punctuated. The photographs are their own
-         work, placed so the page has a rhythm rather than a gallery bolted on
-         the end: a lead, then a pair, then a row of three, each set following
-         the paragraph it belongs to. -->
-    <div class="prose">
-      <p>At Quillin Auto Glass, we believe in more than just fixing glass. We
-        believe in providing service with a smile. Whether you are in need of a
-        windshield replacement or a quick chip repair, our team is here to make
-        the process easy, fast and friendly.</p>
+    <!-- TWO SECTIONS, EXCLUSIVE, NOT LINKS. Owner instruction: the page opens
+         on "About us" and "Our work" sits beside it, and only one is open at a
+         time. They are tabs, so they are marked up as tabs: role="tablist" with
+         two role="tab" buttons owning two role="tabpanel" bodies, arrow keys
+         between them, and a roving tabindex. A pair of divs that merely look
+         like tabs would leave a screen reader with no idea the second one is
+         there at all.
 
-      <figure class="album album--lead">
-        <img src="assets/img/about/lead.jpg?v=fd22e702" width="900" height="600"
-             loading="lazy" decoding="async"
-             alt="Aria Quillin fitting a windshield to a Land Rover Defender in the shop">
-      </figure>
+         Deliberately NOT the .expand accordion used on Services. That one lets
+         several rows stand open together, which is right for a list of services
+         and wrong here: the whole of this instruction is that one excludes the
+         other. -->
+    <div class="tabs" role="tablist" aria-label="About Quillin Auto Glass">
+      <button type="button" class="tabs__tab is-on" id="tab-story" role="tab"
+              aria-selected="true" aria-controls="pane-story" tabindex="0">About us</button>
+      <button type="button" class="tabs__tab" id="tab-work" role="tab"
+              aria-selected="false" aria-controls="pane-work" tabindex="-1">Our work</button>
+    </div>
 
-      <p>As a family owned business, we treat each customer like they are one of
-        our own. Your satisfaction is our top priority, and we are dedicated to
-        ensuring your experience is smooth, stress free and enjoyable.</p>
+    <!-- Their own words, lightly punctuated. The lead photograph stays with the
+         prose rather than moving to Our work: it is Aria at work, and the page
+         about who they are should not be a wall of text with the people in it
+         filed somewhere else. -->
+    <div class="tabs__pane" id="pane-story" role="tabpanel" aria-labelledby="tab-story">
+      <div class="prose">
+        <p>At Quillin Auto Glass, we believe in more than just fixing glass. We
+          believe in providing service with a smile. Whether you are in need of a
+          windshield replacement or a quick chip repair, our team is here to make
+          the process easy, fast and friendly.</p>
 
-      <figure class="album album--pair">
-        <img src="assets/img/about/transit.jpg?v=68cbce52" width="560" height="420"
-             loading="lazy" decoding="async"
-             alt="A Quillin technician walking back to a Ford Transit van on a job">
-        <img src="assets/img/about/tesla.jpg?v=7bc63d9c" width="560" height="420"
-             loading="lazy" decoding="async"
-             alt="A windshield lifted out of a car and set down on the driveway">
-      </figure>
+        <figure class="album album--lead">
+          <img src="assets/img/about/lead.jpg?v=fd22e702" width="900" height="600"
+               loading="lazy" decoding="async"
+               alt="Aria Quillin fitting a windshield to a Land Rover Defender in the shop">
+        </figure>
 
-      <p>With over ten years of experience in the industry and a childlike
-        passion for building up broken things and solving puzzles, Quillin Auto
-        has been a dream well in the making. Reaching the community and caring
-        for neighbors using the gifts on hand, Aria and Jacob Quillin have taken
-        their core values and beliefs and poured them into this company. The
-        Quillins aim to serve the community that they grew up in with integrity,
-        honesty and transparency.</p>
+        <p>As a family owned business, we treat each customer like they are one of
+          our own. Your satisfaction is our top priority, and we are dedicated to
+          ensuring your experience is smooth, stress free and enjoyable.</p>
 
-      <figure class="album album--trio">
-        <img src="assets/img/about/chip.jpg?v=08150c6d" width="420" height="420"
-             loading="lazy" decoding="async"
-             alt="A rock chip in a windshield, sized against a quarter">
-        <img src="assets/img/about/fleet.jpg?v=86807d2a" width="420" height="420"
-             loading="lazy" decoding="async"
-             alt="A pickup and a food truck waiting outside the shop">
-        <img src="assets/img/about/sunroof.jpg?v=714fe519" width="420" height="420"
-             loading="lazy" decoding="async"
-             alt="A sunroof fitted into the roof of a car">
-      </figure>
+        <p>With over ten years of experience in the industry and a childlike
+          passion for building up broken things and solving puzzles, Quillin Auto
+          has been a dream well in the making. Reaching the community and caring
+          for neighbors using the gifts on hand, Aria and Jacob Quillin have taken
+          their core values and beliefs and poured them into this company. The
+          Quillins aim to serve the community that they grew up in with integrity,
+          honesty and transparency.</p>
 
-      <p class="prose__sign">Let&rsquo;s get you back on the road.</p>
+        <p class="prose__sign">Let&rsquo;s get you back on the road.</p>
+      </div>
+    </div>
+
+    <div class="tabs__pane" id="pane-work" role="tabpanel" aria-labelledby="tab-work" hidden>
+      <div class="prose">
+        <!-- No invented claims. "A chip is a repair, not a replacement" is the
+             rule the quote flow itself runs on; a turnaround time is not ours
+             to state and is not anywhere in what they sent. -->
+        <p>The same windshield, before and after. A chip like this one is a
+          repair, not a replacement.</p>
+
+        <!-- A real pair, same vehicle, same job: the quarter is in the first
+             frame for scale, which is the same measure the quote flow offers
+             when it asks whether the damage is bigger than a coin. -->
+        <figure class="album album--ba">
+          <span class="ba">
+            <img src="assets/img/about/ba-chip-before.jpg?v=da711909" width="1200" height="900"
+                 loading="lazy" decoding="async"
+                 alt="A star shaped rock chip in a windshield, with a quarter held beside it for scale">
+            <b class="ba__tag">Before</b>
+          </span>
+          <span class="ba">
+            <img src="assets/img/about/ba-chip-after.jpg?v=07d92ab7" width="1200" height="900"
+                 loading="lazy" decoding="async"
+                 alt="The same chip after repair, filled with resin and barely visible">
+            <b class="ba__tag">After</b>
+          </span>
+          <figcaption>Rock chip repair, filled and sealed.</figcaption>
+        </figure>
+
+        <!-- "We come to you" is their own line, from the Guarantee page. -->
+        <p>Windshields, back glass, door glass and sunroofs, on cars, vans and
+          working vehicles. We come to you.</p>
+
+        <figure class="album album--trio">
+          <img src="assets/img/about/transit.jpg?v=68cbce52" width="560" height="420"
+               loading="lazy" decoding="async"
+               alt="A Quillin technician walking back to a Ford Transit van on a job">
+          <img src="assets/img/about/tesla.jpg?v=7bc63d9c" width="560" height="420"
+               loading="lazy" decoding="async"
+               alt="A windshield lifted out of a car and set down on the driveway">
+          <img src="assets/img/about/fleet.jpg?v=86807d2a" width="420" height="420"
+               loading="lazy" decoding="async"
+               alt="A pickup and a food truck waiting outside the shop">
+        </figure>
+
+        <figure class="album album--pair">
+          <img src="assets/img/about/sunroof.jpg?v=714fe519" width="420" height="420"
+               loading="lazy" decoding="async"
+               alt="A sunroof fitted into the roof of a car">
+          <img src="assets/img/about/chip.jpg?v=08150c6d" width="420" height="420"
+               loading="lazy" decoding="async"
+               alt="A rock chip in a windshield, sized against a quarter">
+        </figure>
+      </div>
     </div>
 
     <p class="goback">
@@ -900,18 +988,44 @@
      whichever page is showing, so it follows the customer through rather than
      sitting on the glass in front of them. See placeHelp in app.js. -->
 
+<!-- Owner instruction, 2026-10-19, in person: "Questions? Reach out!" (it read "Questions? Call us!" until the owners renamed it the same evening) opens a
+     small box in the middle of the page with the number and two choices, one
+     that opens the phone app with the number in, one that opens messages. The
+     corner link keeps its tel: href, so with the script broken it still dials.
+     The wording here is ours, not theirs yet: only the number is theirs. -->
+<dialog class="callbox" id="callbox" aria-labelledby="callbox-title">
+  <div class="callbox__in">
+    <button type="button" class="callbox__close" aria-label="Close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <p class="callbox__lead" id="callbox-title">Questions? We&rsquo;re a call or a text away.</p>
+    <p class="callbox__num">(214) 586-7650</p>
+    <div class="callbox__do">
+      <a class="btn callbox__btn" href="tel:+12145867650">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>
+        Call
+      </a>
+      <a class="btn callbox__btn callbox__btn--text" href="sms:+12145867650">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>
+        Text
+      </a>
+    </div>
+  </div>
+</dialog>
+
 <nav class="dock" aria-label="Sections">
   <a href="#quote">quote</a>
   <a href="#services">services</a>
   <a href="#guarantee">guarantee</a>
-  <a href="#contact">contact</a>
+  <a href="#contact">contact &amp; info</a>
   <a href="#about" class="nav--apart">about</a>
 </nav>
 
-<script src="js/backdrop.js?v=797049a9"></script>
-<script src="js/landing.js?v=90b186fa"></script>
+<script src="js/backdrop.js?v=c29ceb16"></script>
+<script src="js/landing.js?v=c76b25e7"></script>
 <script src="js/vin.js?v=546382b1"></script>
 <script src="js/glass.js?v=7b7553fa"></script>
-<script src="js/app.js?v=bd7c4b66"></script>
+<script src="js/app.js?v=43cfcd63"></script>
+<script src="js/yearbox.js?v=f8a7cb26"></script>
 </body>
 </html>

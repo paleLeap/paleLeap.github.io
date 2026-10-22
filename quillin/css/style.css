@@ -51,7 +51,22 @@
      decoration. It clears AA now, and the things that were never body text in
      the first place, placeholders and disabled selects, still read as quiet. */
   --muted:   #9aa3ac;
-  --faint:   #79828b;
+  /* Lifted again, 2026-09-23, and this time against the thing it is actually
+     read on. Every grey here was measured against flat --bg #0a0c0e, which is
+     what the page is where there is no backdrop. There IS a backdrop, on every
+     page, and the scrim does not take it all the way back to --bg.
+
+     Measured properly for the first time with tools/backdrop-contrast.py, which
+     composites each shot under the scrim gradient and finds the brightest place
+     a glyph could land: #79828b was 5.02:1 on flat --bg and **4.27:1 on the
+     photographs**, under the 4.5 floor. That was true of the OLD backdrops too,
+     so this is a pre-existing failure being found rather than one the new
+     images introduced; they made it 4.20.
+
+     #8b939d is 6.31:1 flat and 4.6:1 on the brightest backdrop. Still clearly
+     quieter than --muted at 7.66, which is the job: hints and labels that read
+     as secondary without dropping below legible. */
+  --faint:   #8b939d;
   --line:    rgba(255, 255, 255, .09);
   /* The long rules that separate sections on the reading pages. Brand orange,
      owner instruction: the same colour as the plus and minus on a disclosure.
@@ -189,7 +204,7 @@ body {
 
 .brand:hover .brandnav,
 .brand:focus-within .brandnav,
-.brand.is-open .brandnav { max-width: 26rem; }
+.brand.is-open .brandnav { max-width: 30rem; }   /* 26rem until "contact & info" (2026-10-19): the words need 440px, 460 with touch padding */
 
 /* Words, set exactly like the bar at the bottom of the page, so the two read as
    the same control in two places rather than two different ideas. */
@@ -198,7 +213,7 @@ body {
   white-space: nowrap;
   padding: .4375rem .75rem;
   font-size: .75rem;
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: .1em;
   text-decoration: none;
   color: var(--faint);
@@ -272,7 +287,7 @@ body {
    5.3:1 on this ground, so quiet is not the same as hard to read. */
 .top__tel {
   font-size: .875rem;
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: .01em;
   color: var(--muted);
   text-decoration: none;
@@ -328,7 +343,7 @@ body:not(.on-quote) .greeting { display: none; }
 .panel__sub {
   margin: 0 0 2.75rem calc(var(--title-fs) * .587);
   font-size: clamp(1rem, 2.2vw, 1.25rem);
-  font-weight: 200;
+  font-weight: 400;
   letter-spacing: -.008em;
   color: var(--muted);
 }
@@ -434,17 +449,9 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
    corner where it was already being offered. */
 .under { margin: 2.25rem 0 0; }
 
-/* Small and wide, sitting above the page like a plate on a door. The name is
-   not the thing the customer came for, so it does not get the big type. */
-.wordmark {
-  margin: 0 0 2.5rem;
-  font-size: .6875rem;
-  font-weight: 500;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
+/* .wordmark lived here: a tracked-capitals wordmark at .22em that no markup
+   and no script has referenced for some time. Deleted rather than left to be
+   found and "fixed" by somebody who assumes it is on screen somewhere. */
 /* The heading holds the start button until the flow begins, at which point
    app.js replaces its contents with plain text. Both states are styled here. */
 .greeting h1 {
@@ -474,7 +481,7 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
   max-width: 52ch;
   font-size: clamp(1.25rem, 2.8vw, 1.625rem);
   line-height: 1.5;
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: -.008em;
   color: var(--ink-dim);
   text-wrap: balance;
@@ -573,9 +580,21 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 .reset { margin-top: 2.25rem; }
 
-.reset__ask { font-size: .9375rem; color: var(--muted); border-bottom-color: transparent; }
+/* "Start over" is a .plainlink, and .plainlink underlines with text-decoration
+   rather than a border, deliberately: see the note there. These two rules were
+   still setting border-bottom-color, on a border with no width, so the quiet
+   resting state and the hover cue both did nothing at all. Same properties, on
+   the decoration that is actually drawn.
 
-.reset__ask:hover { color: var(--muted); border-bottom-color: var(--line-2); }
+   Quieter than its siblings on purpose. It is the way OUT of the flow and it
+   should not compete with the way on. */
+.reset__ask {
+  font-size: .9375rem;
+  color: var(--muted);
+  text-decoration-color: transparent;
+}
+
+.reset__ask:hover { color: var(--muted); text-decoration-color: var(--line-2); }
 
 .reset__ask[hidden] { display: none; }
 
@@ -651,12 +670,32 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
   content: "";
   position: absolute;
   inset: 0;
+  /* Lighter than it was, so the photographs behind it can actually be seen.
+     Owner instruction: the backdrop should be orange, bright and welcoming.
+
+     It was .93/.88/.87/.93, which let 13% of the image through. This lets 38%
+     through. The images are baked DARKER than either previous set and far more
+     saturated, which is the only way that number moves: see the long note in
+     tools/backdrop.py, but briefly, contrast is a luminance ratio and warmth is
+     chroma, so the way to a warmer backdrop that type still survives is less
+     light and much more colour, not more of both.
+
+     .62 is not a taste. It is the lightest this can be with every text colour
+     clearing 4.5:1 against the brightest place a glyph could land, across BOTH
+     image sets, which tools/backdrop-contrast.py computes by compositing the
+     real files under this exact gradient. --faint is the binding constraint at
+     4.55:1 and the owners' work photographs are the binding SET, because a lit
+     workshop is brighter than a sunset. Run the tool before touching these
+     numbers, and run it over both folders.
+
+     Still heavier top and bottom, where the header and the section bar have to
+     stay legible over whatever drifts underneath them. */
   background: linear-gradient(
     to bottom,
-    rgba(10, 12, 14, .93) 0%,
-    rgba(10, 12, 14, .88) 22%,
-    rgba(10, 12, 14, .87) 70%,
-    rgba(10, 12, 14, .93) 100%
+    rgba(10, 12, 14, .68) 0%,
+    rgba(10, 12, 14, .63) 22%,
+    rgba(10, 12, 14, .62) 70%,
+    rgba(10, 12, 14, .68) 100%
   );
 }
 
@@ -670,7 +709,11 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
   transition-timing-function: linear;
   /* duration is set per layer by backdrop.js from FADE_MS */
   transform: scale(1.12);
-  animation: drift 46s ease-in-out infinite alternate;
+  /* 46s to 72s, owner instruction: slower. The pan is what stops a held image
+     looking like a dead one, so it wants to be perceptible and never watchable.
+     The offset in backdrop.js that keeps the two layers out of step is half of
+     this; change one and change the other. */
+  animation: drift 72s ease-in-out infinite alternate;
   will-change: opacity, transform;
 }
 
@@ -681,11 +724,109 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
   to   { transform: scale(1.12) translate( 3%,  1.5%); }
 }
 
+/* ---------- the working layer: removed ----------
+
+   A second, blurred plane of them working drifted against the skyline here.
+   Removed 2026-10-19 on the owners' word, in person: it read as a glass panel
+   crossing the page, and it meant two photographs always showed at once. See
+   backdrop.js and LOG.md, "Two planes". */
+
 /* Everything the customer reads sits above it. */
 /* Everything anyone reads sits above it. .panel is in this list now: the
    backdrop used to run behind one page, so the supporting panels never needed
    lifting, and left out they would render underneath a fixed layer. */
 .top, .flow, .panel, .dock, .aboutcorner { position: relative; z-index: 1; }
+
+/* ---------- "About us." in the bottom right corner ----------
+
+   THIS RULE WAS MISSING ENTIRELY. The markup has carried the comment "Bottom
+   right corner, in the logo's orange, very faint" since it was written, and the
+   only `.aboutcorner` declarations in the file were the shared z-index line
+   above and two overrides inside media queries: a padding for touch and a
+   display:none below 40rem. Nothing ever positioned it or coloured it.
+
+   So on every desktop it rendered as what an unstyled anchor is: default link
+   blue, at the left margin, in the document flow. It is in the deploy repo and
+   in git history in exactly that state, so it has been live the whole time.
+   Same failure as .brand__logo carrying default blue invisibly, which is
+   already in the notes; this one was visible and nobody had said so.
+
+   Above the dock in the stacking order, not just beside it. The dock is fixed
+   at z-index 10 with a gradient that runs the full width, so at the shared
+   z-index 1 this sat UNDERNEATH that gradient and would have been washed out
+   even once it was positioned. The dock's own links are centred, so the right
+   corner is free.
+
+   Not "very faint", despite the comment. The contrast pass moved this whole
+   site off faint text, and the backdrop is brighter now than when that comment
+   was written; brand orange measures 5.17:1 against the worst backdrop and
+   reads as quiet on its own, at this size, without being under the floor. */
+.aboutcorner {
+  position: fixed;
+  right: var(--gutter);
+  bottom: .625rem;
+  z-index: 11;
+  /* .625rem, not .5rem: at .5 the box measured 41px and the floor here is 44.
+     The notes are explicit that a target only just big enough is the same as
+     one that is not, after .6875rem once landed a link on 43.99. */
+  padding: .625rem .25rem;
+  font-size: .9375rem;
+  font-weight: 400;
+  color: var(--orange);
+  text-decoration: none;
+  transition: color .2s var(--ease), opacity .2s var(--ease);
+  opacity: .78;
+}
+
+.aboutcorner:hover,
+.aboutcorner:focus-visible { opacity: 1; }
+
+/* The header above the menu scrim, AT EVERY WIDTH.
+
+   That z-index: 1 above makes `.top` a STACKING CONTEXT, so everything inside
+   it is trapped there and compared against its siblings rather than against the
+   scrim. The scrim is z-index 20 on body::after, so with the header at 1 the
+   blur lands ON TOP of the two things the menu is meant to bring into focus:
+   the mark and the words.
+
+   This was diagnosed and fixed once, and the fix was written inside
+   `@media (max-width: 40rem)` because a phone was what was being tested. Above
+   640px it therefore never applied, and clicking the logo on a laptop blurred
+   the whole screen INCLUDING the menu it had just opened. The menu was there
+   and 391px wide; it was simply underneath the blur, and a click on a category
+   hit the scrim, which closes the menu. So the logo appeared to do nothing but
+   fog the page.
+
+   Measured at 1280x720 before the fix: elementFromPoint over the first menu
+   word returned BODY, not the link.
+
+   Stacking bugs do not respect breakpoints. If a fix for one has a media query
+   around it, that is worth a second look. */
+body.menu-open .top { z-index: 30; }
+
+.brand { position: relative; }
+
+/* Portrait screens: the whole photograph, fitted to the height and panned
+   across. Owner instruction 2026-10-21: the 16:9 cut under cover showed a
+   phone only its middle quarter, a headlight or half a face, and the drift
+   above moves it by eleven pixels there, which nobody sees. backdrop.js swaps
+   in the uncropped phone copy and starts the pan afresh on each photograph,
+   alternating direction, so every part of it is shown in its turn. The pan
+   is set inline by backdrop.js, which is why the reduced-motion rule below
+   has nothing to undo: it is never started for those visitors. */
+@media (max-aspect-ratio: 1/1) {
+  .backdrop__layer {
+    background-size: auto 100%;
+    background-position: 50% 50%;
+    transform: none;
+    animation: none;
+  }
+}
+
+@keyframes pan {
+  from { background-position: 0% 50%; }
+  to   { background-position: 100% 50%; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .backdrop__layer { animation: none; }
@@ -731,6 +872,101 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 .album--pair { grid-template-columns: 1fr 1fr; }
 
 .album--trio { grid-template-columns: repeat(3, 1fr); }
+
+/* ---------- before and after ----------
+
+   Two frames of the same job, side by side, labelled. Wider than the other
+   albums because the whole point is comparing two pictures, and at 34rem each
+   half is too small to see a chip in.
+
+   The label is ON the photograph rather than under it. A caption under a
+   two-up grid has to be read as "left is before, right is after", which is one
+   more thing to work out; a word in the corner of each frame is not. */
+.album--ba {
+  grid-template-columns: 1fr 1fr;
+  max-width: 44rem;
+}
+
+.ba { position: relative; display: block; }
+
+.ba__tag {
+  position: absolute;
+  left: .5rem;
+  bottom: .5rem;
+  padding: .25rem .5rem;
+  border-radius: 2px;
+  background: rgba(10, 12, 14, .78);
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* The one place a caption earns its keep: naming the JOB, which neither
+   photograph can say on its own. */
+.album--ba figcaption {
+  grid-column: 1 / -1;
+  margin: .25rem 0 0;
+  font-size: .9375rem;
+  color: var(--muted);
+}
+
+@media (max-width: 30rem) {
+  /* Stacked, and then the tags are doing all the work of saying which is
+     which, which is why they are on the images and not under them. */
+  .album--ba { grid-template-columns: 1fr; }
+}
+
+/* ---------- the About page's two sections ----------
+
+   Owner instruction: "About us" open by default with "Our work" beside it, one
+   open at a time. Tabs, not links.
+
+   No box, no pill, no card. The page's language is hairline rules and type, so
+   a tab is a word with a rule under it and the live one takes the orange the
+   rest of the site already uses for "you are here". The strip itself sits on
+   the same hairline that separates everything else. */
+.tabs {
+  display: flex;
+  gap: 1.75rem;
+  margin: 0 0 1.75rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.tabs__tab {
+  position: relative;
+  margin: 0 0 -1px;
+  padding: .75rem .125rem;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  font: inherit;
+  font-size: 1.0625rem;
+  font-weight: 450;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color .2s var(--ease), border-color .2s var(--ease);
+}
+
+.tabs__tab:hover { color: var(--ink-dim); }
+
+.tabs__tab.is-on {
+  color: var(--ink);
+  border-bottom-color: var(--brand-orange);
+}
+
+.tabs__pane[hidden] { display: none; }
+
+/* The pane that arrives fades in, on the same curve and duration as a step in
+   the quote flow, so moving between these two reads as the same kind of motion
+   as everything else. No height animation: the two panes are very different
+   lengths and sliding between them would be a long, slow concertina. */
+.tabs__pane { animation: fadeIn .28s var(--ease) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tabs__pane { animation: none; }
+}
 
 /* On a narrow screen three across becomes three postage stamps, so the trio
    drops to two and the odd one out runs full width underneath. */
@@ -792,7 +1028,7 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 .dock a {
   padding: .4375rem .875rem;
   font-size: .75rem;
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: .1em;
   color: var(--faint);
   text-decoration: none;
@@ -956,13 +1192,46 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 /* The job a run of questions belongs to. Small caps and faint: it groups the
    questions under it without competing with them for attention. */
-.faq__group {
+/* 10px capitals at .18em in --faint was the exact combination this file argues
+   against further down, where it explains why every tracked micro-label was
+   taken off the step questions: tracked capitals destroy word shape, so they
+   are read letter by letter, and at 10px there is nothing left to fall back on.
+   It survived here because these are category headings rather than questions.
+   That is not a reason, it is just where the sweep stopped.
+
+   Still capitals, because they are labelling groups of questions and the case
+   is doing structural work. But 12px, a third of the tracking, and --muted
+   instead of --faint: 7.66:1 against the background rather than 5.02:1. */
+/* The category headings inside Common Questions: "Rock chip repair" and the
+   rest, labelling the group of questions under them.
+
+   THE SELECTOR CARRIES THE SERVICE BODY DELIBERATELY. These are `<p>` elements
+   inside `.svc__body`, so `.svc__body p` up at line 931 matches them too, and
+   at 0-1-1 it outranks a bare `.faq__group` at 0-1-0. Everything this rule set
+   that `.svc__body p` also sets, it lost: the labels have been rendering at
+   17px, weight 400, --ink-dim, which is body text, while this block said 10px,
+   weight 500, --faint. Nobody noticed because the two things it DID win,
+   uppercase and the tracking, were enough to make them look labelled.
+
+   Same family as the disclosure trap in LOG.md: a descendant selector reaches
+   inside a component that has its own ideas. When a component rule and a
+   layout rule can both claim an element, say which one wins rather than
+   depending on where they happen to sit in the file.
+
+   Now that the rule actually applies: 13px rather than the 10px it used to
+   claim, because 10px capitals in --faint is the exact combination this
+   stylesheet argues against further down, and because dropping straight from
+   the 17px these have really been to 10px is a bigger change than fixing a bug
+   should make. Tracking cut from .18em to .06em, and --muted at 7.66:1 rather
+   than --faint at 5.02:1. The point is a label that is clearly not a
+   paragraph, which at 17px it was not. */
+.svc__body p.faq__group {
   margin: 0 0 .125rem;
-  font-size: .625rem;
+  font-size: .8125rem;
   font-weight: 500;
-  letter-spacing: .18em;
+  letter-spacing: .06em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--muted);
 }
 
 .faq__item { border-top: 1px solid var(--rule); }
@@ -973,7 +1242,7 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
   padding: .875rem 2rem .875rem 0;
   position: relative;
   font-size: .9375rem;
-  font-weight: 300;
+  font-weight: 450;
   color: var(--ink-dim);
   transition: color .2s var(--ease);
 }
@@ -1011,7 +1280,7 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
   margin: 0;
   padding: 0 1.5rem 1.125rem 0;
   font-size: .9375rem;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.65;
   color: var(--muted);
   max-width: 54ch;
@@ -1396,11 +1665,14 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 /* ---------- answered pieces of glass ----------
 
-   The running list on the chip-or-crack page: what has been settled so far,
-   above the question asking about the next one. Each row is a button back into
-   its own question, because this page is reachable by Back and arriving that
-   way means every pane is answered and there is nothing else on screen to
-   press.
+   The running list on the chip-or-crack page: what has been settled, above the
+   question. Each row is a button back into its own question, because this page
+   is reachable by Back and arriving that way means the question is answered and
+   closed and there is nothing else on screen to press.
+
+   Since chip or crack became a windshield-only question this list holds one row
+   at most, and only ever on the way back. It still earns its rules: that dead
+   end is the reason it was built.
 
    Rows with a hairline, like .choice, rather than boxes. It is the same kind of
    thing: a list of pieces of glass, one line each. */
@@ -1480,14 +1752,17 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
   border-radius: 2px;
   background: var(--raise);
   box-shadow: inset 0 0 0 1px var(--line-2);
-  animation: fadeIn .25s var(--ease) both;
+  /* No fadeIn animation here any more. This panel is opened and closed by
+     slideOpen and slideShut like every other disclosure, and those animate
+     opacity as well as height: running a CSS fade on the display flip as well
+     meant two fades at once, on two curves, and only on the way IN. Closing had
+     nothing at all, so it arrived politely and then vanished.
+
+     The helpers also honour prefers-reduced-motion themselves, which is why the
+     media query that used to sit here has gone with it. */
 }
 
 .startover[hidden] { display: none; }
-
-@media (prefers-reduced-motion: reduce) {
-  .startover { animation: none; }
-}
 
 .startover__msg {
   margin: 0;
@@ -1580,9 +1855,9 @@ body.on-quote #step-vin .manual { max-width: 26rem; margin-left: auto; margin-ri
 
 .pageback:active { color: var(--orange); }
 
-/* The primary answer on the pages that word their own: "Yes, that's right"
-   and "Send my request". Above the footer, not in it, because it is the answer
-   to the question rather than a way out of it. */
+/* The primary answer on the pages that word their own: "Yes. One More Step to
+   Go!" and "Send My Request". Above the footer, not in it, because it is the
+   answer to the question rather than a way out of it. */
 .confirm__do { margin: 2rem 0 0; }
 
 /* ---------- the vehicle, named on the damage page ----------
@@ -1714,20 +1989,49 @@ a, button, label, select, input, textarea, summary {
   min-width: 0;
   font: inherit;
   font-size: clamp(1.25rem, 3vw, 1.75rem);
-  font-weight: 200;
-  letter-spacing: .1em;
+  /* Was 200. A hairline weight is the exact thing the contrast pass removed
+     everywhere else, after every one of the owners' testers called the type
+     faded; this field was missed because it is the only input on the site that
+     sets its own weight. 500 also suits what it is, which is a code rather than
+     a sentence. */
+  font-weight: 500;
+  /* Was .1em. Enough to read a VIN back one character at a time against a door
+     jamb sticker, without the string looking sprayed across the page. */
+  letter-spacing: .06em;
   font-variant-numeric: tabular-nums;
   text-transform: uppercase;
   /* Centred, and only as wide as the job. A full bleed rule invited a sentence;
      a rule the length of a VIN says how much is wanted before a character is
-     typed. 17ch is the seventeen characters, the em is the letter-spacing they
-     carry, and the rest is breathing room at either end.
+     typed.
+
+     WHY NOT 17ch, WHICH IS WHAT THIS USED TO SAY. `ch` is the advance of the
+     ZERO glyph, so `17ch` is exactly seventeen characters only in a MONOSPACED
+     font. Inter is proportional, and a VIN is mostly letters, which are wider
+     than its zero. The old `calc(17ch + 1.7em + 1em)` was therefore a guess
+     wearing the clothes of a measurement, and it was wrong in both directions
+     at once: 38% wider than the placeholder sitting on it, and 7px NARROWER
+     than a complete VIN, so the last character of a real one pushed past the
+     end of its own rule.
+
+     It survived because it was measured once, at 375px wide, where the clamp
+     above holds the type at 20px. The error is proportional, so it was always
+     there; it is just easier to see at 28px.
+
+     0.75em is the MEASURED mean advance of a VIN character at this weight and
+     tracking: 1HGCM82633A004352 renders 354px at 28px, which is 20.8px or
+     0.744em each. The extra 1em is breathing room, half at each end.
+
+     A VIN of all Ms and Ws would still be 494px and would scroll. That is not
+     worth designing for: VINs exclude I, O and Q but nothing makes them
+     letter-heavy, and the alternative is a rule so long the empty field looks
+     abandoned. If this ever has to be exact, the answer is a monospaced face
+     for this one field, and then `17ch` becomes true rather than approximate.
 
      The old right padding was clearance for the circled ? that used to sit in
      the field. That control is gone, so the space it reserved goes with it,
      otherwise the text sits visibly off centre inside its own rule. */
   width: 100%;
-  max-width: calc(17ch + 1.7em + 1em);
+  max-width: calc(17 * 0.75em + 1em);
   text-align: center;
   padding: .25rem 0 .625rem;
   border: 0;
@@ -1737,11 +2041,16 @@ a, button, label, select, input, textarea, summary {
   transition: border-color .25s var(--ease);
 }
 
+/* The hint had grown to 38% shorter than the rule under it, which is what made
+   the orange look oversized: the eye measures a rule against whatever sits on
+   it, and there was half a rule of nothing. Bigger, and lighter than the value
+   it stands in for, so it fills the line without being mistaken for one. */
 .field input::placeholder {
   letter-spacing: .02em;
   text-transform: none;
   color: var(--faint);
-  font-size: 1.0625rem;
+  font-size: 1.25rem;
+  font-weight: 400;
 }
 
 .field input:focus { outline: none; border-bottom-color: var(--orange); }
@@ -1824,6 +2133,9 @@ a, button, label, select, input, textarea, summary {
   background: none;
   color: var(--ink);
   cursor: pointer;
+  /* And the dropdowns, for the same reason: the year, make and model rules
+     changed state instantly while every other field on the site eased. */
+  transition: border-color .25s var(--ease), color .25s var(--ease);
 }
 
 .manual select:disabled { color: var(--faint); cursor: default; }
@@ -1892,7 +2204,8 @@ a, button, label, select, input, textarea, summary {
   background: var(--brand-orange);
   color: #fff;
   cursor: pointer;
-  transition: background .2s var(--ease), opacity .2s var(--ease);
+  transition: background .2s var(--ease), opacity .2s var(--ease),
+              box-shadow .2s var(--ease);
 }
 
 .btn:hover { background: var(--orange); }
@@ -1984,6 +2297,37 @@ a, button, label, select, input, textarea, summary {
 .btn[disabled] { opacity: .3; cursor: default; }
 
 .btn[disabled]:hover { background: var(--brand-orange); }
+
+/* ---------- the send, and only the send ----------
+
+   Owner request: make "Send My Request" stand out, "maybe green, or a green
+   outline, on hover". Both halves of that, because they are answering the same
+   worry the review button's new wording answers: the customer was told nothing
+   is sent until they choose to send it, so the one control that finally sends
+   it must not look like the four Continues that came before it.
+
+   Brand green TRUE as the fill, per the palette note at the top of this file:
+   the raised --green is a tint for TEXT on near-black and is far too light to
+   carry white. Measured, white on each fill:
+
+     --brand-orange #e56813   3.32:1     every other .btn
+     --brand-green  #2e6911   6.68:1     this one
+     --green        #8cc63f   2.03:1     which is why it is the ring, not the fill
+
+   The hover is that ring rather than a second green, so the whole thing runs on
+   the two tokens Quillin already own and no third value has to be justified.
+   A ring and not a border: .btn has border: 0, and growing one on hover moves
+   the button under the cursor by two pixels.
+
+   Keyed on the id deliberately. A .btn--send class would sit at the same
+   specificity as .btn and lose to any later .btn rule, which has already
+   happened twice in this file, to .btn--small and to the contact button. */
+#send-request { background: var(--brand-green); }
+
+#send-request:hover { box-shadow: 0 0 0 2px var(--green); }
+
+/* Nothing to send yet, so nothing to promise. */
+#send-request[disabled]:hover { background: var(--brand-green); box-shadow: none; }
 
 /* ---------- glass picker ---------- */
 
@@ -2108,6 +2452,12 @@ a, button, label, select, input, textarea, summary {
   border-bottom: 1px solid var(--line);
   background: rgba(255, 255, 255, .02);
   color: var(--ink);
+  /* Same .25s as the VIN field and the free text box. This had NONE, so its
+     rule snapped to orange on focus and to red on a bad value while the
+     identical rule under the VIN box two steps earlier faded. That is what the
+     owners meant by the input animations being different: not one control
+     looking wrong, but two controls of the same kind behaving differently. */
+  transition: border-color .25s var(--ease), background .25s var(--ease);
 }
 
 .reach__input[hidden] { display: none; }
@@ -2282,7 +2632,7 @@ a, button, label, select, input, textarea, summary {
      from a stylus or a trackpad in tablet mode. */
   .brand:hover .brandnav { max-width: 0; }
 
-  .brand.is-open .brandnav { max-width: 26rem; }
+  .brand.is-open .brandnav { max-width: 30rem; }
 }
 
 @media (max-width: 40rem) {
@@ -2356,7 +2706,10 @@ a, button, label, select, input, textarea, summary {
   .brandnav a {
     padding: .6875rem .25rem;
     font-size: 1.375rem;
-    font-weight: 200;
+    /* Was 200. These words are the whole of the navigation on a phone and they
+       sit over a blurred, moving background, which is the worst place on the
+       site for a hairline. */
+    font-weight: 400;
     letter-spacing: -.015em;
     /* Full strength. These and the mark are the only things in focus. */
     color: var(--ink);
@@ -2390,18 +2743,14 @@ a, button, label, select, input, textarea, summary {
     filter: drop-shadow(0 2px 14px rgba(0, 0, 0, .5));
   }
 
-  /* Above the scrim.
+  /* Lifting the header above the scrim used to live here, phone only, which is
+     exactly why it was broken on a laptop. It is at the top of this file now,
+     next to the rule that creates the stacking context it is answering.
 
-     `.top` carries position:relative and z-index:1, which makes it a STACKING
-     CONTEXT: everything inside it is trapped there, so .brand's z-index 30 was
-     compared against its siblings rather than against the scrim, and the scrim
-     covered both the mark and the menu. That blurred the two things meant to be
-     in focus, and a real finger tapping a category hit the scrim and closed the
-     menu instead. Programmatic clicks bypass hit testing, which is why it
-     tested clean. The header itself has to be lifted. */
-  body.menu-open .top { z-index: 30; }
-
-  .brand { position: relative; }
+     Keeping the note about how it hid: a real finger tapping a category hit the
+     scrim and closed the menu, but PROGRAMMATIC clicks bypass hit testing, so
+     every automated check passed. Test this one with elementFromPoint, not with
+     .click(). */
 
   /* Bigger, on the owner's own feedback. The mark is the only thing on a phone
      header telling you whose business this is, and it was being shrunk to make
@@ -2493,8 +2842,15 @@ a, button, label, select, input, textarea, summary {
     justify-content: flex-start;
     overflow-x: auto;
     scrollbar-width: none;
-    border-top: 1px solid var(--rule);
-    background: var(--bg);
+    /* Owner instruction, 2026-10-19, in person: the bar is the burnt orange the
+       rest of the site uses (--brand-orange, the Get your quote button's
+       colour), see-through so the backdrop shows behind it. First at 80%
+       orange, then the same evening "60% transparency": 40% orange. The
+       words are white. Measured against the real backdrops, white went from
+       4.41-4.60:1 at 80% to 8.28-9.40:1 at 40%, because the orange is the
+       bright half of the mix; dark ink was only 3.97-4.14 even at 80%. */
+    border-top: 0;
+    background: rgba(229, 104, 19, .4);
   }
 
   .dock::-webkit-scrollbar { display: none; }
@@ -2514,11 +2870,13 @@ a, button, label, select, input, textarea, summary {
        centred content that overflows clips its left edge and cannot be
        scrolled back to. At 320 this leaves 7px of slack. */
     padding: .875rem .5rem;
-    font-size: .6875rem;
-    letter-spacing: .07em;
-    /* Up off --faint. This bar is the only way to the other pages on a phone,
-       and the owners' whole point is that people should find them. */
-    color: var(--muted);
+    /* Owner instruction, 2026-10-19: larger and easier to read. Was 11px at
+       weight 400 and .07em tracking. */
+    font-size: .9375rem;
+    font-weight: 600;
+    letter-spacing: .01em;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .3);
   }
 
   /* Tapping a word should read as the word answering you, not as a box
@@ -2529,22 +2887,28 @@ a, button, label, select, input, textarea, summary {
      long as the finger is down. */
   /* The halo was white, so a press on a phone flashed the one colour this is
      meant to stop flashing. */
+  /* On the orange bar (2026-10-19) an orange word would vanish, so a press
+     darkens the word's own patch of bar instead. */
   .dock a:active {
-    color: var(--orange);
-    text-shadow: 0 0 10px rgba(240, 125, 42, .45);
+    color: #fff;
+    background: rgba(0, 0, 0, .14);
   }
 
   /* Where you are now is the same gesture held far lower: a dim lift and the
      faintest halo. Enough to answer the question if you go looking for it,
      not enough to read as a lit control demanding attention, which is what
      the filled pill did. */
+  /* The current page was an orange word; on an orange bar that is invisible,
+     so it is underlined instead (2026-10-19). */
   .dock a.is-on {
-    color: var(--orange);
+    color: #fff;
     background: none;
-    text-shadow: 0 0 10px rgba(240, 125, 42, .28);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
   }
 
-  .dock a.is-on:active { color: var(--orange); text-shadow: 0 0 10px rgba(240, 125, 42, .45); }
+  .dock a.is-on:active { background: rgba(0, 0, 0, .14); }
 
   /* Every item gets a divider, so about no longer needs its own. The rule is
      drawn on the item rather than added as an element, and sits on the shared
@@ -2561,8 +2925,8 @@ a, button, label, select, input, textarea, summary {
     top: 50%;
     transform: translate(-50%, -50%);
     width: 1px;
-    height: .75rem;
-    background: var(--line-2);
+    height: 1rem;
+    background: rgba(255, 255, 255, .45);   /* white on the orange bar, 2026-10-19 */
     pointer-events: none;
   }
 
@@ -2613,4 +2977,424 @@ body.menu-open::after { opacity: 1; pointer-events: auto; }
   clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ---------- the call box ----------
+
+   Owner instruction, 2026-10-19, in person: the corner link ("Questions? Reach out!") opens a small
+   box in the centre of the page, with the number and a choice of calling or
+   texting it. A real <dialog> opened with showModal, so Escape closes it, focus
+   is held inside it, and the page behind cannot be tapped by accident.
+
+   The padding lives on .callbox__in, not on the dialog, so that a tap on the
+   dialog element itself can only be a tap on the dimmed page around it, which
+   is what closes it. See landing.js.
+
+   Selectors are written .callbox .callbox__btn on purpose: .btn sits earlier in
+   the file at equal specificity, and the traps in LOG.md record two controls
+   that lost their styling to exactly that. */
+.callbox {
+  padding: 0;
+  border: 1px solid var(--line-2);
+  border-top: 3px solid var(--brand-orange);
+  border-radius: 6px;
+  background: #121519;
+  color: var(--ink);
+  width: min(22rem, calc(100vw - 2rem));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .55);
+}
+
+.callbox::backdrop {
+  background: rgba(10, 12, 14, .55);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+.callbox__in {
+  position: relative;
+  padding: 1.75rem 1.5rem 1.5rem;
+  text-align: center;
+}
+
+.callbox__close {
+  position: absolute;
+  top: .25rem;
+  right: .25rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.callbox__close:hover { color: var(--ink); }
+
+.callbox__close svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.callbox__lead {
+  margin: 0 1.5rem;
+  font-size: 1.0625rem;
+  color: var(--ink-dim);
+  text-wrap: balance;
+}
+
+.callbox__num {
+  margin: .5rem 0 1.25rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.callbox__do {
+  display: flex;
+  gap: .75rem;
+}
+
+.callbox .callbox__btn {
+  flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .875rem 1rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.callbox .callbox__btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* Text is the second choice, not a lesser one, so it is outlined in white
+   rather than greyed: either is a perfectly good way to reach them. */
+.callbox .callbox__btn--text {
+  background: none;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .55);
+}
+
+.callbox .callbox__btn--text:hover { background: rgba(255, 255, 255, .06); }
+
+/* The bottom bar, fitted to the phone's width.
+
+   "contact" became "contact & info" (owner instruction, 2026-10-19), and the
+   five words then measure 325px at 15px weight 600, before any spacing. So the
+   gaps between words tighten first, and the type steps down only where the
+   screen is too narrow for that alone. Widths measured in the browser on the
+   real font; each step is the largest size that fits:
+
+     384px and up  15px    gaps .3125rem   needs 383px   (390, 393, 414, 430)
+     372 to 383    14px    gaps .375rem    needs 372px   (375)
+     350 to 371    13px    gaps .375rem    needs 350px   (360)
+     under 350     12.5px  gaps .25rem     needs 319px   (320)
+
+   Replaces the single 22.5rem step that fitted the shorter "contact". Placed
+   last so it wins over the 40rem block at equal specificity. */
+@media (max-width: 40rem) {
+  .dock { padding-left: .25rem; padding-right: .25rem; }
+  .dock a { padding-left: .3125rem; padding-right: .3125rem; }
+}
+
+@media (max-width: 383px) {
+  .dock a { font-size: .875rem; padding-left: .375rem; padding-right: .375rem; }
+}
+
+@media (max-width: 371px) {
+  .dock a { font-size: .8125rem; }
+}
+
+@media (max-width: 349px) {
+  .dock a { font-size: .78125rem; padding-left: .25rem; padding-right: .25rem; }
+}
+
+/* ---------- the bar's own copy of the backdrop ----------
+
+   Owner instruction, 2026-10-19, in person: only the BACKGROUND may show
+   through the see-through bottom bar, never page text scrolling beneath it.
+   backdrop.js puts a second, synchronised backdrop inside .dock; on a phone it
+   is shown, and the bar paints that instead of being see-through to the page.
+
+   How it lines up: the copy is position: fixed and the size of the viewport,
+   exactly like the real one, so every photograph sits on the same pixels. The
+   bar's clip-path trims it to the bar's own box. That only works because the
+   phone .dock has transform: none: a transform would make the bar the
+   containing block, and the copy would shrink to the bar instead of the screen.
+
+   Its base is --bg, the same ground the real backdrop sits on, because the two
+   photographs in a crossfade do not fully cover each other halfway through and
+   whatever is underneath shows for that moment. The orange is laid over the
+   photograph, scrim and all, at the 40% the owners chose.
+
+   Hidden everywhere except phones: on a laptop the bar is a different thing,
+   a fade at the foot of the page, and has a transform. */
+.backdrop--dock { display: none; }
+
+@media (max-width: 40rem) {
+  .dock {
+    clip-path: inset(0);
+    /* What the bar shows before the photographs have loaded, and if the copy
+       were ever missing: --bg with the 40% orange already mixed in. Opaque, so
+       page text cannot show through even then. */
+    background: #623110;
+  }
+
+  .backdrop--dock {
+    display: block;
+    z-index: -1;
+    background: var(--bg);
+  }
+
+  .backdrop--dock::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: rgba(229, 104, 19, .4);
+  }
+}
+
+/* ---------- the year, make and model lists, opened ----------
+
+   Owner instruction, 2026-10-19, in person: the list that drops down should
+   not be the browser's own window; it should look like the rest of the site.
+
+   appearance: base-select makes the real <select> stylable, list and all,
+   with nothing changed in app.js: it is still a select, so the values, the
+   change events and the keyboard all behave exactly as before. Supported in
+   Chrome and Edge 135+, Chrome on Android, and Safari 27 (17 Sep 2026, per
+   webkit.org/blog/18325, checked 2026-10-19). Firefox and older iPhones fall
+   back to their own list, which is the behaviour this site had until now, so
+   nothing is worse anywhere. Hence @supports: without it the declarations
+   below would restyle the closed box in browsers that cannot open a styled
+   list to match.
+
+   base-select gives the closed box its own border, padding and background;
+   they are put back to the site's, a rule under the words. */
+@supports (appearance: base-select) {
+  .manual select,
+  .manual select::picker(select) { appearance: base-select; }
+
+  .manual select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: none;
+    padding: .9375rem 0;
+    color: var(--ink);
+  }
+
+  /* The same orange chevron the year box draws, not the browser's solid
+     triangle, so the three boxes read as one set. */
+  .manual select::picker-icon {
+    content: "";
+    width: 1.125rem;
+    height: 1.125rem;
+    background: var(--orange);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+    transition: rotate .25s var(--ease);
+  }
+
+  .manual select:open::picker-icon { rotate: 180deg; }
+
+  .manual select::picker(select) {
+    margin-top: .375rem;
+    padding: .375rem 0;
+    max-height: min(22rem, 60vh);
+    background: var(--raise);
+    color: var(--ink);
+    border: 1px solid rgba(240, 125, 42, .45);
+    border-top: 3px solid var(--brand-orange);
+    border-radius: 6px;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, .6);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(240, 125, 42, .6) transparent;
+  }
+
+  /* Rows a thumb can hit: 44px is the floor Apple and Google both publish. */
+  .manual select option {
+    min-height: 2.75rem;
+    padding: .625rem 1rem;
+    font-size: 1.0625rem;
+    background: none;
+    color: var(--ink);
+    gap: .5rem;
+  }
+
+  /* The "Make" and "Model" placeholder row is a label, not an answer, so it
+     is not offered in the open list; it still shows in the closed box. */
+  .manual select option[value=""] { display: none; }
+
+  .manual select option:hover,
+  .manual select option:focus-visible {
+    background: rgba(240, 125, 42, .16);
+    color: #fff;
+    outline: none;
+  }
+
+  .manual select option:checked {
+    background: rgba(229, 104, 19, .3);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .manual select option::checkmark { color: var(--orange); }
+}
+
+/* The corner link reads "Questions? Click here to reach out!" (owner wording,
+   2026-10-19). At 236px on one line it ran off a 320 screen: the logo leaves
+   about 180. On narrow screens it wraps to two right-aligned lines instead of
+   shrinking, because the owners' whole point about this site is type people
+   can read. */
+@media (max-width: 26rem) {
+  .top__tel {
+    white-space: normal;
+    text-align: right;
+    max-width: 10.5rem;
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+}
+
+/* ---------- the year box ----------
+
+   A text box dressed exactly as the select it replaced (same size, same rule
+   under the words, "Year" in the same ink), with the list styled like the Make
+   and Model lists above. See js/yearbox.js for why it is not a select.
+
+   position: relative and a z-index so the open list lies OVER the Make and
+   Model boxes below it rather than under them. */
+.yearbox { position: relative; z-index: 3; }
+
+.yearbox__input {
+  width: 100%;
+  font: inherit;
+  /* 18px: never under 16, or iOS zooms the page on focus. */
+  font-size: 1.125rem;
+  font-weight: 400;
+  padding: .9375rem 2rem .9375rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color .25s var(--ease);
+}
+
+.yearbox__input::placeholder { color: var(--ink); opacity: 1; }
+.yearbox__input:focus { cursor: text; border-bottom-color: var(--orange); }
+.yearbox__input:focus::placeholder { color: var(--faint); }
+
+.yearbox__icon {
+  position: absolute;
+  right: .25rem;
+  top: 1.65rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  translate: 0 -50%;
+  fill: none;
+  stroke: var(--orange);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  transition: rotate .25s var(--ease);
+}
+
+.yearbox__input[aria-expanded="true"] + .yearbox__icon { rotate: 180deg; }
+
+.yearbox__list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + .375rem);
+  margin: 0;
+  padding: .375rem 0;
+  list-style: none;
+  background: var(--raise);
+  border: 1px solid rgba(240, 125, 42, .45);
+  border-top: 3px solid var(--brand-orange);
+  border-radius: 6px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .6);
+}
+
+/* Rows a thumb can hit: 44px, the floor Apple and Google both publish. */
+.yearbox__opt {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: .625rem 1rem;
+  font-size: 1.0625rem;
+  color: var(--ink);
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+
+.yearbox__opt:hover,
+.yearbox__opt.is-active { background: rgba(240, 125, 42, .16); color: #fff; }
+
+.yearbox__opt[aria-selected="true"] {
+  background: rgba(229, 104, 19, .3);
+  color: #fff;
+  font-weight: 600;
+}
+
+.yearbox__empty { padding: .75rem 1rem; font-size: 1rem; color: var(--ink-dim); }
+
+/* Tablet widths, menu open.
+
+   With "contact & info" (2026-10-19) the open strip is 409px, and the corner
+   link is now "Questions? Click here to reach out!". At 768 the header came to
+   908px and the page scrolled sideways. Phones stack the menu instead and
+   laptops have the room; between them, while the strip is open, the socials and
+   the corner link step aside: taken out of the row so they push nothing, and
+   faded out so the words do not collide. They return when the strip shuts.
+   58rem (928px) is where the open header measures as fitting. */
+@media (min-width: 40.0625rem) and (max-width: 58rem) {
+  .top__right { transition: opacity .25s var(--ease), visibility .25s; }
+
+  .top:has(.brand.is-open) .top__right,
+  .top:has(.brand:focus-within) .top__right {
+    position: absolute;
+    top: var(--gutter);
+    right: var(--gutter);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+@media (min-width: 40.0625rem) and (max-width: 58rem) and (hover: hover) {
+  .top:has(.brand:hover) .top__right {
+    position: absolute;
+    top: var(--gutter);
+    right: var(--gutter);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
 }

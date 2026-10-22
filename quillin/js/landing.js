@@ -23,6 +23,12 @@
   var OUT_MS = 170;          // must match .flow's transition in style.css
   // The same curve as --ease in the stylesheet and EASE in app.js.
   var EASE = 'cubic-bezier(.22,.61,.36,1)';
+  /* The same two numbers app.js opens and shuts its disclosures on. They were
+     260 and 200 here, which is a second opinion about how fast this site moves,
+     held by the half of it that happens to live in a different file. Nobody
+     chose two speeds; there are just two implementations. One vocabulary. */
+  var OPEN_MS = 340;
+  var SHUT_MS = 240;
   var busy = false;
   var target = null;         // where we are heading, which a click can change mid-fade
 
@@ -41,6 +47,22 @@
 
     stage.classList.toggle('is-open', valid);
     document.body.classList.toggle('on-quote', id === 'quote');
+
+    /* Say where we are, so anything that cares can follow. Added for the
+       backdrop, which shows the skylines on the quote screen and the owners'
+       own work behind the pages about them.
+
+       Dispatched from HERE, in apply(), rather than from go(): every route into
+       a panel passes through this one function, including the first paint,
+       which arrives via fromHash(false) and never touches go() at all. Wiring
+       it to the animated path would have left the backdrop wrong on arrival and
+       right only after the first click.
+
+       It carries the id rather than expecting a listener to read the DOM,
+       because the only signal otherwise available outside this closure is
+       body.on-quote, which distinguishes quote from everything else and cannot
+       tell about from services. */
+    document.dispatchEvent(new CustomEvent('panel:change', { detail: { id: id, valid: valid } }));
 
     // the new view has a different height and a different rule, so re-decide
     if (typeof checkDock === 'function') requestAnimationFrame(checkDock);
@@ -277,6 +299,58 @@
      The markup is still real <details>, so with this script broken or not yet
      run every one of them still opens, and keyboard and screen reader
      behaviour comes free. */
+  /* ---- the About page's two sections ---------------------------------------
+
+     Owner instruction: "About us" open, "Our work" beside it, one at a time.
+
+     Written as a real tablist rather than two buttons that toggle a div. The
+     roving tabindex and the arrow keys are the part that is easy to skip and
+     the part that decides whether this is reachable without a mouse: only the
+     live tab is in the tab order, and left/right move between them, which is
+     what a screen reader announces a tablist as doing.
+
+     Exclusivity is the whole instruction, so it is enforced by construction:
+     every switch hides ALL panes and shows one. There is no state in which two
+     are open, including the first paint, because the markup ships with the
+     second pane already carrying `hidden`.
+
+     Nothing here animates a height. The two panes are very different lengths,
+     and the fade is done in CSS on .tabs__pane so it cannot get out of step
+     with the rest of the site's motion. */
+  Array.prototype.forEach.call(document.querySelectorAll('.tabs'), function (strip) {
+    var tabs = Array.prototype.slice.call(strip.querySelectorAll('[role="tab"]'));
+    if (tabs.length < 2) return;
+
+    function select(tab, focus) {
+      tabs.forEach(function (t) {
+        var on = (t === tab);
+        t.classList.toggle('is-on', on);
+        t.setAttribute('aria-selected', String(on));
+        /* Only the live tab is tabbable. Without this, tabbing through the page
+           stops on every tab in the strip, which is the behaviour a tablist
+           exists to replace. */
+        t.setAttribute('tabindex', on ? '0' : '-1');
+        var pane = document.getElementById(t.getAttribute('aria-controls'));
+        if (pane) pane.hidden = !on;
+      });
+      if (focus) tab.focus();
+    }
+
+    tabs.forEach(function (tab, i) {
+      tab.addEventListener('click', function () { select(tab, false); });
+      tab.addEventListener('keydown', function (e) {
+        var go = null;
+        if (e.key === 'ArrowRight') go = tabs[(i + 1) % tabs.length];
+        if (e.key === 'ArrowLeft')  go = tabs[(i - 1 + tabs.length) % tabs.length];
+        if (e.key === 'Home')       go = tabs[0];
+        if (e.key === 'End')        go = tabs[tabs.length - 1];
+        if (!go) return;
+        e.preventDefault();
+        select(go, true);
+      });
+    });
+  });
+
   Array.prototype.forEach.call(document.querySelectorAll('.expand'),
     function (item) {
       var summary = item.querySelector('summary');
@@ -293,7 +367,7 @@
           ? [{ height: '0px', opacity: 0 }, { height: h + 'px', opacity: 1 }]
           : [{ height: h + 'px', opacity: 1 }, { height: '0px', opacity: 0 }];
 
-        var anim = body.animate(frames, { duration: open ? 260 : 200, easing: EASE });
+        var anim = body.animate(frames, { duration: open ? OPEN_MS : SHUT_MS, easing: EASE });
         item._anim = anim;
 
         /* Safe to run twice, and it has to be: the good path is onfinish, and
@@ -311,7 +385,12 @@
           if (!open) item.open = false;     // closed only after it has shrunk
         }
         anim.onfinish = done;
-        setTimeout(done, (open ? 260 : 200) + 120);
+        /* The backstop, and it has to stay BEHIND the animation. It read
+           (open ? 260 : 200) + 120 with the durations written out a second time,
+           so changing the speed above silently moved this in front of the
+           animation it is supposed to catch, and `done` would have closed a
+           <details> that was still opening. Same constants, one place. */
+        setTimeout(done, (open ? OPEN_MS : SHUT_MS) + 120);
       }
 
       summary.addEventListener('click', function (e) {
@@ -393,4 +472,25 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(alignSubs);
 
   checkDock();
+
+  /* "Questions? Reach out!" opens the call box rather than dialling straight
+     away, owner instruction 2026-10-19: the customer chooses between calling
+     and texting. Only where <dialog> is supported; anywhere else the link's
+     own tel: href still dials, which is the behaviour it always had. */
+  var tel = document.querySelector('.top__tel');
+  var callbox = document.getElementById('callbox');
+  if (tel && callbox && typeof callbox.showModal === 'function') {
+    tel.addEventListener('click', function (e) {
+      e.preventDefault();
+      callbox.showModal();
+    });
+    callbox.querySelector('.callbox__close').addEventListener('click', function () {
+      callbox.close();
+    });
+    /* The padding is on the inner box, so the dialog itself is only ever the
+       target when the tap landed outside it, on the dimmed page. */
+    callbox.addEventListener('click', function (e) {
+      if (e.target === callbox) callbox.close();
+    });
+  }
 })();
