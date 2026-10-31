@@ -142,3 +142,16 @@ WordPress and 12 that do, plus cold-email copy and follow-ups. Nothing sent.
 The pitch is overflow capacity, not website building. Those agencies already
 build websites; what they buy is a spare pair of hands when they have sold more
 than they can staff.
+
+## 2026-10-31 17:34 CDT: Westurn, playable at /westurn/
+
+The Westurn duel game (Godot 4.7, /data/Projects/Games/Westurn) exported
+for the browser and served from `westurn/`: https://paleleap.com/westurn/.
+Godot's single-threaded web build, because GitHub Pages can't send the
+COOP/COEP headers the threaded build needs. About 40 MB, nearly all of it
+the engine (index.wasm), which Pages serves compressed. Not linked from
+the projects list (the user asked only for it to be hosted).
+
+To update it: run `./publish-web.sh` in the Westurn folder (exports and
+copies into `westurn/`), then commit and push here. Saves live in each
+player's browser.
