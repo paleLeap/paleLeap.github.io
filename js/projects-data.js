@@ -53,7 +53,7 @@ const PROJECTS = [
     tags:     ["Python", "Desktop", "Market data"],
     shot:     null,
     year:     "2026",
-    status:   "Running daily",
+    status:   "Shared by code",
     download: null,
     featured: true,
   },

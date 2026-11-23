@@ -185,3 +185,20 @@ Actions (PyInstaller + Inno Setup, self-tested on the Windows runner) and
 attaches it to each v* release. The page's download is now
 releases/latest/download/WallpaperFinder-Setup.exe (about 150 MB), with the
 source zip kept as the Linux route.
+
+## 2026-11-22 22:35 CST: Slate behind a download code; Wallpaper Finder fixes
+
+Slate: the user wanted it downloadable only with a temporary code they give
+out. The page now has a code box posting to a Cloudflare Worker
+(`slate-gate`, source /data/Slate/share/gate) that holds Slate.zip in a
+Durable Object and gives it once per code (single use, 24 h). Codes come from
+`/data/Slate/share/slate-code`. The shared build is scanner only (user's
+choice): order code, EXECUTE, Robinhood sign-in cut, keys and personal
+details stripped (share/build_share.py refuses to build if any remain). Page
+copy rewritten to describe that copy, new screenshot, status "Shared by code".
+Measured: fake code -> 403 page via the real form; real code -> the exact
+zip; same code again -> "already been used".
+
+Wallpaper Finder: a friend's download was the source zip; the page now offers
+only the Windows installer (source via GitHub). v1.0.1 fixes saves on Windows
+(real Pictures folder under OneDrive, retry on virus-scanner lock).

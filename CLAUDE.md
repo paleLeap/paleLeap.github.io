@@ -135,7 +135,10 @@ Motion switched on, which looked broken. Keep the crossfades.
 
 ## Open items
 
-- Slate has no screenshots and no download.
+- Slate's download is behind one-time codes: a Cloudflare Worker
+  (/data/Slate/share/gate, slate-gate.westurn-matchmaker.workers.dev) holds the
+  zip; `/data/Slate/share/slate-code` makes a code, `publish-share.sh` uploads
+  a new build. The form on projects/slate.html posts to it.
 - Westurn (projects/westurn.html) carries the game's zips in `downloads/`.
   Windows zip is about 71 MB: GitHub warns over 50 MB and refuses over 100 MB.
 - The six background photographs are other people's work, taken from a personal

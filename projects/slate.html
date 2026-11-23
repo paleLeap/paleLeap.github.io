@@ -28,20 +28,27 @@
       <span>2026</span>
       <span>Python, SQLite</span>
       <span>Linux</span>
-      <span>Running daily</span>
+      <span>Shared by code</span>
     </div>
 
-    <a class="get" href="#" aria-disabled="true">download (packaging in progress)</a>
+    <form class="code" method="post" action="https://slate-gate.westurn-matchmaker.workers.dev/download">
+      <label for="code">Slate is shared by invitation. Have a download code?</label>
+      <div class="gets">
+        <input id="code" name="code" placeholder="ABCD-2345" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="9" required>
+        <button class="get" type="submit">download</button>
+      </div>
+      <p>No code? <a href="../index.html#contact">Ask for one</a>. A code works once, within 24 hours.</p>
+    </form>
 
     <figure>
-      <img src="../assets/screenshots/slate-01.png" alt="Slate's main window showing the ranked Top 10">
-      <figcaption>The main page. Ten tickers, ranked on momentum.</figcaption>
+      <img src="../assets/screenshots/slate-01.jpg" alt="Slate's main window: the early radar, the Top 10, a chart and live posts">
+      <figcaption>The main page: the early radar, the Top 10, a chart and the posts behind it.</figcaption>
     </figure>
 
     <p>
-      Slate is read-only. It connects to market-data and social endpoints and
-      nothing else. There is no order-entry code path anywhere in it. It hands
-      you a shortlist, you place your own trades.
+      The copy shared here is read-only. It connects to market-data and social
+      endpoints and nothing else, and has no order-entry code in it. It hands
+      you a shortlist; you place your own trades.
     </p>
 
     <h2>What it does</h2>
@@ -65,11 +72,6 @@
       way to know if the ranking is worth anything.
     </p>
 
-    <figure>
-      <img src="../assets/screenshots/slate-02.png" alt="Slate's focus screen for a single ticker">
-      <figcaption>Focus. Everything known about one ticker on one screen.</figcaption>
-    </figure>
-
     <h2>How it works</h2>
     <p>
       The interesting piece is the premarket participation ratio. Raw premarket
@@ -92,8 +94,14 @@
     </p>
 
     <h2>Running it</h2>
+    <p>
+      Linux, with Python 3.11 or newer. Unzip, then run the line below; the
+      first run installs what it needs. SHARED.md inside the zip covers the
+      email the SEC asks for and the optional Schwab key. Nothing here is
+      financial advice.
+    </p>
     <pre><code>./run.sh                 the window
-./install-collector.sh   the 24/7 collector, once</code></pre>
+./install-collector.sh   the 24/7 collector, once (optional)</code></pre>
   </div>
 
 </div>

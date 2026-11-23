@@ -438,6 +438,22 @@ pre {
 .gets { display: flex; flex-wrap: wrap; gap: 0.6rem 1.8rem; margin-bottom: 3rem; }
 .gets .get { margin-bottom: 0; }
 
+/* a download behind a code (Slate): a code box and a button in the row above */
+.code { margin-bottom: 3rem; }
+.code label { display: block; margin-bottom: 0.8rem; color: var(--text-dim); }
+.code .gets { margin-bottom: 0.8rem; align-items: baseline; }
+.code input {
+  font: inherit; font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0.08em;
+  width: 9.5rem; padding: 0.2rem 0; color: var(--text);
+  background: transparent; border: 0; border-bottom: 1px solid var(--text-faint); border-radius: 0;
+  text-transform: uppercase;
+}
+.code input:focus { outline: none; border-bottom-color: var(--accent); }
+.code input::placeholder { color: var(--text-faint); text-transform: none; }
+.code button { font: inherit; font-size: 0.95rem; background: none; border: 0; padding: 0; cursor: pointer; }
+.code p { font-size: 0.82rem; color: var(--text-faint); margin: 0; }
+.code p a { color: var(--text-dim); }
+
 figure { margin: 0 0 2.5rem; }
 figure img { width: 100%; }
 figcaption {
