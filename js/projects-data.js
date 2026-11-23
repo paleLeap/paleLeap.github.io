@@ -42,7 +42,7 @@ const PROJECTS = [
     shot:     "assets/screenshots/wallpaper-finder-01.jpg",
     year:     "2026",
     status:   "In use",
-    download: "https://github.com/paleLeap/wallpaper-finder/archive/refs/heads/main.zip",
+    download: "https://github.com/paleLeap/wallpaper-finder/releases/latest/download/WallpaperFinder-Setup.exe",
     featured: true,
   },
 

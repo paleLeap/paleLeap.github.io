@@ -32,7 +32,8 @@
     </div>
 
     <div class="gets">
-      <a class="get" href="https://github.com/paleLeap/wallpaper-finder/archive/refs/heads/main.zip">download</a>
+      <a class="get" href="https://github.com/paleLeap/wallpaper-finder/releases/latest/download/WallpaperFinder-Setup.exe">download for Windows</a>
+      <a class="get" href="https://github.com/paleLeap/wallpaper-finder/archive/refs/heads/main.zip">Linux (source zip)</a>
       <a class="get" href="https://github.com/paleLeap/wallpaper-finder">source on GitHub</a>
     </div>
 
@@ -59,18 +60,19 @@
 
     <h2>Running it</h2>
     <p>
-      You need Python 3.9 or newer. The only package is PySide6, about 250 MB,
-      because a whole browser engine comes with it. Unzip the download, then
-      inside the folder:
+      Windows: download the installer (about 150 MB) and run it. It installs
+      for you only, with no admin prompt, adds a Start menu entry and opens
+      the program. Nothing else to install. The installer is not signed, so
+      Windows may say it protected your PC: choose More info, then Run anyway.
     </p>
-    <p>Linux</p>
+    <p>
+      Linux: you need Python 3.9 or newer, and the one package is PySide6
+      (about 250 MB, because a whole browser engine comes with it). Unzip the
+      source, then inside the folder:
+    </p>
     <pre><code>python3 -m venv program/.venv
 program/.venv/bin/pip install -r program/requirements.txt
 ./scan</code></pre>
-    <p>Windows</p>
-    <pre><code>py -m venv program\.venv
-program\.venv\Scripts\pip install -r program\requirements.txt
-scan.cmd</code></pre>
   </div>
 
 </div>

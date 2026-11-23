@@ -176,3 +176,12 @@ User asked for the wallpaper finder under projects. Source is
 Linux and Windows from its README. Download is GitHub's main-branch zip, not
 a copy here, so it stays current. Screenshot of the start screen taken under
 xvfb (`assets/screenshots/wallpaper-finder-01.jpg`, 1208x613).
+
+## 2026-11-22 21:55 CST: Wallpaper Finder gets a Windows installer
+
+User: it didn't install properly on Windows; a friend should just download,
+install and launch. The repo now builds WallpaperFinder-Setup.exe on GitHub
+Actions (PyInstaller + Inno Setup, self-tested on the Windows runner) and
+attaches it to each v* release. The page's download is now
+releases/latest/download/WallpaperFinder-Setup.exe (about 150 MB), with the
+source zip kept as the Linux route.
