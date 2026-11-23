@@ -50,7 +50,7 @@ const PROJECTS = [
     slug:     "slate",
     name:     "Slate",
     blurb:    "A single-window trading terminal that watches social feeds for the earliest mention of a ticker and keeps a live Top 10 ranked against your strategy. Read-only by design, it never places a trade.",
-    tags:     ["Python", "Desktop", "Market data"],
+    tags:     ["Python", "Windows, Linux", "Market data"],
     shot:     null,
     year:     "2026",
     status:   "Shared by code",

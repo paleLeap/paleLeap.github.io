@@ -137,8 +137,10 @@ Motion switched on, which looked broken. Keep the crossfades.
 
 - Slate's download is behind one-time codes: a Cloudflare Worker
   (/data/Slate/share/gate, slate-gate.westurn-matchmaker.workers.dev) holds the
-  zip; `/data/Slate/share/slate-code` makes a code, `publish-share.sh` uploads
-  a new build. The form on projects/slate.html posts to it.
+  Windows installer and the Linux zip; `/data/Slate/share/slate-code` makes a
+  code, `publish-share.sh` rebuilds both (Windows via the private repo
+  paleLeap/slate-shared on GitHub Actions). The form on projects/slate.html
+  posts code + file (win | linux) to it.
 - Westurn's downloads live in the releases of github.com/paleLeap/westurn
   (Westurn-Setup.exe built there on a Windows machine; `publish-windows.sh` in
   the game's folder makes a release). The page links releases/latest.

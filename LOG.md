@@ -213,3 +213,17 @@ zip; a Windows runner starts the game headless (no script errors), builds
 Westurn-Setup.exe (61 MB, per-user, Start menu, opens when done) and attaches
 it. The page links releases/latest; the zips left `downloads/`. The Slate
 form sends file=linux until a Windows installer is in the gate.
+
+## 2026-11-22 23:30 CST: Slate's Windows installer behind the code
+
+User: Slate already runs on Windows (installed through Hawthorn); the site
+had no proper Windows executable. Slate-Setup.exe (182 MB) is now built by
+the private repo paleLeap/slate-shared (user chose that route): Slate plus
+an embeddable Python 3.14 pinned to Hawthorn's tested Windows packages,
+`python -m slate --selftest` passed on the Windows runner, Inno Setup
+(per-user, Start menu, pythonw -m slate, config.yaml kept on update), then
+uploaded to the gate in 8 MB pieces. The gate now holds two files and
+streams them in 1 MB rows. The form has Windows installer (default) / Linux.
+Measured: a real code downloaded all 181,798,587 bytes (MZ header) in 23 s.
+The radio buttons first took the code box's 9.5rem width (two rows); the
+code-box rule is scoped to non-radio inputs now (one row, 26 px gap).

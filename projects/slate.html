@@ -27,16 +27,19 @@
     <div class="facts">
       <span>2026</span>
       <span>Python, SQLite</span>
-      <span>Linux</span>
+      <span>Windows, Linux</span>
       <span>Shared by code</span>
     </div>
 
     <form class="code" method="post" action="https://slate-gate.westurn-matchmaker.workers.dev/download">
       <label for="code">Slate is shared by invitation. Have a download code?</label>
       <div class="gets">
-        <input type="hidden" name="file" value="linux">
         <input id="code" name="code" placeholder="ABCD-2345" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="9" required>
         <button class="get" type="submit">download</button>
+      </div>
+      <div class="which">
+        <label><input type="radio" name="file" value="win" checked> Windows installer</label>
+        <label><input type="radio" name="file" value="linux"> Linux</label>
       </div>
       <p>No code? <a href="../index.html#contact">Ask for one</a>. A code works once, within 24 hours.</p>
     </form>
@@ -96,10 +99,17 @@
 
     <h2>Running it</h2>
     <p>
-      Linux, with Python 3.11 or newer. Unzip, then run the line below; the
-      first run installs what it needs. SHARED.md inside the zip covers the
-      email the SEC asks for and the optional Schwab key. Nothing here is
-      financial advice.
+      Windows: run Slate-Setup.exe (about 180 MB; Slate brings its own
+      Python, so nothing else is needed). It installs for you only, with no
+      admin prompt, adds a Start menu entry and opens Slate. The installer is
+      not signed, so Windows may say it protected your PC: choose More info,
+      then Run anyway.
+    </p>
+    <p>
+      Linux, with Python 3.11 or newer: unzip, then run the line below; the
+      first run installs what it needs. SHARED.md inside covers the email the
+      SEC asks for and the optional Schwab key. Nothing here is financial
+      advice.
     </p>
     <pre><code>./run.sh                 the window
 ./install-collector.sh   the 24/7 collector, once (optional)</code></pre>
