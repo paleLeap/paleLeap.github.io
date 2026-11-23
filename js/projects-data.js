@@ -23,6 +23,18 @@
 const PROJECTS = [
 
   {
+    slug:     "westurn",
+    name:     "Westurn",
+    blurb:    "A first-person western duel. Draw from the holster, no crosshair, only the head or heart kills outright. Duel a friend online with a room code, take on five stages of outlaws, or work the shooting gallery out back.",
+    tags:     ["Godot", "Windows, Linux, browser", "Online 1v1"],
+    shot:     "assets/screenshots/westurn-01.jpg",
+    year:     "2026",
+    status:   "Prototype, playable",
+    download: "downloads/Westurn-windows.zip",
+    featured: true,
+  },
+
+  {
     slug:     "slate",
     name:     "Slate",
     blurb:    "A single-window trading terminal that watches social feeds for the earliest mention of a ticker and keeps a live Top 10 ranked against your strategy. Read-only by design, it never places a trade.",

@@ -81,8 +81,8 @@ the URL hash, so links are shareable and the back button works.
     css/style.css         one stylesheet, all tokens at the top
     projects/_template.html   copy this to start a new project page
     assets/bg/            six pre-processed photographs
-    assets/screenshots/   project screenshots (empty)
-    downloads/            project zips (empty)
+    assets/screenshots/   project screenshots
+    downloads/            project zips (Westurn)
 
 ## Things that will bite you
 
@@ -135,10 +135,9 @@ Motion switched on, which looked broken. Keep the crossfades.
 
 ## Open items
 
-- The projects section says "Nothing published yet." Slate has a page at
-  `projects/slate.html` but is not in `js/projects-data.js`, has no screenshots
-  and no download.
-- `assets/screenshots/` and `downloads/` are empty.
+- Slate has no screenshots and no download.
+- Westurn (projects/westurn.html) carries the game's zips in `downloads/`.
+  Windows zip is about 71 MB: GitHub warns over 50 MB and refuses over 100 MB.
 - The six background photographs are other people's work, taken from a personal
   wallpaper collection. Fine on a desktop, worth revisiting on a public site.
 - The WordPress theme is committed locally but never pushed.

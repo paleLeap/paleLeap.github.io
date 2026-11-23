@@ -434,6 +434,9 @@ pre {
   margin-bottom: 3rem;
 }
 .get[aria-disabled="true"] { color: var(--text-faint); pointer-events: none; }
+/* several downloads side by side, wrapping on a phone */
+.gets { display: flex; flex-wrap: wrap; gap: 0.6rem 1.8rem; margin-bottom: 3rem; }
+.gets .get { margin-bottom: 0; }
 
 figure { margin: 0 0 2.5rem; }
 figure img { width: 100%; }

@@ -155,3 +155,14 @@ the projects list (the user asked only for it to be hosted).
 To update it: run `./publish-web.sh` in the Westurn folder (exports and
 copies into `westurn/`), then commit and push here. Saves live in each
 player's browser.
+
+## 2026-11-22 21:25 CST: Westurn in the projects list
+
+User asked for Westurn on the site under projects. Added it to
+`js/projects-data.js` (first, featured) and wrote `projects/westurn.html`:
+what it is, download for Windows / Linux, play in the browser, how to duel a
+friend with a room code, two screenshots (`assets/screenshots/westurn-0*.jpg`,
+1280x720 from the game's own test frames). New `.gets` row in style.css so
+several download links sit side by side and wrap on a phone (measured: three
+links, two rows at 688 px wide, 28 px gap). Zips and the browser build in
+`westurn/` replaced with the 2026-11-22 build (adds the shooting gallery).
