@@ -202,3 +202,14 @@ zip; same code again -> "already been used".
 Wallpaper Finder: a friend's download was the source zip; the page now offers
 only the Windows installer (source via GitHub). v1.0.1 fixes saves on Windows
 (real Pictures folder under OneDrive, retry on virus-scanner lock).
+
+## 2026-11-22 23:00 CST: Westurn gets a Windows installer
+
+User: downloading from the site is a hassle, no proper Windows executables.
+Westurn's downloads now come from github.com/paleLeap/westurn (public; holds
+only the Inno Setup recipe and releases, not the game's source).
+`publish-windows.sh` in the game's folder releases Westurn.exe and the Linux
+zip; a Windows runner starts the game headless (no script errors), builds
+Westurn-Setup.exe (61 MB, per-user, Start menu, opens when done) and attaches
+it. The page links releases/latest; the zips left `downloads/`. The Slate
+form sends file=linux until a Windows installer is in the gate.

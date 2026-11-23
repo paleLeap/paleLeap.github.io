@@ -30,7 +30,7 @@ const PROJECTS = [
     shot:     "assets/screenshots/westurn-01.jpg",
     year:     "2026",
     status:   "Prototype, playable",
-    download: "downloads/Westurn-windows.zip",
+    download: "https://github.com/paleLeap/westurn/releases/latest/download/Westurn-Setup.exe",
     featured: true,
   },
 
