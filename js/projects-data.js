@@ -35,6 +35,18 @@ const PROJECTS = [
   },
 
   {
+    slug:     "wallpaper-finder",
+    name:     "Wallpaper Finder",
+    blurb:    "Searches several wallpaper sites at once, shows small previews, and downloads only the ones you tick. Pick themes, a minimum size and a main colour. Does GIFs too.",
+    tags:     ["Python", "Linux, Windows", "Open source"],
+    shot:     "assets/screenshots/wallpaper-finder-01.jpg",
+    year:     "2026",
+    status:   "In use",
+    download: "https://github.com/paleLeap/wallpaper-finder/archive/refs/heads/main.zip",
+    featured: true,
+  },
+
+  {
     slug:     "slate",
     name:     "Slate",
     blurb:    "A single-window trading terminal that watches social feeds for the earliest mention of a ticker and keeps a live Top 10 ranked against your strategy. Read-only by design, it never places a trade.",

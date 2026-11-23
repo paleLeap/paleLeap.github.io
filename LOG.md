@@ -166,3 +166,13 @@ friend with a room code, two screenshots (`assets/screenshots/westurn-0*.jpg`,
 several download links sit side by side and wrap on a phone (measured: three
 links, two rows at 688 px wide, 28 px gap). Zips and the browser build in
 `westurn/` replaced with the 2026-11-22 build (adds the shooting gallery).
+
+## 2026-11-22 21:32 CST: Wallpaper Finder in the projects list
+
+User asked for the wallpaper finder under projects. Source is
+~/mantle/keep/wallpaper-finder, public at github.com/paleLeap/wallpaper-finder
+(in sync). Added to `js/projects-data.js` (after Westurn, featured) and wrote
+`projects/wallpaper-finder.html`: what it does, sources and keys, setup for
+Linux and Windows from its README. Download is GitHub's main-branch zip, not
+a copy here, so it stays current. Screenshot of the start screen taken under
+xvfb (`assets/screenshots/wallpaper-finder-01.jpg`, 1208x613).

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wallpaper Finder | paleLeap</title>
+<meta name="description" content="A desktop app that searches several wallpaper sites at once, previews the results and downloads only the ones you pick. Linux and Windows, open source.">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="bg" data-base="../" aria-hidden="true"></div>
+
+<div class="stage is-open">
+
+  <a class="back" href="../index.html#projects">projects</a>
+
+  <div class="doc">
+    <h1>Wallpaper Finder</h1>
+
+    <p>
+      Searches several wallpaper sites at once, shows you small previews, and
+      downloads only the ones you tick. Nothing comes down at full size until
+      you choose it. Also does GIFs.
+    </p>
+
+    <div class="facts">
+      <span>2026</span>
+      <span>Python, Qt</span>
+      <span>Linux, Windows</span>
+      <span>In use</span>
+    </div>
+
+    <div class="gets">
+      <a class="get" href="https://github.com/paleLeap/wallpaper-finder/archive/refs/heads/main.zip">download</a>
+      <a class="get" href="https://github.com/paleLeap/wallpaper-finder">source on GitHub</a>
+    </div>
+
+    <figure>
+      <img src="../assets/screenshots/wallpaper-finder-01.jpg" alt="Wallpaper Finder's start screen: sources on the left, theme tags in the middle, a Search button on the right">
+      <figcaption>Pick sources and themes, a minimum size and a colour, then search.</figcaption>
+    </figure>
+
+    <h2>What it does</h2>
+    <p>
+      Choose Images or GIFs, tick the sources you want, pick themes or type
+      your own words, and set a minimum size and a main colour if you care.
+      Specific size takes exact dimensions, for a banner or an ultrawide.
+      Search, say how many, and watch the grid fill. Tick the good ones,
+      press Submit selections, pick a folder, and those download at full size.
+    </p>
+    <p>
+      Sources: wallhaven and Wikimedia Commons need nothing at all. Pexels and
+      GIPHY need a free key; click the source and the app explains why, links
+      to the sign-up page and gives you a box to paste the key into. It
+      remembers what it has already shown you, so a second search brings new
+      ones.
+    </p>
+
+    <h2>Running it</h2>
+    <p>
+      You need Python 3.9 or newer. The only package is PySide6, about 250 MB,
+      because a whole browser engine comes with it. Unzip the download, then
+      inside the folder:
+    </p>
+    <p>Linux</p>
+    <pre><code>python3 -m venv program/.venv
+program/.venv/bin/pip install -r program/requirements.txt
+./scan</code></pre>
+    <p>Windows</p>
+    <pre><code>py -m venv program\.venv
+program\.venv\Scripts\pip install -r program\requirements.txt
+scan.cmd</code></pre>
+  </div>
+
+</div>
+
+<script src="../js/backgrounds.js"></script>
+<script src="../js/main.js"></script>
+</body>
+</html>
